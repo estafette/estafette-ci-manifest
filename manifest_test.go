@@ -27,6 +27,24 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "golang", manifest.Labels["language"])
 	})
 
+	t.Run("ReturnsManifestWithMappedBuilderTrack", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "dev", manifest.Builder.Track)
+	})
+
+	t.Run("ReturnsManifestWithBuilderTrackDefaultStable", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifest("")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "stable", manifest.Builder.Track)
+	})
+
 	t.Run("ReturnsManifestWithMappedOrderedPipelinesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act

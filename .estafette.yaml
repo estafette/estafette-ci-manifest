@@ -20,6 +20,7 @@ pipelines:
     image: golang:1.8.3-alpine3.6
     commands:
     - apk --no-cache add git
+    - git remote get-url origin
     - git tag ${ESTAFETTE_BUILD_VERSION}
     - git push origin ${ESTAFETTE_BUILD_VERSION}
     when:

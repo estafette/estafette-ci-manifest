@@ -6,12 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReadManifest(t *testing.T) {
+func TestReadManifestFromFile(t *testing.T) {
 
 	t.Run("ReturnsManifestWithoutErrors", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifest("test-manifest.yaml")
+		_, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 	})
@@ -19,7 +19,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedLabels", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "estafette-ci-builder", manifest.Labels["app"])
@@ -30,7 +30,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedOrderedPipelinesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -80,7 +80,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsWorkDirDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -90,7 +90,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsWorkDirIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -100,7 +100,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsShellDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -110,7 +110,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsShellIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -120,7 +120,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsWhenIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -130,7 +130,7 @@ func TestReadManifest(t *testing.T) {
 	t.Run("ReturnsWhenDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 

@@ -11,11 +11,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
 	Labels    map[string]string    `yaml:"labels,omitempty"`
 	Pipelines []*EstafettePipeline `yaml:"dummy,omitempty"`
 }
 
+// EstafettePipeline is the object that parts of the .estafette.yaml deserialize to
 type EstafettePipeline struct {
 	Name             string
 	ContainerImage   string            `yaml:"image,omitempty"`
@@ -150,8 +152,8 @@ func isReservedPopertyName(s []string, e string) bool {
 	return false
 }
 
-// ManifestExists checks whether the .estafette.yaml exists
-func ManifestExists(manifestPath string) bool {
+// Exists checks whether the .estafette.yaml exists
+func Exists(manifestPath string) bool {
 
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
 		// does not exist
@@ -162,8 +164,8 @@ func ManifestExists(manifestPath string) bool {
 	return true
 }
 
-// ReadManifest reads the .estafette.yaml into an EstafetteManifest object
-func ReadManifest(manifestPath string) (manifest EstafetteManifest, err error) {
+// ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
+func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err error) {
 
 	log.Info().Msgf("Reading %v file...", manifestPath)
 
@@ -176,6 +178,20 @@ func ReadManifest(manifestPath string) (manifest EstafetteManifest, err error) {
 	}
 
 	log.Info().Msgf("Finished reading %v file successfully", manifestPath)
+
+	return
+}
+
+// ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
+func ReadManifest(manifestString string) (manifest EstafetteManifest, err error) {
+
+	log.Info().Msg("Reading manifest from string...")
+
+	if err := manifest.unmarshalYAML([]byte(manifestString)); err != nil {
+		return manifest, err
+	}
+
+	log.Info().Msg("Finished unmarshalling manifest from string successfully")
 
 	return
 }

@@ -85,8 +85,12 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "value1", manifest.Pipelines[4].CustomProperties["unknownProperty1"])
 		assert.Equal(t, "value2", manifest.Pipelines[4].CustomProperties["unknownProperty2"])
 
-		_, unknownPropertyExist := manifest.Pipelines[4].CustomProperties["unsupportedUnknownProperty"]
-		assert.False(t, unknownPropertyExist)
+		// support custom properties of more complex type, so []string can be used
+		assert.Equal(t, "supported1", manifest.Pipelines[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
+		assert.Equal(t, "supported2", manifest.Pipelines[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
+
+		_, unknownPropertyExist := manifest.Pipelines[4].CustomProperties["unknownProperty3"]
+		assert.True(t, unknownPropertyExist)
 
 		_, reservedPropertyForGolangNameExist := manifest.Pipelines[4].CustomProperties["ContainerImage"]
 		assert.False(t, reservedPropertyForGolangNameExist)

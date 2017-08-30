@@ -37,9 +37,10 @@ pipelines:
 
   slack-notify:
     image: extensions/slack-build-status:dev
+    env:
+      ESTAFETTE_SLACK_WEBHOOK: estafette.secret(PiUCBMW1LEeyFk3i.vn0sEYGK_QU_tXtxQ7PbQra1L8a-reYGkDbzP9K9A6NzKbsf4CExtahJW7JjViXCtxuRlAt_c4kYF2oBRaCQ_4x3iDWLUp4P7AkchXI9Es4l7eeUWfB3A-Lpy4LG)
     name: ${ESTAFETTE_LABEL_APP}
     channels:
     - '#build-status'
     when:
-      status == 'failed' &&
-      server == 'gocd'
+      status == 'failed'

@@ -272,9 +272,9 @@ func TestCustomVersion(t *testing.T) {
 			LabelTemplate: "whateveryoulike",
 		}
 		params := EstafetteVersionParams{
-			auto:     5,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 5,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -289,9 +289,9 @@ func TestCustomVersion(t *testing.T) {
 			LabelTemplate: "{{auto}}",
 		}
 		params := EstafetteVersionParams{
-			auto:     5,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 5,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -306,9 +306,9 @@ func TestCustomVersion(t *testing.T) {
 			LabelTemplate: "{{branch}}",
 		}
 		params := EstafetteVersionParams{
-			auto:     5,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 5,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -323,9 +323,9 @@ func TestCustomVersion(t *testing.T) {
 			LabelTemplate: "{{revision}}",
 		}
 		params := EstafetteVersionParams{
-			auto:     5,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 5,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -347,9 +347,9 @@ func TestSemverVersion(t *testing.T) {
 			ReleaseBranch: "alpha",
 		}
 		params := EstafetteVersionParams{
-			auto:     5,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 5,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -368,9 +368,9 @@ func TestSemverVersion(t *testing.T) {
 			ReleaseBranch: "alpha",
 		}
 		params := EstafetteVersionParams{
-			auto:     16,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 16,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -389,9 +389,9 @@ func TestSemverVersion(t *testing.T) {
 			ReleaseBranch: "release",
 		}
 		params := EstafetteVersionParams{
-			auto:     16,
-			branch:   "alpha",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 16,
+			Branch:        "alpha",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act
@@ -410,9 +410,9 @@ func TestSemverVersion(t *testing.T) {
 			ReleaseBranch: "release",
 		}
 		params := EstafetteVersionParams{
-			auto:     16,
-			branch:   "release",
-			revision: "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+			AutoIncrement: 16,
+			Branch:        "release",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
 		}
 
 		// act

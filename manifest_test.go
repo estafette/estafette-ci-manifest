@@ -175,15 +175,15 @@ func TestReadManifestFromFile(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 
-	t.Run("ReturnsCustomVersionByDefaultIfNoOtherVersionTypeIsSet", func(t *testing.T) {
+	t.Run("ReturnsSemverVersionByDefaultIfNoOtherVersionTypeIsSet", func(t *testing.T) {
 
 		// act
 		manifest, err := ReadManifest("")
 
 		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.SemVer)
-		assert.NotNil(t, manifest.Version.Custom)
-		assert.Equal(t, "{{revision}}", manifest.Version.Custom.LabelTemplate)
+		assert.Nil(t, manifest.Version.Custom)
+		assert.NotNil(t, manifest.Version.SemVer)
+		assert.Equal(t, 0, manifest.Version.SemVer.Major)
 	})
 
 	t.Run("ReturnsCustomVersionWithLabelTemplateDefaultingToRevisionPlaceholder", func(t *testing.T) {
@@ -216,6 +216,34 @@ version:
 		assert.Nil(t, manifest.Version.Custom)
 		assert.NotNil(t, manifest.Version.SemVer)
 		assert.Equal(t, 1, manifest.Version.SemVer.Major)
+	})
+
+	t.Run("ReturnsSemverVersionWithMajorDefaultingToZero", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifest(`
+version:
+  semver:
+    minor: 2`)
+
+		assert.Nil(t, err)
+		assert.Nil(t, manifest.Version.Custom)
+		assert.NotNil(t, manifest.Version.SemVer)
+		assert.Equal(t, 0, manifest.Version.SemVer.Major)
+	})
+
+	t.Run("ReturnsSemverVersionWithMinorDefaultingToZero", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifest(`
+version:
+  semver:
+    major: 1`)
+
+		assert.Nil(t, err)
+		assert.Nil(t, manifest.Version.Custom)
+		assert.NotNil(t, manifest.Version.SemVer)
+		assert.Equal(t, 0, manifest.Version.SemVer.Minor)
 	})
 
 	t.Run("ReturnsSemverVersionWithPatchDefaultingToAutoPlaceholder", func(t *testing.T) {

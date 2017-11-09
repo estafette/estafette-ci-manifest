@@ -13,10 +13,11 @@ import (
 
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
-	Builder   EstafetteBuilder     `yaml:"builder,omitempty"`
-	Version   EstafetteVersion     `yaml:"version,omitempty"`
-	Labels    map[string]string    `yaml:"labels,omitempty"`
-	Pipelines []*EstafettePipeline `yaml:"dummy,omitempty"`
+	Builder       EstafetteBuilder     `yaml:"builder,omitempty"`
+	Version       EstafetteVersion     `yaml:"version,omitempty"`
+	Labels        map[string]string    `yaml:"labels,omitempty"`
+	GlobalEnvVars map[string]string    `yaml:"env,omitempty"`
+	Pipelines     []*EstafettePipeline `yaml:"dummy,omitempty"`
 }
 
 // unmarshalYAML parses the .estafette.yaml file into an EstafetteManifest object

@@ -1,11 +1,14 @@
+# selects the dev track for builder in order to dogfood estafette's components
 builder:
   track: dev
 
+# these turn into ESTAFETTE_LABEL_... envvars, automatically injected into all pipeline steps
 labels:
   app: estafette-ci-manifest
   team: estafette-team
   language: golang
 
+# generates a 0.0.x-<branch> version made available as ESTAFETTE_BUILD_VERSION envvar, automatically injected into all pipeline steps
 version:
   semver:
     major: 0
@@ -14,34 +17,25 @@ version:
     labelTemplate: '{{branch}}'
     releaseBranch: master
 
-pipelines:
-  set-pending-build-status:
-    image: extensions/github-status:dev
-    status: pending
-    when:
-      server == 'estafette'
+# global environments variables that are automatically injected into all pipeline steps and can be overridden by defining an envvar in a pipeline step with the same name
+env:
+  VAR1: somevalue
+  VAR2: another value
 
+# pipeline steps to be executed sequentially; for each step the 'when' is evaluated to see whether it should be executed or skipped
+pipelines:
   build:
-    image: golang:1.9.0-alpine3.6
+    image: golang:1.10.2-alpine3.7
     workDir: /go/src/github.com/estafette/${ESTAFETTE_LABEL_APP}
     commands:
     - go test -v `go list ./... | grep -v /vendor/`
 
-  # tag-revision:
-  #   image: golang:1.9.0-alpine3.6
-  #   commands:
-  #   - apk --no-cache add git
-  #   - git tag ${ESTAFETTE_BUILD_VERSION}
-  #   - git push origin ${ESTAFETTE_BUILD_VERSION}
-  #   when:
-  #     status == 'succeeded' &&
-  #     branch == 'master' &&
-  #     server == 'gocd'
-
-  set-build-status:
-    image: extensions/github-status:dev
-    when:
-      server == 'estafette'
+  tag-revision:
+    image: golang:1.10.2-alpine3.7
+    commands:
+    - apk --no-cache add git
+    - git tag ${ESTAFETTE_BUILD_VERSION}
+    - git push origin ${ESTAFETTE_BUILD_VERSION}
 
   slack-notify:
     image: extensions/slack-build-status:dev

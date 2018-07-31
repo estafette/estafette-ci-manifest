@@ -39,13 +39,7 @@ pipelines:
       server == 'estafette'
 
   push-to-docker-hub:
-    image: docker:17.03.0-ce
-    commands:
-    - docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'
-    - docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}
-    when:
-      status == 'succeeded' &&
-      branch == 'master'
+    release: push-to-docker-hub
 
   slack-notify:
     image: docker:17.03.0-ce
@@ -61,3 +55,25 @@ pipelines:
     unknownProperty3:
       - supported1
       - supported2
+
+releases:
+  push-to-docker-hub:
+    image: docker:17.03.0-ce
+    commands:
+    - docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'
+    - docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}
+    when:
+      status == 'succeeded' &&
+      branch == 'master'
+
+  promote-to-beta:
+    image: extensions/tag-container-image:dev
+
+  deploy-to-development:
+    image: extensions/deploy-to-kubernetes-engine:dev
+
+  deploy-to-staging:
+    image: extensions/deploy-to-kubernetes-engine:beta
+
+  deploy-to-production:
+    image: extensions/deploy-to-kubernetes-engine:stable

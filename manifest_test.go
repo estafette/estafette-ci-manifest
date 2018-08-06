@@ -1,6 +1,8 @@
 package manifest
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -508,5 +510,26 @@ func TestGetReservedPropertyNames(t *testing.T) {
 		assert.True(t, isReservedPopertyName(names, "When"))
 		assert.True(t, isReservedPopertyName(names, "EnvVars"))
 		assert.True(t, isReservedPopertyName(names, "CustomProperties"))
+	})
+}
+
+func TestJsonMarshalling(t *testing.T) {
+
+	t.Run("ReturnsStagesAsPipelines", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+		}
+
+		// act
+		data, err := json.Marshal(manifest)
+
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(string(data), "Pipelines"))
+		assert.False(t, strings.Contains(string(data), "Stages"))
 	})
 }

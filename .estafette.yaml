@@ -23,8 +23,8 @@ env:
   VAR1: somevalue
   VAR2: another value
 
-# pipeline steps to be executed sequentially; for each step the 'when' is evaluated to see whether it should be executed or skipped
-pipelines:
+# pipeline stages to be executed sequentially; for each step the 'when' is evaluated to see whether it should be executed or skipped
+stages:
   build:
     image: golang:1.10.2-alpine3.7
     workDir: /go/src/github.com/estafette/${ESTAFETTE_LABEL_APP}

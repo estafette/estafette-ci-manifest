@@ -1,6 +1,8 @@
 package manifest
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,57 +47,55 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "stable", manifest.Builder.Track)
 	})
 
-	t.Run("ReturnsManifestWithMappedOrderedPipelinesInSameOrderAsInTheManifest", func(t *testing.T) {
+	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
 		manifest, err := ReadManifestFromFile("test-manifest.yaml")
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, 5, len(manifest.Pipelines))
+		assert.Equal(t, 5, len(manifest.Stages))
 
-		assert.Equal(t, "build", manifest.Pipelines[0].Name)
-		assert.Equal(t, "golang:1.8.0-alpine", manifest.Pipelines[0].ContainerImage)
-		assert.Equal(t, "/go/src/github.com/estafette/estafette-ci-builder", manifest.Pipelines[0].WorkingDirectory)
-		assert.Equal(t, "go test -v ./...", manifest.Pipelines[0].Commands[0])
-		assert.Equal(t, "CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./publish/estafette-ci-builder .", manifest.Pipelines[0].Commands[1])
+		assert.Equal(t, "build", manifest.Stages[0].Name)
+		assert.Equal(t, "golang:1.8.0-alpine", manifest.Stages[0].ContainerImage)
+		assert.Equal(t, "/go/src/github.com/estafette/estafette-ci-builder", manifest.Stages[0].WorkingDirectory)
+		assert.Equal(t, "go test -v ./...", manifest.Stages[0].Commands[0])
+		assert.Equal(t, "CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./publish/estafette-ci-builder .", manifest.Stages[0].Commands[1])
 
-		assert.Equal(t, "bake", manifest.Pipelines[1].Name)
-		assert.Equal(t, "docker:17.03.0-ce", manifest.Pipelines[1].ContainerImage)
-		assert.Equal(t, "cp Dockerfile ./publish", manifest.Pipelines[1].Commands[0])
-		assert.Equal(t, "docker build -t estafette-ci-builder ./publish", manifest.Pipelines[1].Commands[1])
+		assert.Equal(t, "bake", manifest.Stages[1].Name)
+		assert.Equal(t, "docker:17.03.0-ce", manifest.Stages[1].ContainerImage)
+		assert.Equal(t, "cp Dockerfile ./publish", manifest.Stages[1].Commands[0])
+		assert.Equal(t, "docker build -t estafette-ci-builder ./publish", manifest.Stages[1].Commands[1])
 
-		assert.Equal(t, "set-build-status", manifest.Pipelines[2].Name)
-		assert.Equal(t, "extensions/github-status:0.0.2", manifest.Pipelines[2].ContainerImage)
-		assert.Equal(t, 0, len(manifest.Pipelines[2].Commands))
-		assert.Equal(t, "server == 'estafette'", manifest.Pipelines[2].When)
+		assert.Equal(t, "set-build-status", manifest.Stages[2].Name)
+		assert.Equal(t, "extensions/github-status:0.0.2", manifest.Stages[2].ContainerImage)
+		assert.Equal(t, 0, len(manifest.Stages[2].Commands))
+		assert.Equal(t, "server == 'estafette'", manifest.Stages[2].When)
 
-		assert.Equal(t, "push-to-docker-hub", manifest.Pipelines[3].Name)
-		assert.Equal(t, "docker:17.03.0-ce", manifest.Pipelines[3].ContainerImage)
-		assert.Equal(t, "docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'", manifest.Pipelines[3].Commands[0])
-		assert.Equal(t, "docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}", manifest.Pipelines[3].Commands[1])
-		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Pipelines[3].When)
+		assert.Equal(t, "push-to-docker-hub", manifest.Stages[3].Name)
+		assert.Equal(t, "docker-hub", manifest.Stages[3].Release)
+		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Stages[3].When)
 
-		assert.Equal(t, "slack-notify", manifest.Pipelines[4].Name)
-		assert.Equal(t, "docker:17.03.0-ce", manifest.Pipelines[4].ContainerImage)
-		assert.Equal(t, "curl -X POST --data-urlencode 'payload={\"channel\": \"#build-status\", \"username\": \"estafette-ci-builder\", \"text\": \"Build ${ESTAFETTE_BUILD_VERSION} for ${ESTAFETTE_LABEL_APP} has failed!\"}' ${ESTAFETTE_SLACK_WEBHOOK}", manifest.Pipelines[4].Commands[0])
-		assert.Equal(t, "status == 'failed' || branch == 'master'", manifest.Pipelines[4].When)
+		assert.Equal(t, "slack-notify", manifest.Stages[4].Name)
+		assert.Equal(t, "docker:17.03.0-ce", manifest.Stages[4].ContainerImage)
+		assert.Equal(t, "curl -X POST --data-urlencode 'payload={\"channel\": \"#build-status\", \"username\": \"estafette-ci-builder\", \"text\": \"Build ${ESTAFETTE_BUILD_VERSION} for ${ESTAFETTE_LABEL_APP} has failed!\"}' ${ESTAFETTE_SLACK_WEBHOOK}", manifest.Stages[4].Commands[0])
+		assert.Equal(t, "status == 'failed' || branch == 'master'", manifest.Stages[4].When)
 
-		assert.Equal(t, "some value with spaces", manifest.Pipelines[4].EnvVars["SOME_ENVIRONMENT_VAR"])
-		assert.Equal(t, "value1", manifest.Pipelines[4].CustomProperties["unknownProperty1"])
-		assert.Equal(t, "value2", manifest.Pipelines[4].CustomProperties["unknownProperty2"])
+		assert.Equal(t, "some value with spaces", manifest.Stages[4].EnvVars["SOME_ENVIRONMENT_VAR"])
+		assert.Equal(t, "value1", manifest.Stages[4].CustomProperties["unknownProperty1"])
+		assert.Equal(t, "value2", manifest.Stages[4].CustomProperties["unknownProperty2"])
 
 		// support custom properties of more complex type, so []string can be used
-		assert.Equal(t, "supported1", manifest.Pipelines[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
-		assert.Equal(t, "supported2", manifest.Pipelines[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
+		assert.Equal(t, "supported1", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
+		assert.Equal(t, "supported2", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
 
-		_, unknownPropertyExist := manifest.Pipelines[4].CustomProperties["unknownProperty3"]
+		_, unknownPropertyExist := manifest.Stages[4].CustomProperties["unknownProperty3"]
 		assert.True(t, unknownPropertyExist)
 
-		_, reservedPropertyForGolangNameExist := manifest.Pipelines[4].CustomProperties["ContainerImage"]
+		_, reservedPropertyForGolangNameExist := manifest.Stages[4].CustomProperties["ContainerImage"]
 		assert.False(t, reservedPropertyForGolangNameExist)
 
-		_, reservedPropertyForYamlNameExist := manifest.Pipelines[4].CustomProperties["image"]
+		_, reservedPropertyForYamlNameExist := manifest.Stages[4].CustomProperties["image"]
 		assert.False(t, reservedPropertyForYamlNameExist)
 	})
 
@@ -106,7 +106,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "/go/src/github.com/estafette/estafette-ci-builder", manifest.Pipelines[0].WorkingDirectory)
+		assert.Equal(t, "/go/src/github.com/estafette/estafette-ci-builder", manifest.Stages[0].WorkingDirectory)
 	})
 
 	t.Run("ReturnsWorkDirIfSet", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "/estafette-work", manifest.Pipelines[1].WorkingDirectory)
+		assert.Equal(t, "/estafette-work", manifest.Stages[1].WorkingDirectory)
 	})
 
 	t.Run("ReturnsShellDefaultIfMissing", func(t *testing.T) {
@@ -126,7 +126,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "/bin/sh", manifest.Pipelines[0].Shell)
+		assert.Equal(t, "/bin/sh", manifest.Stages[0].Shell)
 	})
 
 	t.Run("ReturnsShellIfSet", func(t *testing.T) {
@@ -136,7 +136,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "/bin/bash", manifest.Pipelines[1].Shell)
+		assert.Equal(t, "/bin/bash", manifest.Stages[1].Shell)
 	})
 
 	t.Run("ReturnsWhenIfSet", func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Pipelines[3].When)
+		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Stages[3].When)
 	})
 
 	t.Run("ReturnsWhenDefaultIfMissing", func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "status == 'succeeded'", manifest.Pipelines[0].When)
+		assert.Equal(t, "status == 'succeeded'", manifest.Stages[0].When)
 	})
 
 	t.Run("ReturnsManifestWithSemverVersion", func(t *testing.T) {
@@ -181,6 +181,32 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "Greetings", manifest.GlobalEnvVars["VAR_A"])
 		assert.Equal(t, "World", manifest.GlobalEnvVars["VAR_B"])
 	})
+
+	t.Run("ReturnsManifestWithMappedOrderedReleasesInSameOrderAsInTheManifest", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+
+		assert.Equal(t, 5, len(manifest.Releases))
+
+		assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
+		assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].ContainerImage)
+
+		assert.Equal(t, "beta", manifest.Releases[1].Name)
+		assert.Equal(t, "extensions/tag-container-image:dev", manifest.Releases[1].ContainerImage)
+
+		assert.Equal(t, "development", manifest.Releases[2].Name)
+		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].ContainerImage)
+
+		assert.Equal(t, "staging", manifest.Releases[3].Name)
+		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].ContainerImage)
+
+		assert.Equal(t, "production", manifest.Releases[4].Name)
+		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].ContainerImage)
+	})
+
 }
 
 func TestVersion(t *testing.T) {
@@ -484,5 +510,26 @@ func TestGetReservedPropertyNames(t *testing.T) {
 		assert.True(t, isReservedPopertyName(names, "When"))
 		assert.True(t, isReservedPopertyName(names, "EnvVars"))
 		assert.True(t, isReservedPopertyName(names, "CustomProperties"))
+	})
+}
+
+func TestJsonMarshalling(t *testing.T) {
+
+	t.Run("ReturnsStagesAsPipelines", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+		}
+
+		// act
+		data, err := json.Marshal(manifest)
+
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(string(data), "Pipelines"))
+		assert.False(t, strings.Contains(string(data), "Stages"))
 	})
 }

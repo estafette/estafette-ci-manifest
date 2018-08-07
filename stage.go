@@ -1,9 +1,5 @@
 package manifest
 
-import (
-	"github.com/rs/zerolog/log"
-)
-
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
 	Name             string
@@ -21,21 +17,21 @@ type EstafetteStage struct {
 func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		ContainerImage   string            `yaml:"image,omitempty"`
-		Shell            string            `yaml:"shell,omitempty"`
-		WorkingDirectory string            `yaml:"workDir,omitempty"`
-		Commands         []string          `yaml:"commands,omitempty"`
-		When             string            `yaml:"when,omitempty"`
-		EnvVars          map[string]string `yaml:"env,omitempty"`
-		AutoInjected     bool              `yaml:"autoInjected,omitempty"`
+		Name             string
+		ContainerImage   string                 `yaml:"image,omitempty"`
+		Shell            string                 `yaml:"shell,omitempty"`
+		WorkingDirectory string                 `yaml:"workDir,omitempty"`
+		Commands         []string               `yaml:"commands,omitempty"`
+		When             string                 `yaml:"when,omitempty"`
+		EnvVars          map[string]string      `yaml:"env,omitempty"`
+		AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
+		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 
 	// unmarshal to auxiliary type
 	if err := unmarshal(&aux); err != nil {
 		return err
 	}
-
-	log.Debug().Interface("aux", aux).Msg("Unmarshalled auxiliary type for EstafetteStage")
 
 	// map auxiliary properties
 	stage.ContainerImage = aux.ContainerImage
@@ -45,22 +41,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.When = aux.When
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected
-
-	// get all properties in a map
-	propertiesMap := make(map[string]interface{})
-	if err := unmarshal(&propertiesMap); err != nil {
-		return err
-	}
-
-	// remove reserved properties
-	for _, reservedPropertyName := range getReservedPropertyNames() {
-		if _, ok := propertiesMap[reservedPropertyName]; ok {
-			delete(propertiesMap, reservedPropertyName)
-		}
-	}
-
-	// copy remaining (custom) properties
-	stage.CustomProperties = propertiesMap
+	stage.CustomProperties = aux.CustomProperties
 
 	// set default property values
 	stage.SetDefaults()

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-
-	"github.com/rs/zerolog/log"
 )
 
 // EstafetteVersion is the object that determines how version numbers are generated
@@ -26,8 +24,6 @@ func (version *EstafetteVersion) UnmarshalYAML(unmarshal func(interface{}) error
 	if err := unmarshal(&aux); err != nil {
 		return err
 	}
-
-	log.Debug().Interface("aux", aux).Msg("Unmarshalled auxiliary type for EstafetteVersion")
 
 	// map auxiliary properties
 	version.SemVer = aux.SemVer

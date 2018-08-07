@@ -3,8 +3,6 @@ package manifest
 import (
 	"io/ioutil"
 	"os"
-	"reflect"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -17,14 +15,12 @@ type EstafetteManifest struct {
 	Version       EstafetteVersion    `yaml:"version,omitempty"`
 	Labels        map[string]string   `yaml:"labels,omitempty"`
 	GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
-	Stages        []*EstafetteStage   `yaml:"stagesdummy,omitempty" json:"Pipelines,omitempty"`
-	Releases      []*EstafetteRelease `yaml:"releasesdummy,omitempty"`
+	Stages        []*EstafetteStage   `yaml:"-" json:"Pipelines,omitempty"`
+	Releases      []*EstafetteRelease `yaml:"-"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
 func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
-
-	log.Debug().Msg("Unmarshaling EstafetteManifest with custom code")
 
 	var aux struct {
 		Builder       EstafetteBuilder  `yaml:"builder,omitempty"`
@@ -39,8 +35,6 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	if err := unmarshal(&aux); err != nil {
 		return err
 	}
-
-	log.Debug().Interface("aux", aux).Msg("Unmarshalled auxiliary type for EstafetteManifest")
 
 	// map auxiliary properties
 	c.Builder = aux.Builder
@@ -87,8 +81,6 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Releases = append(c.Releases, release)
 	}
 
-	log.Debug().Interface("manifest", c).Msg("Copied auxiliary type properties for EstafetteManifest")
-
 	// set default property values
 	c.SetDefaults()
 
@@ -99,34 +91,6 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 func (c *EstafetteManifest) SetDefaults() {
 	c.Builder.SetDefaults()
 	c.Version.SetDefaults()
-}
-
-func getReservedPropertyNames() (names []string) {
-	// create list of reserved property names
-	reservedPropertyNames := []string{}
-	val := reflect.ValueOf(EstafetteStage{})
-	for i := 0; i < val.Type().NumField(); i++ {
-		yamlName := val.Type().Field(i).Tag.Get("yaml")
-		if yamlName != "" {
-			reservedPropertyNames = append(reservedPropertyNames, strings.Replace(yamlName, ",omitempty", "", 1))
-		}
-		propertyName := val.Type().Field(i).Name
-		if propertyName != "" {
-			reservedPropertyNames = append(reservedPropertyNames, propertyName)
-		}
-	}
-
-	return reservedPropertyNames
-}
-
-func isReservedPopertyName(s []string, e string) bool {
-
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 // Exists checks whether the .estafette.yaml exists
@@ -151,7 +115,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 		return manifest, err
 	}
 
-	if err := yaml.Unmarshal(data, &manifest); err != nil {
+	if err := yaml.UnmarshalStrict(data, &manifest); err != nil {
 		return manifest, err
 	}
 	manifest.SetDefaults()
@@ -166,7 +130,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 
 	log.Info().Msg("Reading manifest from string...")
 
-	if err := yaml.Unmarshal([]byte(manifestString), &manifest); err != nil {
+	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
 		return manifest, err
 	}
 	manifest.SetDefaults()

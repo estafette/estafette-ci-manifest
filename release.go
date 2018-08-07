@@ -1,14 +1,13 @@
 package manifest
 
 import (
-	"github.com/rs/zerolog/log"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // EstafetteRelease represents a release action that in itself contains one or multiple stages
 type EstafetteRelease struct {
 	Name   string
-	Stages []*EstafetteStage `yaml:"stagesdummy,omitempty"`
+	Stages []*EstafetteStage `yaml:"-"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteRelease
@@ -20,8 +19,6 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	if err := unmarshal(&aux); err != nil {
 		return err
 	}
-
-	log.Debug().Interface("aux", aux).Msg("Unmarshalled auxiliary type for EstafetteRelease")
 
 	// map auxiliary properties
 	for _, mi := range aux {

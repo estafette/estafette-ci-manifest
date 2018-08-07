@@ -116,30 +116,3 @@ commands:
 		assert.Equal(t, "supported2", stage.CustomProperties["unknownProperty3"].([]interface{})[1].(string))
 	})
 }
-
-func TestGetReservedPropertyNames(t *testing.T) {
-
-	t.Run("ReturnsListWithPropertyNamesAndYamlNames", func(t *testing.T) {
-
-		// act
-		names := getReservedPropertyNames()
-
-		// yaml names
-		assert.True(t, isReservedPopertyName(names, "image"))
-		assert.True(t, isReservedPopertyName(names, "shell"))
-		assert.True(t, isReservedPopertyName(names, "workDir"))
-		assert.True(t, isReservedPopertyName(names, "commands"))
-		assert.True(t, isReservedPopertyName(names, "when"))
-		assert.True(t, isReservedPopertyName(names, "env"))
-
-		// property names
-		assert.True(t, isReservedPopertyName(names, "Name"))
-		assert.True(t, isReservedPopertyName(names, "ContainerImage"))
-		assert.True(t, isReservedPopertyName(names, "Shell"))
-		assert.True(t, isReservedPopertyName(names, "WorkingDirectory"))
-		assert.True(t, isReservedPopertyName(names, "Commands"))
-		assert.True(t, isReservedPopertyName(names, "When"))
-		assert.True(t, isReservedPopertyName(names, "EnvVars"))
-		assert.True(t, isReservedPopertyName(names, "CustomProperties"))
-	})
-}

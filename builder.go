@@ -10,11 +10,9 @@ type EstafetteBuilder struct {
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder
 func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
-	type Aux struct {
+	var aux struct {
 		Track string `yaml:"track,omitempty"`
 	}
-
-	var aux = Aux{Track: "stable"}
 
 	// unmarshal to auxiliary type
 	if err := unmarshal(&aux); err != nil {
@@ -27,7 +25,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 
 	// set default property values
-	//builder.SetDefaults()
+	builder.SetDefaults()
 
 	log.Debug().Interface("builder", builder).Msg("Copied auxiliary type properties for EstafetteBuilder")
 

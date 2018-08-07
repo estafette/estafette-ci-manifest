@@ -64,6 +64,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		}
 
 		stage.Name = mi.Key.(string)
+		stage.SetDefaults()
 		c.Stages = append(c.Stages, stage)
 	}
 
@@ -88,82 +89,17 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 
 	log.Debug().Interface("manifest", c).Msg("Copied auxiliary type properties for EstafetteManifest")
 
+	// set default property values
+	c.SetDefaults()
+
 	return nil
 }
 
-// // unmarshalYAML parses the .estafette.yaml file into an EstafetteManifest object
-// func (c *EstafetteManifest) unmarshalYAML(data []byte) error {
-
-// 	err := yaml.Unmarshal(data, c)
-// 	if err != nil {
-// 		log.Error().Err(err).Msg("Unmarshalling .estafette.yaml manifest failed")
-// 		return err
-// 	}
-
-// 	// set default for Builder.Track if not set
-// 	if c.Builder.Track == "" {
-// 		c.Builder.Track = "stable"
-// 	}
-
-// 	// set default version if no version is included
-// 	if c.Version.Custom == nil && c.Version.SemVer == nil {
-// 		c.Version.SemVer = &EstafetteSemverVersion{}
-// 	}
-// 	// if version is custom set defaults
-// 	if c.Version.Custom != nil {
-// 		if c.Version.Custom.LabelTemplate == "" {
-// 			c.Version.Custom.LabelTemplate = "{{revision}}"
-// 		}
-// 	}
-
-// 	// if version is semver set defaults
-// 	if c.Version.SemVer != nil {
-// 		if c.Version.SemVer.Patch == "" {
-// 			c.Version.SemVer.Patch = "{{auto}}"
-// 		}
-// 		if c.Version.SemVer.LabelTemplate == "" {
-// 			c.Version.SemVer.LabelTemplate = "{{branch}}"
-// 		}
-// 		if c.Version.SemVer.ReleaseBranch == "" {
-// 			c.Version.SemVer.ReleaseBranch = "master"
-// 		}
-// 	}
-
-// 	// create list of reserved property names
-// 	reservedPropertyNames := getReservedPropertyNames()
-
-// 	// to preserve order for the pipelines use MapSlice
-// 	outerSlice := yaml.MapSlice{}
-// 	err = yaml.Unmarshal(data, &outerSlice)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	for _, s := range outerSlice {
-
-// 		// support pipelines keyword for backwards compatibility, although it's replaced by the stages keyword
-// 		if s.Key == "pipelines" || s.Key == "stages" {
-
-// 			stages, err := unmarshalStagesYAML(s.Value, reservedPropertyNames)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			c.Stages = stages
-// 		}
-// 		if s.Key == "releases" {
-
-// 			releases, err := unmarshalReleasesYAML(s.Value, reservedPropertyNames)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			c.Releases = releases
-// 		}
-// 	}
-
-// 	return nil
-// }
+// SetDefaults sets default values for properties of EstafetteManifest if not defined
+func (c *EstafetteManifest) SetDefaults() {
+	c.Builder.SetDefaults()
+	c.Version.SetDefaults()
+}
 
 func getReservedPropertyNames() (names []string) {
 	// create list of reserved property names
@@ -218,6 +154,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	if err := yaml.Unmarshal(data, &manifest); err != nil {
 		return manifest, err
 	}
+	manifest.SetDefaults()
 
 	log.Info().Msgf("Finished reading %v file successfully", manifestPath)
 
@@ -232,6 +169,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	if err := yaml.Unmarshal([]byte(manifestString), &manifest); err != nil {
 		return manifest, err
 	}
+	manifest.SetDefaults()
 
 	log.Info().Msg("Finished unmarshalling manifest from string successfully")
 

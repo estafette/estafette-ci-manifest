@@ -6,7 +6,7 @@ import (
 
 // EstafetteRelease represents a release action that in itself contains one or multiple stages
 type EstafetteRelease struct {
-	Name   string
+	Name   string            `yaml:"-"`
 	Stages []*EstafetteStage `yaml:"-"`
 }
 

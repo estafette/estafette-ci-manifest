@@ -2,29 +2,29 @@ package manifest
 
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
-	Name             string
-	ContainerImage   string            `yaml:"image,omitempty"`
-	Shell            string            `yaml:"shell,omitempty"`
-	WorkingDirectory string            `yaml:"workDir,omitempty"`
-	Commands         []string          `yaml:"commands,omitempty"`
-	When             string            `yaml:"when,omitempty"`
-	EnvVars          map[string]string `yaml:"env,omitempty"`
-	AutoInjected     bool              `yaml:"autoInjected,omitempty"`
-	CustomProperties map[string]interface{}
+	Name             string                 `yaml:"-"`
+	ContainerImage   string                 `yaml:"image,omitempty"`
+	Shell            string                 `yaml:"shell,omitempty"`
+	WorkingDirectory string                 `yaml:"workDir,omitempty"`
+	Commands         []string               `yaml:"commands,omitempty"`
+	When             string                 `yaml:"when,omitempty"`
+	EnvVars          map[string]string      `yaml:"env,omitempty"`
+	AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
+	CustomProperties map[string]interface{} `yaml:",inline"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteStage
 func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name             string
-		ContainerImage   string                 `yaml:"image,omitempty"`
-		Shell            string                 `yaml:"shell,omitempty"`
-		WorkingDirectory string                 `yaml:"workDir,omitempty"`
-		Commands         []string               `yaml:"commands,omitempty"`
-		When             string                 `yaml:"when,omitempty"`
-		EnvVars          map[string]string      `yaml:"env,omitempty"`
-		AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
+		Name             string                 `yaml:"-"`
+		ContainerImage   string                 `yaml:"image"`
+		Shell            string                 `yaml:"shell"`
+		WorkingDirectory string                 `yaml:"workDir"`
+		Commands         []string               `yaml:"commands"`
+		When             string                 `yaml:"when"`
+		EnvVars          map[string]string      `yaml:"env"`
+		AutoInjected     bool                   `yaml:"autoInjected"`
 		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 
@@ -65,5 +65,4 @@ func (stage *EstafetteStage) SetDefaults() {
 	if stage.When == "" {
 		stage.When = "status == 'succeeded'"
 	}
-
 }

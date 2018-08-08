@@ -12,8 +12,8 @@ import (
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
 	Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
-	Version       EstafetteVersion    `yaml:"version,omitempty"`
 	Labels        map[string]string   `yaml:"labels,omitempty"`
+	Version       EstafetteVersion    `yaml:"version,omitempty"`
 	GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
 	Stages        []*EstafetteStage   `yaml:"-" json:"Pipelines,omitempty"`
 	Releases      []*EstafetteRelease `yaml:"-"`
@@ -23,12 +23,12 @@ type EstafetteManifest struct {
 func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Builder       EstafetteBuilder  `yaml:"builder,omitempty"`
-		Version       EstafetteVersion  `yaml:"version,omitempty"`
-		Labels        map[string]string `yaml:"labels,omitempty"`
-		GlobalEnvVars map[string]string `yaml:"env,omitempty"`
-		Stages        yaml.MapSlice     `yaml:"stages,omitempty"`
-		Releases      yaml.MapSlice     `yaml:"releases,omitempty"`
+		Builder       EstafetteBuilder  `yaml:"builder"`
+		Labels        map[string]string `yaml:"labels"`
+		Version       EstafetteVersion  `yaml:"version"`
+		GlobalEnvVars map[string]string `yaml:"env"`
+		Stages        yaml.MapSlice     `yaml:"stages"`
+		Releases      yaml.MapSlice     `yaml:"releases"`
 	}
 
 	// unmarshal to auxiliary type

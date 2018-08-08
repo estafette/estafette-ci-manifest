@@ -16,8 +16,8 @@ type EstafetteVersion struct {
 func (version *EstafetteVersion) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		SemVer *EstafetteSemverVersion `yaml:"semver,omitempty"`
-		Custom *EstafetteCustomVersion `yaml:"custom,omitempty"`
+		SemVer *EstafetteSemverVersion `yaml:"semver"`
+		Custom *EstafetteCustomVersion `yaml:"custom"`
 	}
 
 	// unmarshal to auxiliary type

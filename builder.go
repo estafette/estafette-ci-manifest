@@ -9,7 +9,7 @@ type EstafetteBuilder struct {
 func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Track string `yaml:"track,omitempty"`
+		Track string `yaml:"track"`
 	}
 
 	// unmarshal to auxiliary type

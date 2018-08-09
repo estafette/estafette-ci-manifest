@@ -396,6 +396,8 @@ labels:
   team: estafette-team
 version:
   semver:
+    major: 0
+    minor: 0
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
     releaseBranch: master

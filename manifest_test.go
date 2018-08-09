@@ -218,6 +218,29 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Equal(t, "tooling", manifest.Releases[5].Name)
 	})
+
+	t.Run("UmarshallingManifestWithDeprecatedPipelinesVerbStillWorks", func(t *testing.T) {
+
+		input := `
+pipelines:
+  deploy:
+    image: extensions/deploy-to-kubernetes-engine:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+  create-release-notes:
+    image: extensions/create-release-notes-from-changelog:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+`
+
+		// act
+		manifest, err := ReadManifest(input)
+
+		assert.Nil(t, err)
+		assert.Equal(t, 2, len(manifest.Stages))
+	})
 }
 
 func TestVersion(t *testing.T) {

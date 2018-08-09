@@ -89,8 +89,8 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "value2", manifest.Stages[4].CustomProperties["unknownProperty2"])
 
 		// support custom properties of more complex type, so []string can be used
-		// assert.Equal(t, "supported1", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
-		// assert.Equal(t, "supported2", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
+		assert.Equal(t, "supported1", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
+		assert.Equal(t, "supported2", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
 
 		_, unknownPropertyExist := manifest.Stages[4].CustomProperties["unknownProperty3"]
 		assert.True(t, unknownPropertyExist)
@@ -339,165 +339,7 @@ version:
 	})
 }
 
-func TestCustomVersion(t *testing.T) {
-
-	t.Run("ReturnsLabelTemplateAsIsWhenItHasNoPlaceholders", func(t *testing.T) {
-
-		version := EstafetteCustomVersion{
-			LabelTemplate: "whateveryoulike",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 5,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "whateveryoulike", versionString)
-	})
-
-	t.Run("ReturnsLabelTemplateWithAutoPlaceholderReplaced", func(t *testing.T) {
-
-		version := EstafetteCustomVersion{
-			LabelTemplate: "{{auto}}",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 5,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "5", versionString)
-	})
-
-	t.Run("ReturnsLabelTemplateWithBranchPlaceholderReplaced", func(t *testing.T) {
-
-		version := EstafetteCustomVersion{
-			LabelTemplate: "{{branch}}",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 5,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "release", versionString)
-	})
-
-	t.Run("ReturnsLabelTemplateWithRevisionPlaceholderReplaced", func(t *testing.T) {
-
-		version := EstafetteCustomVersion{
-			LabelTemplate: "{{revision}}",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 5,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "219aae19153da2b20ac1d88e2fd68e0b20274be2", versionString)
-	})
-}
-
-func TestSemverVersion(t *testing.T) {
-
-	t.Run("ReturnsMajorDotMinorDotPatchDashLabelTemplateAsIsWhenItHasNoPlaceholders", func(t *testing.T) {
-
-		version := EstafetteSemverVersion{
-			Major:         5,
-			Minor:         3,
-			Patch:         "6",
-			LabelTemplate: "whateveryoulike",
-			ReleaseBranch: "alpha",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 5,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "5.3.6-whateveryoulike", versionString)
-	})
-
-	t.Run("ReturnsSemverWithAutoPlaceholderInPatchReplaced", func(t *testing.T) {
-
-		version := EstafetteSemverVersion{
-			Major:         5,
-			Minor:         3,
-			Patch:         "{{auto}}",
-			LabelTemplate: "whateveryoulike",
-			ReleaseBranch: "alpha",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 16,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "5.3.16-whateveryoulike", versionString)
-	})
-
-	t.Run("ReturnsSemverWithBranchPlaceholderInLabelReplaced", func(t *testing.T) {
-
-		version := EstafetteSemverVersion{
-			Major:         5,
-			Minor:         3,
-			Patch:         "6",
-			LabelTemplate: "{{branch}}",
-			ReleaseBranch: "release",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 16,
-			Branch:        "alpha",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "5.3.6-alpha", versionString)
-	})
-
-	t.Run("ReturnsSemverWithoutLabelIfBranchMatchesReleaseBranch", func(t *testing.T) {
-
-		version := EstafetteSemverVersion{
-			Major:         5,
-			Minor:         3,
-			Patch:         "6",
-			LabelTemplate: "{{branch}}",
-			ReleaseBranch: "release",
-		}
-		params := EstafetteVersionParams{
-			AutoIncrement: 16,
-			Branch:        "release",
-			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
-		}
-
-		// act
-		versionString := version.Version(params)
-
-		assert.Equal(t, "5.3.6", versionString)
-	})
-}
-
-func TestJsonMarshalling(t *testing.T) {
+func TestManifestToJsonMarshalling(t *testing.T) {
 
 	t.Run("ReturnsStagesAsPipelines", func(t *testing.T) {
 
@@ -518,7 +360,7 @@ func TestJsonMarshalling(t *testing.T) {
 	})
 }
 
-func TestYamlMarshalling(t *testing.T) {
+func TestManifestToYamlMarshalling(t *testing.T) {
 	t.Run("UmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
 
 		var manifest EstafetteManifest

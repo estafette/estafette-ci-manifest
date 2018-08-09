@@ -44,7 +44,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	return nil
 }
 
-// MarshalYAML customizes marshaling an EstafetteManifest
+// MarshalYAML customizes marshalling an EstafetteManifest
 func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
 	var aux yaml.MapSlice
 

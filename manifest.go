@@ -87,7 +87,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	return nil
 }
 
-// MarshalYAML customizes marshaling an EstafetteManifest
+// MarshalYAML customizes marshalling an EstafetteManifest
 func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	var aux struct {
 		Builder       EstafetteBuilder  `yaml:"builder,omitempty"`

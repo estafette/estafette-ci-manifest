@@ -147,7 +147,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 		return manifest, err
 	}
 
-	if err := yaml.UnmarshalStrict(data, &manifest); err != nil {
+	if err := yaml.Unmarshal(data, &manifest); err != nil {
 		return manifest, err
 	}
 	manifest.setDefaults()
@@ -162,7 +162,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 
 	log.Info().Msg("Reading manifest from string...")
 
-	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
+	if err := yaml.Unmarshal([]byte(manifestString), &manifest); err != nil {
 		return manifest, err
 	}
 	manifest.setDefaults()

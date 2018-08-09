@@ -58,7 +58,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		}
 
 		stage.Name = mi.Key.(string)
-		stage.SetDefaults()
+		stage.setDefaults()
 		c.Stages = append(c.Stages, stage)
 	}
 
@@ -82,7 +82,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	}
 
 	// set default property values
-	c.SetDefaults()
+	c.setDefaults()
 
 	return nil
 }
@@ -119,10 +119,10 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	return aux, err
 }
 
-// SetDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) SetDefaults() {
-	c.Builder.SetDefaults()
-	c.Version.SetDefaults()
+// setDefaults sets default values for properties of EstafetteManifest if not defined
+func (c *EstafetteManifest) setDefaults() {
+	c.Builder.setDefaults()
+	c.Version.setDefaults()
 }
 
 // Exists checks whether the .estafette.yaml exists
@@ -150,7 +150,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	if err := yaml.UnmarshalStrict(data, &manifest); err != nil {
 		return manifest, err
 	}
-	manifest.SetDefaults()
+	manifest.setDefaults()
 
 	log.Info().Msgf("Finished reading %v file successfully", manifestPath)
 
@@ -165,7 +165,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
 		return manifest, err
 	}
-	manifest.SetDefaults()
+	manifest.setDefaults()
 
 	log.Info().Msg("Finished unmarshalling manifest from string successfully")
 

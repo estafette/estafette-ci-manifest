@@ -30,13 +30,13 @@ func (version *EstafetteVersion) UnmarshalYAML(unmarshal func(interface{}) error
 	version.Custom = aux.Custom
 
 	// set default property values
-	version.SetDefaults()
+	version.setDefaults()
 
 	return nil
 }
 
-// SetDefaults sets default values for properties of EstafetteVersion if not defined
-func (version *EstafetteVersion) SetDefaults() {
+// setDefaults sets default values for properties of EstafetteVersion if not defined
+func (version *EstafetteVersion) setDefaults() {
 	if version.Custom == nil && version.SemVer == nil {
 		version.SemVer = &EstafetteSemverVersion{}
 	}

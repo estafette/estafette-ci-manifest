@@ -44,13 +44,13 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.CustomProperties = aux.CustomProperties
 
 	// set default property values
-	stage.SetDefaults()
+	stage.setDefaults()
 
 	return nil
 }
 
-// SetDefaults sets default values for properties of EstafetteStage if not defined
-func (stage *EstafetteStage) SetDefaults() {
+// setDefaults sets default values for properties of EstafetteStage if not defined
+func (stage *EstafetteStage) setDefaults() {
 	// set default for Shell if not set
 	if stage.Shell == "" {
 		stage.Shell = "/bin/sh"

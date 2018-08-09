@@ -37,7 +37,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 		}
 
 		stage.Name = mi.Key.(string)
-		stage.SetDefaults()
+		stage.setDefaults()
 		release.Stages = append(release.Stages, stage)
 	}
 

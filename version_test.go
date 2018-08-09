@@ -15,7 +15,7 @@ func TestUnmarshalVersion(t *testing.T) {
 
 		// act
 		err := yaml.Unmarshal([]byte(``), &version)
-		version.SetDefaults()
+		version.setDefaults()
 
 		assert.Nil(t, err)
 		assert.Nil(t, version.Custom)

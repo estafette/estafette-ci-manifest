@@ -21,13 +21,13 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 
 	// set default property values
-	builder.SetDefaults()
+	builder.setDefaults()
 
 	return nil
 }
 
-// SetDefaults sets default values for properties of EstafetteBuilder if not defined
-func (builder *EstafetteBuilder) SetDefaults() {
+// setDefaults sets default values for properties of EstafetteBuilder if not defined
+func (builder *EstafetteBuilder) setDefaults() {
 	// set default for Track if not set
 	if builder.Track == "" {
 		builder.Track = "stable"

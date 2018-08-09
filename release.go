@@ -43,3 +43,17 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 
 	return nil
 }
+
+// MarshalYAML customizes marshaling an EstafetteManifest
+func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
+	var aux yaml.MapSlice
+
+	for _, stage := range release.Stages {
+		aux = append(aux, yaml.MapItem{
+			Key:   stage.Name,
+			Value: stage,
+		})
+	}
+
+	return aux, err
+}

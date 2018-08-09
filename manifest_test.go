@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func TestReadManifestFromFile(t *testing.T) {
@@ -514,5 +515,65 @@ func TestJsonMarshalling(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(string(data), "Pipelines"))
 		assert.False(t, strings.Contains(string(data), "Stages"))
+	})
+}
+
+func TestYamlMarshalling(t *testing.T) {
+	t.Run("UmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
+
+		var manifest EstafetteManifest
+
+		input := `builder:
+  track: stable
+labels:
+  app: estafette-ci-builder
+  language: golang
+  team: estafette-team
+version:
+  semver:
+    patch: '{{auto}}'
+    labelTemplate: '{{branch}}'
+    releaseBranch: master
+env:
+  VAR_A: Greetings
+  VAR_B: World
+stages:
+  deploy:
+    image: extensions/deploy-to-kubernetes-engine:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+  create-release-notes:
+    image: extensions/create-release-notes-from-changelog:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+releases:
+  staging:
+    deploy:
+      image: extensions/deploy-to-kubernetes-engine:stable
+      shell: /bin/sh
+      workDir: /estafette-work
+      when: status == 'succeeded'
+  production:
+    deploy:
+      image: extensions/deploy-to-kubernetes-engine:stable
+      shell: /bin/sh
+      workDir: /estafette-work
+      when: status == 'succeeded'
+    create-release-notes:
+      image: extensions/create-release-notes-from-changelog:stable
+      shell: /bin/sh
+      workDir: /estafette-work
+      when: status == 'succeeded'
+`
+		err := yaml.Unmarshal([]byte(input), &manifest)
+		assert.Nil(t, err)
+
+		// act
+		output, err := yaml.Marshal(manifest)
+
+		assert.Nil(t, err)
+		assert.Equal(t, input, string(output))
 	})
 }

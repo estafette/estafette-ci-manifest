@@ -29,3 +29,30 @@ create-release-notes:
 		assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", release.Stages[1].ContainerImage)
 	})
 }
+
+func TestReleaseYamlMarshalling(t *testing.T) {
+	t.Run("UmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
+
+		var release EstafetteRelease
+
+		input := `deploy:
+  image: extensions/deploy-to-kubernetes-engine:stable
+  shell: /bin/sh
+  workDir: /estafette-work
+  when: status == 'succeeded'
+create-release-notes:
+  image: extensions/create-release-notes-from-changelog:stable
+  shell: /bin/sh
+  workDir: /estafette-work
+  when: status == 'succeeded'
+`
+		err := yaml.Unmarshal([]byte(input), &release)
+		assert.Nil(t, err)
+
+		// act
+		output, err := yaml.Marshal(release)
+
+		assert.Nil(t, err)
+		assert.Equal(t, input, string(output))
+	})
+}

@@ -87,6 +87,38 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	return nil
 }
 
+// MarshalYAML customizes marshaling an EstafetteManifest
+func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
+	var aux struct {
+		Builder       EstafetteBuilder  `yaml:"builder,omitempty"`
+		Labels        map[string]string `yaml:"labels,omitempty"`
+		Version       EstafetteVersion  `yaml:"version,omitempty"`
+		GlobalEnvVars map[string]string `yaml:"env,omitempty"`
+		Stages        yaml.MapSlice     `yaml:"stages,omitempty"`
+		Releases      yaml.MapSlice     `yaml:"releases,omitempty"`
+	}
+
+	aux.Builder = c.Builder
+	aux.Labels = c.Labels
+	aux.Version = c.Version
+	aux.GlobalEnvVars = c.GlobalEnvVars
+
+	for _, stage := range c.Stages {
+		aux.Stages = append(aux.Stages, yaml.MapItem{
+			Key:   stage.Name,
+			Value: stage,
+		})
+	}
+	for _, release := range c.Releases {
+		aux.Releases = append(aux.Releases, yaml.MapItem{
+			Key:   release.Name,
+			Value: release,
+		})
+	}
+
+	return aux, err
+}
+
 // SetDefaults sets default values for properties of EstafetteManifest if not defined
 func (c *EstafetteManifest) SetDefaults() {
 	c.Builder.SetDefaults()

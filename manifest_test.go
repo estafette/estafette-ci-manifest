@@ -195,28 +195,34 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, 6, len(manifest.Releases))
 
 		assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
+		assert.False(t, manifest.Releases[0].CloneGitRepository)
 		assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
 		assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
 
 		assert.Equal(t, "beta", manifest.Releases[1].Name)
+		assert.True(t, manifest.Releases[1].CloneGitRepository)
 		assert.Equal(t, "tag-image", manifest.Releases[1].Stages[0].Name)
 		assert.Equal(t, "extensions/tag-container-image:dev", manifest.Releases[1].Stages[0].ContainerImage)
 
 		assert.Equal(t, "development", manifest.Releases[2].Name)
+		assert.False(t, manifest.Releases[2].CloneGitRepository)
 		assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
 		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
 
 		assert.Equal(t, "staging", manifest.Releases[3].Name)
+		assert.False(t, manifest.Releases[3].CloneGitRepository)
 		assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
 		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].Stages[0].ContainerImage)
 
 		assert.Equal(t, "production", manifest.Releases[4].Name)
+		assert.False(t, manifest.Releases[4].CloneGitRepository)
 		assert.Equal(t, "deploy", manifest.Releases[4].Stages[0].Name)
 		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].Stages[0].ContainerImage)
 		assert.Equal(t, "create-release-notes", manifest.Releases[4].Stages[1].Name)
 		assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
 
 		assert.Equal(t, "tooling", manifest.Releases[5].Name)
+		assert.False(t, manifest.Releases[5].CloneGitRepository)
 	})
 
 	t.Run("UmarshallingManifestWithDeprecatedPipelinesVerbStillWorks", func(t *testing.T) {
@@ -417,12 +423,14 @@ stages:
     when: status == 'succeeded'
 releases:
   staging:
+    clone: false
     deploy:
       image: extensions/deploy-to-kubernetes-engine:stable
       shell: /bin/sh
       workDir: /estafette-work
       when: status == 'succeeded'
   production:
+    clone: true
     deploy:
       image: extensions/deploy-to-kubernetes-engine:stable
       shell: /bin/sh

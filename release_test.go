@@ -35,7 +35,8 @@ func TestReleaseToYamlMarshalling(t *testing.T) {
 
 		var release EstafetteRelease
 
-		input := `deploy:
+		input := `clone: true
+deploy:
   image: extensions/deploy-to-kubernetes-engine:stable
   shell: /bin/sh
   workDir: /estafette-work

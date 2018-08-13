@@ -417,22 +417,24 @@ stages:
     when: status == 'succeeded'
 releases:
   staging:
-    deploy:
-      image: extensions/deploy-to-kubernetes-engine:stable
-      shell: /bin/sh
-      workDir: /estafette-work
-      when: status == 'succeeded'
+    stages:
+      deploy:
+        image: extensions/deploy-to-kubernetes-engine:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
   production:
-    deploy:
-      image: extensions/deploy-to-kubernetes-engine:stable
-      shell: /bin/sh
-      workDir: /estafette-work
-      when: status == 'succeeded'
-    create-release-notes:
-      image: extensions/create-release-notes-from-changelog:stable
-      shell: /bin/sh
-      workDir: /estafette-work
-      when: status == 'succeeded'
+    stages:
+      deploy:
+        image: extensions/deploy-to-kubernetes-engine:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
+      create-release-notes:
+        image: extensions/create-release-notes-from-changelog:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
 `
 		err := yaml.Unmarshal([]byte(input), &manifest)
 		assert.Nil(t, err)

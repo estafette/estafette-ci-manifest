@@ -14,11 +14,12 @@ func TestUnmarshalRelease(t *testing.T) {
 
 		// act
 		err := yaml.Unmarshal([]byte(`
-deploy:
-  image: extensions/deploy-to-kubernetes-engine:stable
+stages:
+  deploy:
+    image: extensions/deploy-to-kubernetes-engine:stable
 
-create-release-notes:
-  image: extensions/create-release-notes-from-changelog:stable
+  create-release-notes:
+    image: extensions/create-release-notes-from-changelog:stable
 `), &release)
 
 		assert.Nil(t, err)
@@ -35,16 +36,17 @@ func TestReleaseToYamlMarshalling(t *testing.T) {
 
 		var release EstafetteRelease
 
-		input := `deploy:
-  image: extensions/deploy-to-kubernetes-engine:stable
-  shell: /bin/sh
-  workDir: /estafette-work
-  when: status == 'succeeded'
-create-release-notes:
-  image: extensions/create-release-notes-from-changelog:stable
-  shell: /bin/sh
-  workDir: /estafette-work
-  when: status == 'succeeded'
+		input := `stages:
+  deploy:
+    image: extensions/deploy-to-kubernetes-engine:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+  create-release-notes:
+    image: extensions/create-release-notes-from-changelog:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
 `
 		err := yaml.Unmarshal([]byte(input), &release)
 		assert.Nil(t, err)

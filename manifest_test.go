@@ -75,6 +75,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Equal(t, "push-to-docker-hub", manifest.Stages[3].Name)
 		assert.Equal(t, "docker:17.03.0-ce", manifest.Stages[3].ContainerImage)
+		assert.Equal(t, 5, manifest.Stages[3].Retries)
 		assert.Equal(t, "docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'", manifest.Stages[3].Commands[0])
 		assert.Equal(t, "docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}", manifest.Stages[3].Commands[1])
 		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Stages[3].When)

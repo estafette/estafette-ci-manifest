@@ -55,7 +55,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, 5, len(manifest.Stages))
+		assert.Equal(t, 6, len(manifest.Stages))
 
 		assert.Equal(t, "build", manifest.Stages[0].Name)
 		assert.Equal(t, "golang:1.8.0-alpine", manifest.Stages[0].ContainerImage)
@@ -92,6 +92,11 @@ func TestReadManifestFromFile(t *testing.T) {
 		// support custom properties of more complex type, so []string can be used
 		assert.Equal(t, "supported1", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[0].(string))
 		assert.Equal(t, "supported2", manifest.Stages[4].CustomProperties["unknownProperty3"].([]interface{})[1].(string))
+
+		// support custom properties of more even more complex type, so another map[string]interface can be used
+		assert.Equal(t, "extensions", manifest.Stages[5].CustomProperties["container"].(map[string]interface{})["repository"].(string))
+		assert.Equal(t, "gke", manifest.Stages[5].CustomProperties["container"].(map[string]interface{})["name"].(string))
+		assert.Equal(t, "alpha", manifest.Stages[5].CustomProperties["container"].(map[string]interface{})["tag"].(string))
 
 		_, unknownPropertyExist := manifest.Stages[4].CustomProperties["unknownProperty3"]
 		assert.True(t, unknownPropertyExist)
@@ -193,31 +198,32 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, 6, len(manifest.Releases))
+		if assert.Equal(t, 6, len(manifest.Releases)) {
 
-		assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
-		assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
-		assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
+			assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
+			assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
+			assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
 
-		assert.Equal(t, "beta", manifest.Releases[1].Name)
-		assert.Equal(t, "tag-image", manifest.Releases[1].Stages[0].Name)
-		assert.Equal(t, "extensions/tag-container-image:dev", manifest.Releases[1].Stages[0].ContainerImage)
+			assert.Equal(t, "beta", manifest.Releases[1].Name)
+			assert.Equal(t, "tag-image", manifest.Releases[1].Stages[0].Name)
+			assert.Equal(t, "extensions/tag-container-image:dev", manifest.Releases[1].Stages[0].ContainerImage)
 
-		assert.Equal(t, "development", manifest.Releases[2].Name)
-		assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
-		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
+			assert.Equal(t, "development", manifest.Releases[2].Name)
+			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
+			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
 
-		assert.Equal(t, "staging", manifest.Releases[3].Name)
-		assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
-		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].Stages[0].ContainerImage)
+			assert.Equal(t, "staging", manifest.Releases[3].Name)
+			assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
+			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].Stages[0].ContainerImage)
 
-		assert.Equal(t, "production", manifest.Releases[4].Name)
-		assert.Equal(t, "deploy", manifest.Releases[4].Stages[0].Name)
-		assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].Stages[0].ContainerImage)
-		assert.Equal(t, "create-release-notes", manifest.Releases[4].Stages[1].Name)
-		assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
+			assert.Equal(t, "production", manifest.Releases[4].Name)
+			assert.Equal(t, "deploy", manifest.Releases[4].Stages[0].Name)
+			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].Stages[0].ContainerImage)
+			assert.Equal(t, "create-release-notes", manifest.Releases[4].Stages[1].Name)
+			assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
 
-		assert.Equal(t, "tooling", manifest.Releases[5].Name)
+			assert.Equal(t, "tooling", manifest.Releases[5].Name)
+		}
 	})
 
 	t.Run("UmarshallingManifestWithDeprecatedPipelinesVerbStillWorks", func(t *testing.T) {
@@ -445,5 +451,56 @@ releases:
 
 		assert.Nil(t, err)
 		assert.Equal(t, input, string(output))
+	})
+}
+
+func TestManifestToJSONMarshalling(t *testing.T) {
+
+	t.Run("UmarshallingYamlThenMarshalToJSONForNestedCustomProperties", func(t *testing.T) {
+
+		var manifest EstafetteManifest
+
+		input := `builder:
+  track: stable
+labels:
+  app: estafette-ci-builder
+  language: golang
+  team: estafette-team
+version:
+  semver:
+    major: 0
+    minor: 0
+    patch: '{{auto}}'
+    labelTemplate: '{{branch}}'
+    releaseBranch: master
+stages:
+  test-alpha-version:
+    image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
+    retries: 1
+    credentials: gke-tooling
+    app: gke
+    namespace: estafette
+    visibility: private
+    container:
+      repository: extensions
+      name: gke
+      tag: alpha
+    cpu:
+      request: 100m
+      limit: 100m
+    memory:
+      request: 256Mi
+      limit: 256Mi
+    dryrun: true
+`
+		err := yaml.Unmarshal([]byte(input), &manifest)
+		assert.Nil(t, err)
+
+		// act
+		output, err := json.Marshal(manifest)
+
+		if assert.Nil(t, err) {
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":\"true\",\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+		}
 	})
 }

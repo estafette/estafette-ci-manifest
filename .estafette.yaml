@@ -26,13 +26,16 @@ env:
 # pipeline stages to be executed sequentially; for each step the 'when' is evaluated to see whether it should be executed or skipped
 stages:
   build:
-    image: golang:1.10.2-alpine3.7
+    image: golang:1.11.2-alpine3.8
     workDir: /go/src/github.com/estafette/${ESTAFETTE_LABEL_APP}
+    env:
+      CGO_ENABLED: 0
+      GOOS: linux
     commands:
     - go test -v `go list ./... | grep -v /vendor/`
 
   tag-revision:
-    image: golang:1.10.2-alpine3.7
+    image: golang:1.11.2-alpine3.8
     commands:
     - apk --no-cache add git
     - git tag ${ESTAFETTE_BUILD_VERSION}
@@ -40,9 +43,9 @@ stages:
 
   slack-notify:
     image: extensions/slack-build-status:dev
-    webhook: estafette.secret(PiUCBMW1LEeyFk3i.vn0sEYGK_QU_tXtxQ7PbQra1L8a-reYGkDbzP9K9A6NzKbsf4CExtahJW7JjViXCtxuRlAt_c4kYF2oBRaCQ_4x3iDWLUp4P7AkchXI9Es4l7eeUWfB3A-Lpy4LG)
-    name: ${ESTAFETTE_LABEL_APP}
+    workspace: estafette
     channels:
     - '#build-status'
     when:
+      status == 'succeeded' ||
       status == 'failed'

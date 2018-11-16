@@ -3,8 +3,8 @@ package manifest
 import (
 	"testing"
 
+	yaml "github.com/buildkite/yaml"
 	"github.com/stretchr/testify/assert"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func TestUnmarshalRelease(t *testing.T) {

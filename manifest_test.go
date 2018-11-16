@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	yaml "github.com/buildkite/yaml"
 	"github.com/stretchr/testify/assert"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func TestReadManifestFromFile(t *testing.T) {
@@ -198,15 +198,17 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		if assert.Equal(t, 6, len(manifest.Releases)) {
+		if assert.Equal(t, 7, len(manifest.Releases)) {
 
 			assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
 			assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
 			assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
 
 			assert.Equal(t, "beta", manifest.Releases[1].Name)
-			assert.Equal(t, "tag-image", manifest.Releases[1].Stages[0].Name)
-			assert.Equal(t, "extensions/tag-container-image:dev", manifest.Releases[1].Stages[0].ContainerImage)
+			assert.Equal(t, "tag-container-image", manifest.Releases[1].Stages[0].Name)
+			assert.Equal(t, "extensions/docker:stable", manifest.Releases[1].Stages[0].ContainerImage)
+			assert.Equal(t, 1, len(manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})))
+			assert.Equal(t, "beta", manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})[0])
 
 			assert.Equal(t, "development", manifest.Releases[2].Name)
 			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
@@ -223,6 +225,13 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
 
 			assert.Equal(t, "tooling", manifest.Releases[5].Name)
+
+			assert.Equal(t, "stable", manifest.Releases[6].Name)
+			assert.Equal(t, "tag-container-image", manifest.Releases[6].Stages[0].Name)
+			assert.Equal(t, "extensions/docker:stable", manifest.Releases[6].Stages[0].ContainerImage)
+			assert.Equal(t, 2, len(manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})))
+			assert.Equal(t, "stable", manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})[0])
+			assert.Equal(t, "latest", manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})[1])
 		}
 	})
 

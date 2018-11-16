@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	yaml "github.com/buildkite/yaml"
 	"github.com/stretchr/testify/assert"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func TestUnmarshalStage(t *testing.T) {

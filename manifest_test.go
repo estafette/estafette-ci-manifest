@@ -242,6 +242,23 @@ func TestReadManifestFromFile(t *testing.T) {
 		}
 	})
 
+	t.Run("ReturnsReleaseTargetWithActions", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 7, len(manifest.Releases)) {
+
+			assert.Equal(t, "production", manifest.Releases[4].Name)
+			assert.Equal(t, 3, len(manifest.Releases[4].Actions))
+			assert.Equal(t, "deploy-canary", manifest.Releases[4].Actions[0].Name)
+			assert.Equal(t, "rollback-canary", manifest.Releases[4].Actions[1].Name)
+			assert.Equal(t, "deploy-stable", manifest.Releases[4].Actions[2].Name)
+		}
+	})
+
 	t.Run("UmarshallingManifestWithDeprecatedPipelinesVerbStillWorks", func(t *testing.T) {
 
 		input := `

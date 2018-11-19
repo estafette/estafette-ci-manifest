@@ -201,32 +201,39 @@ func TestReadManifestFromFile(t *testing.T) {
 		if assert.Equal(t, 7, len(manifest.Releases)) {
 
 			assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
+			assert.False(t, manifest.Releases[0].CloneRepository)
 			assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
 			assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
 
 			assert.Equal(t, "beta", manifest.Releases[1].Name)
+			assert.False(t, manifest.Releases[1].CloneRepository)
 			assert.Equal(t, "tag-container-image", manifest.Releases[1].Stages[0].Name)
 			assert.Equal(t, "extensions/docker:stable", manifest.Releases[1].Stages[0].ContainerImage)
 			assert.Equal(t, 1, len(manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})))
 			assert.Equal(t, "beta", manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})[0])
 
 			assert.Equal(t, "development", manifest.Releases[2].Name)
+			assert.False(t, manifest.Releases[2].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
 
 			assert.Equal(t, "staging", manifest.Releases[3].Name)
+			assert.False(t, manifest.Releases[3].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].Stages[0].ContainerImage)
 
 			assert.Equal(t, "production", manifest.Releases[4].Name)
+			assert.True(t, manifest.Releases[4].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[4].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].Stages[0].ContainerImage)
 			assert.Equal(t, "create-release-notes", manifest.Releases[4].Stages[1].Name)
 			assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
 
 			assert.Equal(t, "tooling", manifest.Releases[5].Name)
+			assert.False(t, manifest.Releases[5].CloneRepository)
 
 			assert.Equal(t, "stable", manifest.Releases[6].Name)
+			assert.False(t, manifest.Releases[6].CloneRepository)
 			assert.Equal(t, "tag-container-image", manifest.Releases[6].Stages[0].Name)
 			assert.Equal(t, "extensions/docker:stable", manifest.Releases[6].Stages[0].ContainerImage)
 			assert.Equal(t, 2, len(manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})))

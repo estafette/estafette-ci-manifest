@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	yaml "github.com/buildkite/yaml"
 	"github.com/stretchr/testify/assert"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func TestReadManifestFromFile(t *testing.T) {
@@ -198,7 +198,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		if assert.Equal(t, 7, len(manifest.Releases)) {
+		if assert.Equal(t, 6, len(manifest.Releases)) {
 
 			assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
 			assert.False(t, manifest.Releases[0].CloneRepository)
@@ -231,14 +231,6 @@ func TestReadManifestFromFile(t *testing.T) {
 
 			assert.Equal(t, "tooling", manifest.Releases[5].Name)
 			assert.False(t, manifest.Releases[5].CloneRepository)
-
-			assert.Equal(t, "stable", manifest.Releases[6].Name)
-			assert.False(t, manifest.Releases[6].CloneRepository)
-			assert.Equal(t, "tag-container-image", manifest.Releases[6].Stages[0].Name)
-			assert.Equal(t, "extensions/docker:stable", manifest.Releases[6].Stages[0].ContainerImage)
-			assert.Equal(t, 2, len(manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})))
-			assert.Equal(t, "stable", manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})[0])
-			assert.Equal(t, "latest", manifest.Releases[6].Stages[0].CustomProperties["tags"].([]interface{})[1])
 		}
 	})
 
@@ -249,7 +241,7 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		if assert.Equal(t, 7, len(manifest.Releases)) {
+		if assert.Equal(t, 6, len(manifest.Releases)) {
 
 			assert.Equal(t, "production", manifest.Releases[4].Name)
 			assert.Equal(t, 3, len(manifest.Releases[4].Actions))

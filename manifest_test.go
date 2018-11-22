@@ -178,7 +178,7 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, 2, manifest.Version.SemVer.Minor)
 		assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
 		assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
-		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch)
+		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
 	})
 
 	t.Run("ReturnsManifestWithGlobalEnvVars", func(t *testing.T) {
@@ -398,7 +398,7 @@ version:
 		assert.Nil(t, err)
 		assert.Nil(t, manifest.Version.Custom)
 		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch)
+		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
 	})
 }
 

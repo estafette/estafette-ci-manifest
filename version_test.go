@@ -132,7 +132,25 @@ semver:
 		assert.Nil(t, err)
 		assert.Nil(t, version.Custom)
 		assert.NotNil(t, version.SemVer)
-		assert.Equal(t, "master", version.SemVer.ReleaseBranch)
+		assert.Equal(t, "master", version.SemVer.ReleaseBranch.Values[0])
+	})
+
+	t.Run("ReturnsSemverVersionWithMultipleReleaseBranchesForArray", func(t *testing.T) {
+
+		var version EstafetteVersion
+
+		// act
+		err := yaml.Unmarshal([]byte(`
+semver:
+  releaseBranch: 
+  - master
+  - production`), &version)
+
+		assert.Nil(t, err)
+		assert.Nil(t, version.Custom)
+		assert.NotNil(t, version.SemVer)
+		assert.Equal(t, "master", version.SemVer.ReleaseBranch.Values[0])
+		assert.Equal(t, "production", version.SemVer.ReleaseBranch.Values[1])
 	})
 
 }
@@ -217,7 +235,7 @@ func TestSemverVersion(t *testing.T) {
 			Minor:         3,
 			Patch:         "6",
 			LabelTemplate: "whateveryoulike",
-			ReleaseBranch: "alpha",
+			ReleaseBranch: StringOrStringArray{Values: []string{"alpha"}},
 		}
 		params := EstafetteVersionParams{
 			AutoIncrement: 5,
@@ -238,7 +256,7 @@ func TestSemverVersion(t *testing.T) {
 			Minor:         3,
 			Patch:         "{{auto}}",
 			LabelTemplate: "whateveryoulike",
-			ReleaseBranch: "alpha",
+			ReleaseBranch: StringOrStringArray{Values: []string{"alpha"}},
 		}
 		params := EstafetteVersionParams{
 			AutoIncrement: 16,
@@ -259,7 +277,7 @@ func TestSemverVersion(t *testing.T) {
 			Minor:         3,
 			Patch:         "6",
 			LabelTemplate: "{{branch}}",
-			ReleaseBranch: "release",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release"}},
 		}
 		params := EstafetteVersionParams{
 			AutoIncrement: 16,
@@ -280,7 +298,7 @@ func TestSemverVersion(t *testing.T) {
 			Minor:         3,
 			Patch:         "6",
 			LabelTemplate: "{{branch}}",
-			ReleaseBranch: "release",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release"}},
 		}
 		params := EstafetteVersionParams{
 			AutoIncrement: 16,

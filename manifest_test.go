@@ -220,7 +220,9 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "staging", manifest.Releases[3].Name)
 			assert.False(t, manifest.Releases[3].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
-			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:beta", manifest.Releases[3].Stages[0].ContainerImage)
+			assert.Equal(t, "extensions/gke:beta", manifest.Releases[3].Stages[0].ContainerImage)
+			assert.Equal(t, 600, manifest.Releases[3].Stages[0].CustomProperties["volumemounts"].([]interface{})[0].(map[string]interface{})["volume"].(map[string]interface{})["secret"].(map[string]interface{})["items"].([]interface{})[0].(map[string]interface{})["mode"])
+			assert.Equal(t, true, manifest.Releases[3].Stages[0].CustomProperties["volumemounts"].([]interface{})[0].(map[string]interface{})["volume"].(map[string]interface{})["secret"].(map[string]interface{})["items"].([]interface{})[0].(map[string]interface{})["enabled"])
 
 			assert.Equal(t, "production", manifest.Releases[4].Name)
 			assert.True(t, manifest.Releases[4].CloneRepository)
@@ -525,7 +527,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":\"true\",\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
 	})
 }

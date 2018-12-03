@@ -152,7 +152,6 @@ semver:
 		assert.Equal(t, "master", version.SemVer.ReleaseBranch.Values[0])
 		assert.Equal(t, "production", version.SemVer.ReleaseBranch.Values[1])
 	})
-
 }
 
 func TestCustomVersion(t *testing.T) {
@@ -289,6 +288,27 @@ func TestSemverVersion(t *testing.T) {
 		versionString := version.Version(params)
 
 		assert.Equal(t, "5.3.6-alpha", versionString)
+	})
+
+	t.Run("ReturnsSemverWithLabelWithoutSlashIfBranchHasSlash", func(t *testing.T) {
+
+		version := EstafetteSemverVersion{
+			Major:         5,
+			Minor:         3,
+			Patch:         "6",
+			LabelTemplate: "{{branch}}",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release"}},
+		}
+		params := EstafetteVersionParams{
+			AutoIncrement: 16,
+			Branch:        "feature/foo",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+		}
+
+		// act
+		versionString := version.Version(params)
+
+		assert.Equal(t, "5.3.6-feature-foo", versionString)
 	})
 
 	t.Run("ReturnsSemverWithoutLabelIfBranchMatchesReleaseBranch", func(t *testing.T) {

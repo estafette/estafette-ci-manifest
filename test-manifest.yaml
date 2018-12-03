@@ -18,6 +18,14 @@ env:
   VAR_A: Greetings
   VAR_B: World
 
+triggers:
+- type: pipeline
+  ref: github.com/estafette/estafette-ci-manifest/build
+  branch: release
+- type: pipeline
+  ref: github.com/estafette/estafette-ci-contracts/build
+  branch: release
+
 # automatically executed stages on a push to the repository
 stages:
   build:

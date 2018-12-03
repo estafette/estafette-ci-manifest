@@ -102,11 +102,21 @@ releases:
         - beta
 
   development:
+    triggers:
+    - type: pipeline
+      ref: this/build
+      branch: any
+
     stages:
       deploy:
         image: extensions/deploy-to-kubernetes-engine:dev
 
   staging:
+    triggers:
+    - type: pipeline
+      ref: this/releases/development
+      branch: release
+
     stages:
       deploy:
         image: extensions/gke:beta

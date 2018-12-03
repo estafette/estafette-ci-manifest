@@ -253,6 +253,29 @@ func TestReadManifestFromFile(t *testing.T) {
 		}
 	})
 
+	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 6, len(manifest.Releases)) {
+
+			assert.Equal(t, "development", manifest.Releases[2].Name)
+			assert.Equal(t, 1, len(manifest.Releases[2].Triggers))
+			assert.Equal(t, "pipeline", manifest.Releases[2].Triggers[0].Type)
+			assert.Equal(t, "this/build", manifest.Releases[2].Triggers[0].Reference)
+			assert.Equal(t, "any", manifest.Releases[2].Triggers[0].Branch)
+
+			assert.Equal(t, "staging", manifest.Releases[3].Name)
+			assert.Equal(t, 1, len(manifest.Releases[3].Triggers))
+			assert.Equal(t, "pipeline", manifest.Releases[3].Triggers[0].Type)
+			assert.Equal(t, "this/releases/development", manifest.Releases[3].Triggers[0].Reference)
+			assert.Equal(t, "release", manifest.Releases[3].Triggers[0].Branch)
+		}
+	})
+
 	t.Run("UmarshallingManifestWithDeprecatedPipelinesVerbStillWorks", func(t *testing.T) {
 
 		input := `

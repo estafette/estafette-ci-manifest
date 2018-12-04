@@ -21,10 +21,13 @@ env:
 triggers:
 - type: pipeline
   ref: github.com/estafette/estafette-ci-manifest/build
-  branch: release
+  filter: release
 - type: pipeline
   ref: github.com/estafette/estafette-ci-contracts/build
-  branch: release
+  filter: release
+- type: docker
+  ref: golang
+  filter: 1.8.0-alpine
 
 # automatically executed stages on a push to the repository
 stages:
@@ -113,7 +116,9 @@ releases:
     triggers:
     - type: pipeline
       ref: this/build
-      branch: any
+      filter: branch:release
+    - type: cron
+      ref: '*/5 * * * *'
 
     stages:
       deploy:
@@ -123,7 +128,6 @@ releases:
     triggers:
     - type: pipeline
       ref: this/releases/development
-      branch: release
 
     stages:
       deploy:

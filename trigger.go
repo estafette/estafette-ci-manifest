@@ -4,5 +4,5 @@ package manifest
 type EstafetteTrigger struct {
 	Type      string `yaml:"type" json:"type"`
 	Reference string `yaml:"ref" json:"ref"`
-	Branch    string `yaml:"branch,omitempty" json:"branch,omitempty"`
+	Filter    string `yaml:"filter,omitempty" json:"filter,omitempty"`
 }

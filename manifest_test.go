@@ -301,7 +301,7 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "staging", stagingRelease.Name)
 			assert.Equal(t, 1, len(stagingRelease.Triggers))
 			assert.Equal(t, "pipeline-release-finished", stagingRelease.Triggers[0].Event)
-			assert.Equal(t, "", stagingRelease.Triggers[0].Filter.Pipeline)
+			assert.Equal(t, "this", stagingRelease.Triggers[0].Filter.Pipeline)
 			assert.Equal(t, "development", stagingRelease.Triggers[0].Filter.Target)
 			assert.Equal(t, "master", stagingRelease.Triggers[0].Then.Branch)
 
@@ -309,7 +309,7 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "production", productionRelease.Name)
 			assert.Equal(t, 1, len(productionRelease.Triggers))
 			assert.Equal(t, "pipeline-release-finished", productionRelease.Triggers[0].Event)
-			assert.Equal(t, "", productionRelease.Triggers[0].Filter.Pipeline)
+			assert.Equal(t, "this", productionRelease.Triggers[0].Filter.Pipeline)
 			assert.Equal(t, "staging", productionRelease.Triggers[0].Filter.Target)
 			assert.Equal(t, "succeeded", productionRelease.Triggers[0].Filter.Status)
 			assert.Equal(t, "master", productionRelease.Triggers[0].Filter.Branch)

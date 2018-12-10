@@ -127,3 +127,97 @@ func (t *EstafetteTrigger) SetDefaults() {
 		}
 	}
 }
+
+// Equals returns true if the event, all filters and run options match
+func (t *EstafetteTrigger) Equals(trigger *EstafetteTrigger) bool {
+
+	if t == nil && trigger == nil {
+		return true
+	}
+
+	if t == nil || trigger == nil {
+		return false
+	}
+
+	if t.Event != trigger.Event {
+		return false
+	}
+
+	if !t.Filter.Equals(trigger.Filter) {
+		return false
+	}
+
+	if !t.Run.Equals(trigger.Run) {
+		return false
+	}
+
+	return true
+}
+
+// Equals returns true if all filters options match
+func (f *EstafetteTriggerFilter) Equals(filter *EstafetteTriggerFilter) bool {
+
+	if f == nil && filter == nil {
+		return true
+	}
+
+	if f == nil || filter == nil {
+		return false
+	}
+
+	if f.Pipeline != filter.Pipeline {
+		return false
+	}
+
+	if f.Target != filter.Target {
+		return false
+	}
+
+	if f.Action != filter.Action {
+		return false
+	}
+
+	if f.Status != filter.Status {
+		return false
+	}
+
+	if f.Branch != filter.Branch {
+		return false
+	}
+
+	if f.Cron != filter.Cron {
+		return false
+	}
+
+	if f.Image != filter.Image {
+		return false
+	}
+
+	if f.Tag != filter.Tag {
+		return false
+	}
+
+	return true
+}
+
+// Equals returns true if all run options match
+func (r *EstafetteTriggerRun) Equals(run *EstafetteTriggerRun) bool {
+
+	if r == nil && run == nil {
+		return true
+	}
+
+	if r == nil || run == nil {
+		return false
+	}
+
+	if r.Branch != run.Branch {
+		return false
+	}
+
+	if r.Action != run.Action {
+		return false
+	}
+
+	return true
+}

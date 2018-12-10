@@ -19,15 +19,25 @@ env:
   VAR_B: World
 
 triggers:
-- type: pipeline
-  ref: github.com/estafette/estafette-ci-manifest/build
-  filter: release
-- type: pipeline
-  ref: github.com/estafette/estafette-ci-contracts/build
-  filter: release
-- type: docker
-  ref: golang
-  filter: 1.8.0-alpine
+- event: pipeline-build-finished
+  filter:
+    pipeline: github.com/estafette/estafette-ci-manifest
+    status: succeeded
+    branch: master|release
+  then:
+    branch: master
+- event: pipeline-build-started
+  filter:
+    pipeline: github.com/estafette/estafette-ci-contracts
+    branch: master|release
+  then:
+    branch: master
+- event: docker-image-pushed
+  filter:
+    image: golang
+    tag: 1\.8\..+
+  then:
+    branch: master
 
 # automatically executed stages on a push to the repository
 stages:
@@ -114,11 +124,17 @@ releases:
 
   development:
     triggers:
-    - type: pipeline
-      ref: this/build
-      filter: branch:release
-    - type: cron
-      ref: '*/5 * * * *'
+    - event: pipeline-build-finished
+      filter:
+        status: succeeded
+        branch: .+
+      then:
+        branch: .+
+    - event: cron
+      filter:
+        cron: '*/5 * * * *'
+      then:
+        branch: master
 
     stages:
       deploy:
@@ -126,8 +142,13 @@ releases:
 
   staging:
     triggers:
-    - type: pipeline
-      ref: this/releases/development
+    - event: pipeline-release-finished
+      filter:
+        target: development
+        status: succeeded
+        branch: master
+      then:
+        branch: master
 
     stages:
       deploy:
@@ -151,6 +172,16 @@ releases:
     - name: deploy-canary
     - name: rollback-canary
     - name: deploy-stable
+
+    triggers:
+    - event: pipeline-release-finished
+      filter:
+        target: staging
+        status: succeeded
+        branch: master
+      then:
+        branch: master
+        action: deploy-canary
 
     clone: true
     stages:

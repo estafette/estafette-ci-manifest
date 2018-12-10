@@ -261,17 +261,20 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Nil(t, err)
 
 		assert.Equal(t, 3, len(manifest.Triggers))
-		assert.Equal(t, "pipeline", manifest.Triggers[0].Type)
-		assert.Equal(t, "github.com/estafette/estafette-ci-manifest/build", manifest.Triggers[0].Reference)
-		assert.Equal(t, "release", manifest.Triggers[0].Filter)
+		assert.Equal(t, "pipeline-build-finished", manifest.Triggers[0].Event)
+		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", manifest.Triggers[0].Filter.Pipeline)
+		assert.Equal(t, "master|release", manifest.Triggers[0].Filter.Branch)
+		assert.Equal(t, "master", manifest.Triggers[0].Then.Branch)
 
-		assert.Equal(t, "pipeline", manifest.Triggers[1].Type)
-		assert.Equal(t, "github.com/estafette/estafette-ci-contracts/build", manifest.Triggers[1].Reference)
-		assert.Equal(t, "release", manifest.Triggers[1].Filter)
+		assert.Equal(t, "pipeline-build-started", manifest.Triggers[1].Event)
+		assert.Equal(t, "github.com/estafette/estafette-ci-contracts", manifest.Triggers[1].Filter.Pipeline)
+		assert.Equal(t, "master|release", manifest.Triggers[1].Filter.Branch)
+		assert.Equal(t, "master", manifest.Triggers[1].Then.Branch)
 
-		assert.Equal(t, "docker", manifest.Triggers[2].Type)
-		assert.Equal(t, "golang", manifest.Triggers[2].Reference)
-		assert.Equal(t, "1.8.0-alpine", manifest.Triggers[2].Filter)
+		assert.Equal(t, "docker-image-pushed", manifest.Triggers[2].Event)
+		assert.Equal(t, "golang", manifest.Triggers[2].Filter.Image)
+		assert.Equal(t, "1\\.8\\..+", manifest.Triggers[2].Filter.Tag)
+		assert.Equal(t, "master", manifest.Triggers[2].Then.Branch)
 	})
 
 	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
@@ -283,19 +286,35 @@ func TestReadManifestFromFile(t *testing.T) {
 
 		if assert.Equal(t, 6, len(manifest.Releases)) {
 
-			assert.Equal(t, "development", manifest.Releases[2].Name)
-			assert.Equal(t, 2, len(manifest.Releases[2].Triggers))
-			assert.Equal(t, "pipeline", manifest.Releases[2].Triggers[0].Type)
-			assert.Equal(t, "this/build", manifest.Releases[2].Triggers[0].Reference)
-			assert.Equal(t, "branch:release", manifest.Releases[2].Triggers[0].Filter)
-			assert.Equal(t, "cron", manifest.Releases[2].Triggers[1].Type)
-			assert.Equal(t, "*/5 * * * *", manifest.Releases[2].Triggers[1].Reference)
+			developmentRelease := manifest.Releases[2]
+			assert.Equal(t, "development", developmentRelease.Name)
+			assert.Equal(t, 2, len(developmentRelease.Triggers))
+			assert.Equal(t, "pipeline-build-finished", developmentRelease.Triggers[0].Event)
+			assert.Equal(t, "", developmentRelease.Triggers[0].Filter.Pipeline)
+			assert.Equal(t, ".+", developmentRelease.Triggers[0].Filter.Branch)
+			assert.Equal(t, ".+", developmentRelease.Triggers[0].Then.Branch)
+			assert.Equal(t, "cron", developmentRelease.Triggers[1].Event)
+			assert.Equal(t, "*/5 * * * *", developmentRelease.Triggers[1].Filter.Cron)
+			assert.Equal(t, "master", developmentRelease.Triggers[1].Then.Branch)
 
-			assert.Equal(t, "staging", manifest.Releases[3].Name)
-			assert.Equal(t, 1, len(manifest.Releases[3].Triggers))
-			assert.Equal(t, "pipeline", manifest.Releases[3].Triggers[0].Type)
-			assert.Equal(t, "this/releases/development", manifest.Releases[3].Triggers[0].Reference)
-			assert.Equal(t, "", manifest.Releases[3].Triggers[0].Filter)
+			stagingRelease := manifest.Releases[3]
+			assert.Equal(t, "staging", stagingRelease.Name)
+			assert.Equal(t, 1, len(stagingRelease.Triggers))
+			assert.Equal(t, "pipeline-release-finished", stagingRelease.Triggers[0].Event)
+			assert.Equal(t, "", stagingRelease.Triggers[0].Filter.Pipeline)
+			assert.Equal(t, "development", stagingRelease.Triggers[0].Filter.Target)
+			assert.Equal(t, "master", stagingRelease.Triggers[0].Then.Branch)
+
+			productionRelease := manifest.Releases[4]
+			assert.Equal(t, "production", productionRelease.Name)
+			assert.Equal(t, 1, len(productionRelease.Triggers))
+			assert.Equal(t, "pipeline-release-finished", productionRelease.Triggers[0].Event)
+			assert.Equal(t, "", productionRelease.Triggers[0].Filter.Pipeline)
+			assert.Equal(t, "staging", productionRelease.Triggers[0].Filter.Target)
+			assert.Equal(t, "succeeded", productionRelease.Triggers[0].Filter.Status)
+			assert.Equal(t, "master", productionRelease.Triggers[0].Filter.Branch)
+			assert.Equal(t, "master", productionRelease.Triggers[0].Then.Branch)
+			assert.Equal(t, "deploy-canary", productionRelease.Triggers[0].Then.Action)
 		}
 	})
 

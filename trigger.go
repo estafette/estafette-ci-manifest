@@ -4,7 +4,7 @@ package manifest
 type EstafetteTrigger struct {
 	Event  string                  `yaml:"event,omitempty" json:"event,omitempty"`
 	Filter *EstafetteTriggerFilter `yaml:"filter,omitempty" json:"filter,omitempty"`
-	Then   *EstafetteTriggerThen   `yaml:"then,omitempty" json:"then,omitempty"`
+	Run    *EstafetteTriggerRun    `yaml:"run,omitempty" json:"run,omitempty"`
 }
 
 // EstafetteTriggerFilter filters the triggered event
@@ -24,8 +24,8 @@ type EstafetteTriggerFilter struct {
 	Tag   string `yaml:"tag,omitempty" json:"tag,omitempty"`
 }
 
-// EstafetteTriggerThen determines what's triggered when filtered events arive
-type EstafetteTriggerThen struct {
+// EstafetteTriggerRun determines what action to take on a trigger
+type EstafetteTriggerRun struct {
 	Branch string `yaml:"branch,omitempty" json:"branch,omitempty"`
 	Action string `yaml:"action,omitempty" json:"action,omitempty"`
 }
@@ -36,7 +36,7 @@ func (t *EstafetteTrigger) UnmarshalYAML(unmarshal func(interface{}) error) (err
 	var aux struct {
 		Event  string                  `yaml:"event,omitempty" json:"event,omitempty"`
 		Filter *EstafetteTriggerFilter `yaml:"filter,omitempty" json:"filter,omitempty"`
-		Then   *EstafetteTriggerThen   `yaml:"then,omitempty" json:"then,omitempty"`
+		Run    *EstafetteTriggerRun    `yaml:"run,omitempty" json:"run,omitempty"`
 	}
 
 	// unmarshal to auxiliary type
@@ -47,7 +47,7 @@ func (t *EstafetteTrigger) UnmarshalYAML(unmarshal func(interface{}) error) (err
 	// map auxiliary properties
 	t.Event = aux.Event
 	t.Filter = aux.Filter
-	t.Then = aux.Then
+	t.Run = aux.Run
 
 	t.SetDefaults()
 
@@ -66,9 +66,6 @@ func (t *EstafetteTrigger) SetDefaults() {
 		if t.Filter == nil {
 			t.Filter = &EstafetteTriggerFilter{}
 		}
-		if t.Then == nil {
-			t.Then = &EstafetteTriggerThen{}
-		}
 	}
 
 	// set filter branch default
@@ -83,21 +80,6 @@ func (t *EstafetteTrigger) SetDefaults() {
 		"pipeline-release-finished":
 		if t.Filter.Branch == "" {
 			t.Filter.Branch = ".+"
-		}
-	}
-
-	// set then branch default
-	switch t.Event {
-	case "pipeline-build-started",
-		"pipeline-build-finished":
-		if t.Then.Branch == "" {
-			t.Then.Branch = "master"
-		}
-
-	case "pipeline-release-started",
-		"pipeline-release-finished":
-		if t.Then.Branch == "" {
-			t.Then.Branch = ".+"
 		}
 	}
 
@@ -116,6 +98,32 @@ func (t *EstafetteTrigger) SetDefaults() {
 		"pipeline-release-finished":
 		if t.Filter.Status == "" {
 			t.Filter.Status = "succeeded"
+		}
+	}
+
+	// set run default
+	switch t.Event {
+	case "pipeline-build-started",
+		"pipeline-build-finished",
+		"pipeline-release-started",
+		"pipeline-release-finished":
+		if t.Run == nil {
+			t.Run = &EstafetteTriggerRun{}
+		}
+	}
+
+	// set run branch default
+	switch t.Event {
+	case "pipeline-build-started",
+		"pipeline-build-finished":
+		if t.Run.Branch == "" {
+			t.Run.Branch = "master"
+		}
+
+	case "pipeline-release-started",
+		"pipeline-release-finished":
+		if t.Run.Branch == "" {
+			t.Run.Branch = ".+"
 		}
 	}
 }

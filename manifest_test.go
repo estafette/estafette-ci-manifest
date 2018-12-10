@@ -264,17 +264,17 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Equal(t, "pipeline-build-finished", manifest.Triggers[0].Event)
 		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", manifest.Triggers[0].Filter.Pipeline)
 		assert.Equal(t, "master|release", manifest.Triggers[0].Filter.Branch)
-		assert.Equal(t, "master", manifest.Triggers[0].Then.Branch)
+		assert.Equal(t, "master", manifest.Triggers[0].Run.Branch)
 
 		assert.Equal(t, "pipeline-build-started", manifest.Triggers[1].Event)
 		assert.Equal(t, "github.com/estafette/estafette-ci-contracts", manifest.Triggers[1].Filter.Pipeline)
 		assert.Equal(t, "master|release", manifest.Triggers[1].Filter.Branch)
-		assert.Equal(t, "master", manifest.Triggers[1].Then.Branch)
+		assert.Equal(t, "master", manifest.Triggers[1].Run.Branch)
 
 		assert.Equal(t, "docker-image-pushed", manifest.Triggers[2].Event)
 		assert.Equal(t, "golang", manifest.Triggers[2].Filter.Image)
 		assert.Equal(t, "1\\.8\\..+", manifest.Triggers[2].Filter.Tag)
-		assert.Equal(t, "master", manifest.Triggers[2].Then.Branch)
+		assert.Equal(t, "master", manifest.Triggers[2].Run.Branch)
 	})
 
 	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
@@ -292,10 +292,10 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "pipeline-build-finished", developmentRelease.Triggers[0].Event)
 			assert.Equal(t, "", developmentRelease.Triggers[0].Filter.Pipeline)
 			assert.Equal(t, ".+", developmentRelease.Triggers[0].Filter.Branch)
-			assert.Equal(t, ".+", developmentRelease.Triggers[0].Then.Branch)
+			assert.Equal(t, ".+", developmentRelease.Triggers[0].Run.Branch)
 			assert.Equal(t, "cron", developmentRelease.Triggers[1].Event)
 			assert.Equal(t, "*/5 * * * *", developmentRelease.Triggers[1].Filter.Cron)
-			assert.Equal(t, "master", developmentRelease.Triggers[1].Then.Branch)
+			assert.Equal(t, "master", developmentRelease.Triggers[1].Run.Branch)
 
 			stagingRelease := manifest.Releases[3]
 			assert.Equal(t, "staging", stagingRelease.Name)
@@ -303,7 +303,7 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "pipeline-release-finished", stagingRelease.Triggers[0].Event)
 			assert.Equal(t, "this", stagingRelease.Triggers[0].Filter.Pipeline)
 			assert.Equal(t, "development", stagingRelease.Triggers[0].Filter.Target)
-			assert.Equal(t, "master", stagingRelease.Triggers[0].Then.Branch)
+			assert.Equal(t, "master", stagingRelease.Triggers[0].Run.Branch)
 
 			productionRelease := manifest.Releases[4]
 			assert.Equal(t, "production", productionRelease.Name)
@@ -313,8 +313,8 @@ func TestReadManifestFromFile(t *testing.T) {
 			assert.Equal(t, "staging", productionRelease.Triggers[0].Filter.Target)
 			assert.Equal(t, "succeeded", productionRelease.Triggers[0].Filter.Status)
 			assert.Equal(t, "master", productionRelease.Triggers[0].Filter.Branch)
-			assert.Equal(t, "master", productionRelease.Triggers[0].Then.Branch)
-			assert.Equal(t, "deploy-canary", productionRelease.Triggers[0].Then.Action)
+			assert.Equal(t, "master", productionRelease.Triggers[0].Run.Branch)
+			assert.Equal(t, "deploy-canary", productionRelease.Triggers[0].Run.Action)
 		}
 	})
 

@@ -24,19 +24,19 @@ triggers:
     pipeline: github.com/estafette/estafette-ci-manifest
     status: succeeded
     branch: master|release
-  then:
+  run:
     branch: master
 - event: pipeline-build-started
   filter:
     pipeline: github.com/estafette/estafette-ci-contracts
     branch: master|release
-  then:
+  run:
     branch: master
 - event: docker-image-pushed
   filter:
     image: golang
     tag: 1\.8\..+
-  then:
+  run:
     branch: master
 
 # automatically executed stages on a push to the repository
@@ -128,12 +128,12 @@ releases:
       filter:
         status: succeeded
         branch: .+
-      then:
+      run:
         branch: .+
     - event: cron
       filter:
         cron: '*/5 * * * *'
-      then:
+      run:
         branch: master
 
     stages:
@@ -148,7 +148,7 @@ releases:
         target: development
         status: succeeded
         branch: master
-      then:
+      run:
         branch: master
 
     stages:
@@ -180,7 +180,7 @@ releases:
         target: staging
         status: succeeded
         branch: master
-      then:
+      run:
         branch: master
         action: deploy-canary
 

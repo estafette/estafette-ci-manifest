@@ -113,7 +113,7 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, "master", trigger.Then.Branch)
+		assert.Equal(t, "master", trigger.Run.Branch)
 	})
 
 	t.Run("DefaultsThenBranchToMasterForEventPipelineBuildFinished", func(t *testing.T) {
@@ -125,7 +125,7 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, "master", trigger.Then.Branch)
+		assert.Equal(t, "master", trigger.Run.Branch)
 	})
 
 	t.Run("DefaultsThenBranchToAnyForEventPipelineReleaseStarted", func(t *testing.T) {
@@ -137,7 +137,7 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, ".+", trigger.Then.Branch)
+		assert.Equal(t, ".+", trigger.Run.Branch)
 	})
 
 	t.Run("DefaultsThenBranchToAnyForEventPipelineReleaseFinished", func(t *testing.T) {
@@ -149,6 +149,6 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, ".+", trigger.Then.Branch)
+		assert.Equal(t, ".+", trigger.Run.Branch)
 	})
 }

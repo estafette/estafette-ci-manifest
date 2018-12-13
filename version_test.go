@@ -311,6 +311,27 @@ func TestSemverVersion(t *testing.T) {
 		assert.Equal(t, "5.3.6-feature-foo", versionString)
 	})
 
+	t.Run("ReturnsSemverWithLabelHyphensTrimmedAtEnd", func(t *testing.T) {
+
+		version := EstafetteSemverVersion{
+			Major:         5,
+			Minor:         3,
+			Patch:         "6",
+			LabelTemplate: "{{branch}}",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release"}},
+		}
+		params := EstafetteVersionParams{
+			AutoIncrement: 16,
+			Branch:        "-some-branch-surrounded-by-hyphens-",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+		}
+
+		// act
+		versionString := version.Version(params)
+
+		assert.Equal(t, "5.3.6-some-branch-surrounded-by-hyphens", versionString)
+	})
+
 	t.Run("ReturnsSemverWithoutLabelIfBranchMatchesReleaseBranch", func(t *testing.T) {
 
 		version := EstafetteSemverVersion{

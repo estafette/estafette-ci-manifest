@@ -332,7 +332,28 @@ func TestSemverVersion(t *testing.T) {
 		assert.Equal(t, "5.3.6-hotfix-production-deploy", versionString)
 	})
 
-	t.Run("ReturnsSemverWithDNSSafeLabelForNumericBranch", func(t *testing.T) {
+	t.Run("ReturnsSemverWithDNSSafeLabelForBranchStartingWithNumber", func(t *testing.T) {
+
+		version := EstafetteSemverVersion{
+			Major:         5,
+			Minor:         3,
+			Patch:         "6",
+			LabelTemplate: "{{revision}}",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release"}},
+		}
+		params := EstafetteVersionParams{
+			AutoIncrement: 16,
+			Branch:        "19.1.0",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+		}
+
+		// act
+		versionString := version.Version(params)
+
+		assert.Equal(t, "5.3.6-revision-219aae19153da2b20ac1d88e2fd68e0b20274be2", versionString)
+	})
+
+	t.Run("ReturnsSemverWithDNSSafeLabelForRevisionStartingWithNumber", func(t *testing.T) {
 
 		version := EstafetteSemverVersion{
 			Major:         5,
@@ -371,7 +392,7 @@ func TestSemverVersion(t *testing.T) {
 		// act
 		versionString := version.Version(params)
 
-		assert.Equal(t, "5.3.6-hotfix-production-deploy", versionString)
+		assert.Equal(t, "5.3.6-branch-123-hotfix-production-deploy", versionString)
 	})
 
 	t.Run("ReturnsSemverWithDNSSafeLabelOfMax63Characters", func(t *testing.T) {

@@ -301,6 +301,43 @@ pipelines:
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(manifest.Stages))
 	})
+
+	t.Run("ReturnsManifestWithTriggersWithoutErrors", func(t *testing.T) {
+
+		// act
+		_, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsTriggers", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 3, len(manifest.Triggers)) {
+			assert.Equal(t, "github.com/estafette/estafette-ci-manifest", manifest.Triggers[0].Pipeline.Name)
+			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Triggers[1].Git.Repository)
+			assert.Equal(t, "golang", manifest.Triggers[2].Docker.Image)
+		}
+	})
+
+	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 1, len(manifest.Releases)) {
+			assert.Equal(t, "development", manifest.Releases[0].Name)
+			assert.Equal(t, 2, len(manifest.Releases[0].Triggers))
+			assert.Equal(t, "github.com/estafette/estafette-ci-build", manifest.Releases[0].Triggers[0].Pipeline.Name)
+			assert.Equal(t, "0 10 */1 * *", manifest.Releases[0].Triggers[1].Cron.Expression)
+		}
+	})
 }
 
 func TestVersion(t *testing.T) {
@@ -553,7 +590,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"InMemoryWorkingDirectory\":false},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"InMemoryWorkingDirectory\":false},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
 	})
 }

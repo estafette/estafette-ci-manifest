@@ -11,6 +11,14 @@ import (
 
 func TestReadManifestFromFile(t *testing.T) {
 
+	t.Run("ReturnsErrorForManifestWithUnknownSections", func(t *testing.T) {
+
+		// act
+		_, err := ReadManifestFromFile("test-non-strict-manifest.yaml")
+
+		assert.NotNil(t, err)
+	})
+
 	t.Run("ReturnsManifestWithoutErrors", func(t *testing.T) {
 
 		// act

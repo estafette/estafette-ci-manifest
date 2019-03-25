@@ -245,48 +245,66 @@ func (r *EstafetteTriggerRun) Validate() (err error) {
 }
 
 // Fires indicates whether EstafettePipelineTrigger fires for an EstafettePipelineEvent
-func (p *EstafettePipelineTrigger) Fires(e *EstafettePipelineEvent) (bool, error) {
+func (p *EstafettePipelineTrigger) Fires(e *EstafettePipelineEvent) bool {
 
 	// compare event as regex
 	eventMatched, err := regexp.MatchString(p.Event, fmt.Sprintf("^%v$", e.Event))
-	if err != nil {
-		return false, err
-	}
-	if !eventMatched {
-		return false, nil
+	if err != nil || !eventMatched {
+		return false
 	}
 
 	if p.Event == "finished" {
-		// compare event as regex
+		// compare status as regex
 		statusMatched, err := regexp.MatchString(p.Status, fmt.Sprintf("^%v$", e.Status))
-		if err != nil {
-			return false, err
-		}
-		if !statusMatched {
-			return false, nil
+		if err != nil || !statusMatched {
+			return false
 		}
 	}
 
+	// compare name case insensitive
 	nameMatches := strings.EqualFold(p.Name, e.Name)
 	if !nameMatches {
-		return false, nil
+		return false
 	}
 
 	// compare branch as regex
 	branchMatched, err := regexp.MatchString(p.Branch, fmt.Sprintf("^%v$", e.Branch))
-	if err != nil {
-		return false, err
-	}
-	if !branchMatched {
-		return false, nil
+	if err != nil || !branchMatched {
+		return false
 	}
 
-	return true, nil
+	return true
 }
 
 // Fires indicates whether EstafetteReleaseTrigger fires for an EstafetteReleaseEvent
 func (r *EstafetteReleaseTrigger) Fires(e *EstafetteReleaseEvent) bool {
-	return false
+	// compare event as regex
+	eventMatched, err := regexp.MatchString(r.Event, fmt.Sprintf("^%v$", e.Event))
+	if err != nil || !eventMatched {
+		return false
+	}
+
+	if r.Event == "finished" {
+		// compare status as regex
+		statusMatched, err := regexp.MatchString(r.Status, fmt.Sprintf("^%v$", e.Status))
+		if err != nil || !statusMatched {
+			return false
+		}
+	}
+
+	// compare name case insensitive
+	nameMatches := strings.EqualFold(r.Name, e.Name)
+	if !nameMatches {
+		return false
+	}
+
+	// compare branch as regex
+	branchMatched, err := regexp.MatchString(r.Target, fmt.Sprintf("^%v$", e.Target))
+	if err != nil || !branchMatched {
+		return false
+	}
+
+	return true
 }
 
 // Fires indicates whether EstafetteGitTrigger fires for an EstafetteGitEvent

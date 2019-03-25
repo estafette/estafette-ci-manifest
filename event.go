@@ -3,6 +3,7 @@ package manifest
 // EstafettePipelineEvent fires for pipeline changes
 type EstafettePipelineEvent struct {
 	Event  string
+	Status string
 	Name   string
 	Branch string
 }
@@ -10,6 +11,7 @@ type EstafettePipelineEvent struct {
 // EstafetteReleaseEvent fires for pipeline releases
 type EstafetteReleaseEvent struct {
 	Event  string
+	Status string
 	Name   string
 	Target string
 }

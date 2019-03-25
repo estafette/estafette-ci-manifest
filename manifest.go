@@ -134,6 +134,16 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 func (c *EstafetteManifest) setDefaults() {
 	c.Builder.setDefaults()
 	c.Version.setDefaults()
+
+	for _, t := range c.Triggers {
+		t.SetDefaults()
+	}
+
+	for _, r := range c.Releases {
+		for _, t := range r.Triggers {
+			t.SetDefaults()
+		}
+	}
 }
 
 // Exists checks whether the .estafette.yaml exists

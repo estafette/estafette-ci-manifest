@@ -6,11 +6,11 @@ labels:
 # in addition to git push to the pipeline repository, the triggers will start a build as well
 triggers:
 - pipeline:
-    event: succeeded
+    event: finished
+    status: succeeded
     name: github.com/estafette/estafette-ci-manifest
     branch: master
   run:
-    status: succeeded
     branch: master
 - git:
     event: push
@@ -38,8 +38,9 @@ releases:
     triggers:
     - pipeline:
         name: github.com/estafette/estafette-ci-builder
-        run:
-          branch: .*
+        branch: .*
+      run:
+        branch: master
     - cron: 
         expression: '0 10 */1 * *'
 
@@ -57,9 +58,9 @@ releases:
     - release:
         name: github.com/estafette/estafette-ci-builder
         target: development
-        run:
-          branch: .*
-          action: deploy-canary
+      run:
+        branch: .*
+        action: deploy-canary
 
     stages:
       deploy:

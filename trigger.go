@@ -2,6 +2,8 @@ package manifest
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 // EstafetteTrigger represents a trigger of any supported type and what action to take if the trigger fired
@@ -17,6 +19,7 @@ type EstafetteTrigger struct {
 // EstafettePipelineTrigger fires for pipeline changes and applies filtering to limit when this results in an action
 type EstafettePipelineTrigger struct {
 	Event  string `yaml:"event,omitempty"`
+	Status string `yaml:"status,omitempty"`
 	Name   string `yaml:"name,omitempty"`
 	Branch string `yaml:"branch,omitempty"`
 }
@@ -24,6 +27,7 @@ type EstafettePipelineTrigger struct {
 // EstafetteReleaseTrigger fires for pipeline releases and applies filtering to limit when this results in an action
 type EstafetteReleaseTrigger struct {
 	Event  string `yaml:"event,omitempty"`
+	Status string `yaml:"status,omitempty"`
 	Name   string `yaml:"name,omitempty"`
 	Target string `yaml:"target,omitempty"`
 }
@@ -49,9 +53,8 @@ type EstafetteCronTrigger struct {
 
 // EstafetteTriggerRun determines what builds/releases when
 type EstafetteTriggerRun struct {
-	Status string `yaml:"status,omitempty"`
-	Branch string `yaml:"branch,omitempty"`
-	Action string `yaml:"action,omitempty"`
+	BranchToBuild   string `yaml:"branch,omitempty"`
+	ActionToRelease string `yaml:"action,omitempty"`
 }
 
 // SetDefaults sets defaults for EstafetteTrigger
@@ -78,7 +81,10 @@ func (t *EstafetteTrigger) SetDefaults() {
 // SetDefaults sets defaults for EstafettePipelineTrigger
 func (p *EstafettePipelineTrigger) SetDefaults() {
 	if p.Event == "" {
-		p.Event = "succeeded"
+		p.Event = "finished"
+	}
+	if p.Status == "" {
+		p.Status = "succeeded"
 	}
 	if p.Branch == "" {
 		p.Branch = "master"
@@ -88,7 +94,10 @@ func (p *EstafettePipelineTrigger) SetDefaults() {
 // SetDefaults sets defaults for EstafetteReleaseTrigger
 func (r *EstafetteReleaseTrigger) SetDefaults() {
 	if r.Event == "" {
-		r.Event = "succeeded"
+		r.Event = "finished"
+	}
+	if r.Status == "" {
+		r.Status = "succeeded"
 	}
 }
 
@@ -112,11 +121,8 @@ func (c *EstafetteCronTrigger) SetDefaults() {
 
 // SetDefaults sets defaults for EstafetteTriggerRun
 func (r *EstafetteTriggerRun) SetDefaults() {
-	if r.Status == "" {
-		r.Status = "succeeded"
-	}
-	if r.Branch == "" {
-		r.Branch = "master"
+	if r.BranchToBuild == "" {
+		r.BranchToBuild = "master"
 	}
 }
 
@@ -130,7 +136,7 @@ func (t *EstafetteTrigger) Validate() (err error) {
 		t.Git == nil &&
 		t.Docker == nil &&
 		t.Cron == nil {
-		return fmt.Errorf("Set at least a pipeline, release, git, docker or cron trigger")
+		return fmt.Errorf("Set at least a 'pipeline', 'release', 'git', 'docker' or 'cron' trigger")
 	}
 
 	if t.Pipeline != nil {
@@ -170,7 +176,7 @@ func (t *EstafetteTrigger) Validate() (err error) {
 	}
 
 	if numberOfTypes != 1 {
-		return fmt.Errorf("Specify at least and at most one type of trigger, 'pipeline', 'git', 'docker' or 'cron'")
+		return fmt.Errorf("Do not specify more than one type of trigger 'pipeline', 'release', 'git', 'docker' or 'cron' per trigger object")
 	}
 
 	err = t.Run.Validate()
@@ -183,8 +189,11 @@ func (t *EstafetteTrigger) Validate() (err error) {
 
 // Validate checks if EstafettePipelineTrigger is valid
 func (p *EstafettePipelineTrigger) Validate() (err error) {
-	if p.Event != "failed" && p.Event != "succeeded" && p.Event != "finished" {
-		return fmt.Errorf("Set pipeline.event in your trigger to 'failed', 'succeeded' or 'finished'")
+	if p.Event != "started" && p.Event != "finished" {
+		return fmt.Errorf("Set pipeline.event in your trigger to 'started' or 'finished'")
+	}
+	if p.Event == "finished" && p.Status != "succeeded" && p.Status != "failed" {
+		return fmt.Errorf("Set pipeline.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if p.Name == "" {
 		return fmt.Errorf("Set pipeline.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
@@ -194,8 +203,11 @@ func (p *EstafettePipelineTrigger) Validate() (err error) {
 
 // Validate checks if EstafetteReleaseTrigger is valid
 func (r *EstafetteReleaseTrigger) Validate() (err error) {
-	if r.Event != "failed" && r.Event != "succeeded" && r.Event != "finished" {
-		return fmt.Errorf("Set release.event in your trigger to 'failed', 'succeeded' or 'finished'")
+	if r.Event != "started" && r.Event != "finished" {
+		return fmt.Errorf("Set release.event in your trigger to 'started' or 'finished'")
+	}
+	if r.Event == "finished" && r.Status != "succeeded" && r.Status != "failed" {
+		return fmt.Errorf("Set release.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if r.Name == "" {
 		return fmt.Errorf("Set release.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
@@ -233,8 +245,43 @@ func (r *EstafetteTriggerRun) Validate() (err error) {
 }
 
 // Fires indicates whether EstafettePipelineTrigger fires for an EstafettePipelineEvent
-func (p *EstafettePipelineTrigger) Fires(e *EstafettePipelineEvent) bool {
-	return false
+func (p *EstafettePipelineTrigger) Fires(e *EstafettePipelineEvent) (bool, error) {
+
+	// compare event as regex
+	eventMatched, err := regexp.MatchString(p.Event, fmt.Sprintf("^%v$", e.Event))
+	if err != nil {
+		return false, err
+	}
+	if !eventMatched {
+		return false, nil
+	}
+
+	if p.Event == "finished" {
+		// compare event as regex
+		statusMatched, err := regexp.MatchString(p.Status, fmt.Sprintf("^%v$", e.Status))
+		if err != nil {
+			return false, err
+		}
+		if !statusMatched {
+			return false, nil
+		}
+	}
+
+	nameMatches := strings.EqualFold(p.Name, e.Name)
+	if !nameMatches {
+		return false, nil
+	}
+
+	// compare branch as regex
+	branchMatched, err := regexp.MatchString(p.Branch, fmt.Sprintf("^%v$", e.Branch))
+	if err != nil {
+		return false, err
+	}
+	if !branchMatched {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 // Fires indicates whether EstafetteReleaseTrigger fires for an EstafetteReleaseEvent

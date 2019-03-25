@@ -231,3 +231,28 @@ func (c *EstafetteCronTrigger) Validate() (err error) {
 func (r *EstafetteTriggerRun) Validate() (err error) {
 	return nil
 }
+
+// Fires indicates whether EstafettePipelineTrigger fires for an EstafettePipelineEvent
+func (p *EstafettePipelineTrigger) Fires(e *EstafettePipelineEvent) bool {
+	return false
+}
+
+// Fires indicates whether EstafetteReleaseTrigger fires for an EstafetteReleaseEvent
+func (r *EstafetteReleaseTrigger) Fires(e *EstafetteReleaseEvent) bool {
+	return false
+}
+
+// Fires indicates whether EstafetteGitTrigger fires for an EstafetteGitEvent
+func (g *EstafetteGitTrigger) Fires(e *EstafetteGitEvent) bool {
+	return false
+}
+
+// Fires indicates whether EstafetteDockerTrigger fires for an EstafetteDockerEvent
+func (d *EstafetteDockerTrigger) Fires(e *EstafetteDockerEvent) bool {
+	return false
+}
+
+// Fires indicates whether EstafetteCronTrigger fires for an EstafetteCronEvent
+func (c *EstafetteCronTrigger) Fires(e *EstafetteCronEvent) bool {
+	return false
+}

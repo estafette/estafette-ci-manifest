@@ -331,10 +331,10 @@ pipelines:
 
 		assert.Nil(t, err)
 
-		if assert.Equal(t, 1, len(manifest.Releases)) {
+		if assert.Equal(t, 2, len(manifest.Releases)) {
 			assert.Equal(t, "development", manifest.Releases[0].Name)
 			assert.Equal(t, 2, len(manifest.Releases[0].Triggers))
-			assert.Equal(t, "github.com/estafette/estafette-ci-build", manifest.Releases[0].Triggers[0].Pipeline.Name)
+			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Releases[0].Triggers[0].Pipeline.Name)
 			assert.Equal(t, "0 10 */1 * *", manifest.Releases[0].Triggers[1].Cron.Expression)
 		}
 	})

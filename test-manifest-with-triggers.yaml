@@ -1,5 +1,5 @@
 labels:
-  app: estafette-ci-builder
+  app: estafette-ci-api
   team: estafette-team
   language: golang
 
@@ -35,20 +35,30 @@ stages:
 # releases are automatically triggered from stages or manually from gui, cli or slack
 releases:
   development:
+    triggers:
+    - pipeline:
+        name: github.com/estafette/estafette-ci-builder
+        run:
+          branch: .*
+    - cron: 
+        expression: '0 10 */1 * *'
+
+    stages:
+      deploy:
+        image: extensions/deploy-to-kubernetes-engine:dev
+
+  staging:
     actions:
     - name: deploy-canary
     - name: rollback-canary
     - name: deploy-stable
 
     triggers:
-    - pipeline:
-        name: github.com/estafette/estafette-ci-build
+    - release:
+        name: github.com/estafette/estafette-ci-builder
+        target: development
         run:
           branch: .*
-          action: deploy-canary
-    - cron: 
-        expression: '0 10 */1 * *'
-        run:
           action: deploy-canary
 
     stages:

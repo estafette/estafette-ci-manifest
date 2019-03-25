@@ -113,6 +113,78 @@ func TestEstafettePipelineTriggerValidate(t *testing.T) {
 	})
 }
 
+func TestEstafetteReleaseTriggerSetDefaults(t *testing.T) {
+	t.Run("SetsEventToSucceededIfEmpty", func(t *testing.T) {
+
+		trigger := EstafetteReleaseTrigger{
+			Event: "",
+		}
+
+		// act
+		trigger.SetDefaults()
+
+		assert.Equal(t, "succeeded", trigger.Event)
+	})
+}
+
+func TestEstafetteReleaseTriggerValidate(t *testing.T) {
+	t.Run("ReturnsErrorIfEventIsEmpty", func(t *testing.T) {
+
+		trigger := EstafetteReleaseTrigger{
+			Event:  "",
+			Name:   "github.com/estafette/estafette-ci-manifest",
+			Target: "development",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfNameIsEmpty", func(t *testing.T) {
+
+		trigger := EstafetteReleaseTrigger{
+			Event:  "succeeded",
+			Name:   "",
+			Target: "development",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfTargetIsEmpty", func(t *testing.T) {
+
+		trigger := EstafetteReleaseTrigger{
+			Event:  "succeeded",
+			Name:   "github.com/estafette/estafette-ci-manifest",
+			Target: "",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfValid", func(t *testing.T) {
+
+		trigger := EstafetteReleaseTrigger{
+			Event:  "succeeded",
+			Name:   "github.com/estafette/estafette-ci-manifest",
+			Target: "development",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.Nil(t, err)
+	})
+}
+
 func TestEstafetteGitTriggerSetDefaults(t *testing.T) {
 	t.Run("SetsEventToPushIfEmpty", func(t *testing.T) {
 

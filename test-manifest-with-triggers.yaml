@@ -9,6 +9,9 @@ triggers:
     event: succeeded
     name: github.com/estafette/estafette-ci-manifest
     branch: master
+  run:
+    status: succeeded
+    branch: master
 - git:
     event: push
     repository: github.com/estafette/estafette-ci-builder
@@ -32,11 +35,21 @@ stages:
 # releases are automatically triggered from stages or manually from gui, cli or slack
 releases:
   development:
+    actions:
+    - name: deploy-canary
+    - name: rollback-canary
+    - name: deploy-stable
+
     triggers:
     - pipeline:
         name: github.com/estafette/estafette-ci-build
+        run:
+          branch: .*
+          action: deploy-canary
     - cron: 
         expression: '0 10 */1 * *'
+        run:
+          action: deploy-canary
 
     stages:
       deploy:

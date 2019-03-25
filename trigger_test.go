@@ -179,3 +179,29 @@ func TestEstafetteGitTriggerValidate(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func TestEstafetteTriggerRunSetDefaults(t *testing.T) {
+	t.Run("SetsStatusToSucceededIfEmpty", func(t *testing.T) {
+
+		trigger := EstafetteTriggerRun{
+			Status: "",
+		}
+
+		// act
+		trigger.SetDefaults()
+
+		assert.Equal(t, "succeeded", trigger.Status)
+	})
+
+	t.Run("SetsBranchToMasterIfEmpty", func(t *testing.T) {
+
+		trigger := EstafetteTriggerRun{
+			Branch: "",
+		}
+
+		// act
+		trigger.SetDefaults()
+
+		assert.Equal(t, "master", trigger.Branch)
+	})
+}

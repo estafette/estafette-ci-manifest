@@ -10,6 +10,7 @@ type EstafetteTrigger struct {
 	Git      *EstafetteGitTrigger      `yaml:"git,omitempty"`
 	Docker   *EstafetteDockerTrigger   `yaml:"docker,omitempty"`
 	Cron     *EstafetteCronTrigger     `yaml:"cron,omitempty"`
+	Run      EstafetteTriggerRun       `yaml:"run,omitempty"`
 }
 
 // EstafettePipelineTrigger fires for pipeline changes and applies filtering to limit when this results in an action
@@ -38,6 +39,13 @@ type EstafetteCronTrigger struct {
 	Expression string `yaml:"expression,omitempty"`
 }
 
+// EstafetteTriggerRun determines what builds/releases when
+type EstafetteTriggerRun struct {
+	Status string `yaml:"status,omitempty"`
+	Branch string `yaml:"branch,omitempty"`
+	Action string `yaml:"action,omitempty"`
+}
+
 // SetDefaults sets defaults for EstafetteTrigger
 func (t *EstafetteTrigger) SetDefaults() {
 	if t.Pipeline != nil {
@@ -52,6 +60,8 @@ func (t *EstafetteTrigger) SetDefaults() {
 	if t.Cron != nil {
 		t.Cron.SetDefaults()
 	}
+
+	t.Run.SetDefaults()
 }
 
 // SetDefaults sets defaults for EstafettePipelineTrigger
@@ -80,6 +90,16 @@ func (d *EstafetteDockerTrigger) SetDefaults() {
 
 // SetDefaults sets defaults for EstafetteCronTrigger
 func (c *EstafetteCronTrigger) SetDefaults() {
+}
+
+// SetDefaults sets defaults for EstafetteTriggerRun
+func (r *EstafetteTriggerRun) SetDefaults() {
+	if r.Status == "" {
+		r.Status = "succeeded"
+	}
+	if r.Branch == "" {
+		r.Branch = "master"
+	}
 }
 
 // Validate checks if EstafetteTrigger is valid
@@ -127,6 +147,11 @@ func (t *EstafetteTrigger) Validate() (err error) {
 		return fmt.Errorf("Specify at least and at most one type of trigger, 'pipeline', 'git', 'docker' or 'cron'")
 	}
 
+	err = t.Run.Validate()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -159,5 +184,10 @@ func (d *EstafetteDockerTrigger) Validate() (err error) {
 
 // Validate checks if EstafetteCronTrigger is valid
 func (c *EstafetteCronTrigger) Validate() (err error) {
+	return nil
+}
+
+// Validate checks if EstafetteTriggerRun is valid
+func (r *EstafetteTriggerRun) Validate() (err error) {
 	return nil
 }

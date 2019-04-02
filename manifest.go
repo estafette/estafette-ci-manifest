@@ -146,6 +146,17 @@ func (c *EstafetteManifest) setDefaults() {
 	}
 }
 
+// GetAllTriggers returns both build and release triggers as one list
+func (c *EstafetteManifest) GetAllTriggers() []*EstafetteTrigger {
+	// collect both build and release triggers
+	triggers := c.Triggers
+	for _, r := range c.Releases {
+		triggers = append(triggers, r.Triggers...)
+	}
+
+	return triggers
+}
+
 // Exists checks whether the .estafette.yaml exists
 func Exists(manifestPath string) bool {
 

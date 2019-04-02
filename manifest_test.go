@@ -594,3 +594,65 @@ stages:
 		}
 	})
 }
+
+func TestGetAllTriggers(t *testing.T) {
+	t.Run("ReturnsEmptyArrayIfNoTriggersAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 0, len(triggers))
+	})
+
+	t.Run("ReturnsReleaseTriggersIfNoBuildTriggersAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline: &EstafettePipelineTrigger{},
+							Run:      EstafetteTriggerRun{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 1, len(triggers))
+	})
+
+	t.Run("ReturnsBuildAndReleaseTriggersIfBothAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Triggers: []*EstafetteTrigger{
+				&EstafetteTrigger{
+					Pipeline: &EstafettePipelineTrigger{},
+					Run:      EstafetteTriggerRun{},
+				},
+			},
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline: &EstafettePipelineTrigger{},
+							Run:      EstafetteTriggerRun{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 2, len(triggers))
+	})
+}

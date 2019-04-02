@@ -10,10 +10,12 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 	t.Run("ReturnsTrueIfEventStatusNameAndBranchMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafettePipelineTrigger{
@@ -32,10 +34,12 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfEventDoesNotMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafettePipelineTrigger{
@@ -54,10 +58,12 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfStatusDoesNotMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafettePipelineTrigger{
@@ -76,10 +82,12 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfNameDoesNotMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafettePipelineTrigger{
@@ -98,10 +106,12 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfBranchDoesNotMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafettePipelineTrigger{
@@ -122,10 +132,12 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 	t.Run("ReturnsTrueIfEventStatusNameAndBranchMatch", func(t *testing.T) {
 
 		event := EstafetteReleaseEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Target: "development",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Target:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafetteReleaseTrigger{
@@ -144,10 +156,12 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfEventDoesNotMatch", func(t *testing.T) {
 
 		event := EstafetteReleaseEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Target: "development",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Target:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafetteReleaseTrigger{
@@ -166,10 +180,12 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfStatusDoesNotMatch", func(t *testing.T) {
 
 		event := EstafetteReleaseEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Target: "development",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Target:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafetteReleaseTrigger{
@@ -188,10 +204,12 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfNameDoesNotMatch", func(t *testing.T) {
 
 		event := EstafetteReleaseEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Target: "development",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Target:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafetteReleaseTrigger{
@@ -210,10 +228,12 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 	t.Run("ReturnsFalseIfBranchDoesNotMatch", func(t *testing.T) {
 
 		event := EstafetteReleaseEvent{
-			Event:  "finished",
-			Status: "succeeded",
-			Name:   "github.com/estafette/estafette-ci-api",
-			Target: "development",
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Target:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
 		}
 
 		trigger := EstafetteReleaseTrigger{

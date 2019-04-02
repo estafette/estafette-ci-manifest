@@ -53,7 +53,7 @@ type EstafetteCronTrigger struct {
 
 // EstafetteTriggerRun determines what builds/releases when
 type EstafetteTriggerRun struct {
-	TriggerType     string `yaml:"type,omitempty" json:"run,omitempty"`
+	TriggerType     string `yaml:"type,omitempty" json:"type,omitempty"`
 	TargetName      string `yaml:"target,omitempty" json:"target,omitempty"`
 	BranchToBuild   string `yaml:"branch,omitempty" json:"branch,omitempty"`
 	ActionToRelease string `yaml:"action,omitempty" json:"action,omitempty"`

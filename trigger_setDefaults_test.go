@@ -103,8 +103,32 @@ func TestEstafetteTriggerRunSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults()
+		trigger.SetDefaults("build", "")
 
 		assert.Equal(t, "master", trigger.BranchToBuild)
+	})
+
+	t.Run("SetsTriggerTypeToTriggerTypeParam", func(t *testing.T) {
+
+		trigger := EstafetteTriggerRun{
+			TriggerType: "any",
+		}
+
+		// act
+		trigger.SetDefaults("build", "")
+
+		assert.Equal(t, "build", trigger.TriggerType)
+	})
+
+	t.Run("SetsTargetNameToTargetNameParam", func(t *testing.T) {
+
+		trigger := EstafetteTriggerRun{
+			TargetName: "any",
+		}
+
+		// act
+		trigger.SetDefaults("release", "development")
+
+		assert.Equal(t, "development", trigger.TargetName)
 	})
 }

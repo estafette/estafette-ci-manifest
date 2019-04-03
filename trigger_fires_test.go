@@ -31,6 +31,54 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 		assert.True(t, fires)
 	})
 
+	t.Run("ReturnsTrueIfNegativeLookupBranchRegexDoesMatch", func(t *testing.T) {
+
+		event := EstafettePipelineEvent{
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "development",
+			Status:     "succeeded",
+			Event:      "finished",
+		}
+
+		trigger := EstafettePipelineTrigger{
+			Event:  "finished",
+			Status: "succeeded",
+			Name:   "github.com/estafette/estafette-ci-api",
+			Branch: "!~ master",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+
+	t.Run("ReturnsTrueIfNegativeLookupBranchRegexDoesNotMatch", func(t *testing.T) {
+
+		event := EstafettePipelineEvent{
+			RepoSource: "github.com",
+			RepoOwner:  "estafette",
+			RepoName:   "estafette-ci-api",
+			Branch:     "master",
+			Status:     "succeeded",
+			Event:      "finished",
+		}
+
+		trigger := EstafettePipelineTrigger{
+			Event:  "finished",
+			Status: "succeeded",
+			Name:   "github.com/estafette/estafette-ci-api",
+			Branch: "!~ master",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+
 	t.Run("ReturnsFalseIfEventDoesNotMatch", func(t *testing.T) {
 
 		event := EstafettePipelineEvent{
@@ -46,7 +94,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "started",
 			Status: "",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			Branch: "!= master",
 		}
 
 		// act

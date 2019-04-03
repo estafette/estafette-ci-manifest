@@ -95,40 +95,30 @@ func TestEstafetteGitTriggerSetDefaults(t *testing.T) {
 	})
 }
 
-func TestEstafetteTriggerRunSetDefaults(t *testing.T) {
-	t.Run("SetsBranchToBuildToMasterIfEmpty", func(t *testing.T) {
+func TestEstafetteTriggerBuildActionSetDefaults(t *testing.T) {
+	t.Run("SetsBranchToMasterIfEmpty", func(t *testing.T) {
 
-		trigger := EstafetteTriggerRun{
-			BranchToBuild: "",
+		trigger := EstafetteTriggerBuildAction{
+			Branch: "",
 		}
 
 		// act
-		trigger.SetDefaults("build", "")
+		trigger.SetDefaults()
 
-		assert.Equal(t, "master", trigger.BranchToBuild)
+		assert.Equal(t, "master", trigger.Branch)
 	})
+}
 
-	t.Run("SetsTriggerTypeToTriggerTypeParam", func(t *testing.T) {
+func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
+	t.Run("SetsTargetToTargetParam", func(t *testing.T) {
 
-		trigger := EstafetteTriggerRun{
-			TriggerType: "any",
+		trigger := EstafetteTriggerReleaseAction{
+			Target: "any",
 		}
 
 		// act
-		trigger.SetDefaults("build", "")
+		trigger.SetDefaults("development")
 
-		assert.Equal(t, "build", trigger.TriggerType)
-	})
-
-	t.Run("SetsTargetNameToTargetNameParam", func(t *testing.T) {
-
-		trigger := EstafetteTriggerRun{
-			TargetName: "any",
-		}
-
-		// act
-		trigger.SetDefaults("release", "development")
-
-		assert.Equal(t, "development", trigger.TargetName)
+		assert.Equal(t, "development", trigger.Target)
 	})
 }

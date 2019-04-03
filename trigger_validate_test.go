@@ -7,6 +7,54 @@ import (
 )
 
 func TestEstafetteTriggerValidate(t *testing.T) {
+	t.Run("ReturnsNoErrorIfOneTypeAndBuildActionIsSetForTriggerTypeBuild", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Event:  "finished",
+				Status: "succeeded",
+				Name:   "github.com/estafette/estafette-ci-api",
+				Branch: "master",
+			},
+			Git:    nil,
+			Docker: nil,
+			Cron:   nil,
+			BuildAction: &EstafetteTriggerBuildAction{
+				Branch: "master",
+			},
+			ReleaseAction: nil,
+		}
+
+		// act
+		err := trigger.Validate("build", "")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfOneTypeAndReleaseActionIsSetForTriggerTypeRelease", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Event:  "finished",
+				Status: "succeeded",
+				Name:   "github.com/estafette/estafette-ci-api",
+				Branch: "master",
+			},
+			Git:         nil,
+			Docker:      nil,
+			Cron:        nil,
+			BuildAction: nil,
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target: "development",
+			},
+		}
+
+		// act
+		err := trigger.Validate("release", "development")
+
+		assert.Nil(t, err)
+	})
+
 	t.Run("ReturnsErrorIfAllTypesAreEmpty", func(t *testing.T) {
 
 		trigger := EstafetteTrigger{
@@ -14,10 +62,38 @@ func TestEstafetteTriggerValidate(t *testing.T) {
 			Git:      nil,
 			Docker:   nil,
 			Cron:     nil,
+			BuildAction: &EstafetteTriggerBuildAction{
+				Branch: "master",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target: "development",
+			},
 		}
 
 		// act
-		err := trigger.Validate()
+		err := trigger.Validate("build", "")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfAllActionsAreEmpty", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Event:  "finished",
+				Status: "succeeded",
+				Name:   "github.com/estafette/estafette-ci-api",
+				Branch: "master",
+			},
+			Git:           nil,
+			Docker:        nil,
+			Cron:          nil,
+			BuildAction:   nil,
+			ReleaseAction: nil,
+		}
+
+		// act
+		err := trigger.Validate("build", "")
 
 		assert.NotNil(t, err)
 	})
@@ -26,7 +102,8 @@ func TestEstafetteTriggerValidate(t *testing.T) {
 
 		trigger := EstafetteTrigger{
 			Pipeline: &EstafettePipelineTrigger{
-				Event:  "succeeded",
+				Event:  "finished",
+				Status: "succeeded",
 				Name:   "github.com/estafette/estafette-ci-api",
 				Branch: "master",
 			},
@@ -37,10 +114,40 @@ func TestEstafetteTriggerValidate(t *testing.T) {
 			},
 			Docker: nil,
 			Cron:   nil,
+			BuildAction: &EstafetteTriggerBuildAction{
+				Branch: "master",
+			},
+			ReleaseAction: nil,
 		}
 
 		// act
-		err := trigger.Validate()
+		err := trigger.Validate("build", "")
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfMoreThanOneActionIsSet", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Event:  "finished",
+				Status: "succeeded",
+				Name:   "github.com/estafette/estafette-ci-api",
+				Branch: "master",
+			},
+			Git:    nil,
+			Docker: nil,
+			Cron:   nil,
+			BuildAction: &EstafetteTriggerBuildAction{
+				Branch: "master",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target: "development",
+			},
+		}
+
+		// act
+		err := trigger.Validate("build", "")
 
 		assert.NotNil(t, err)
 	})

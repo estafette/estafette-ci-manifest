@@ -59,7 +59,12 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithBuilderTrackDefaultStable", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  hi:
+    image: alpine
+    commands:
+    - echo 'hi'`)
 
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", manifest.Builder.Track)
@@ -68,7 +73,12 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithBuilderInMemoryWorkingDirectoryDefaultFalse", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  hi:
+    image: alpine
+    commands:
+    - echo 'hi'`)
 
 		assert.Nil(t, err)
 		assert.False(t, manifest.Builder.InMemoryWorkingDirectory)
@@ -345,12 +355,16 @@ func TestVersion(t *testing.T) {
 	t.Run("ReturnsSemverVersionByDefaultIfNoOtherVersionTypeIsSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  git-clone:
+    image: extensions/git-clone`)
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsCustomVersionWithLabelTemplateDefaultingToRevisionPlaceholder", func(t *testing.T) {
@@ -359,12 +373,17 @@ func TestVersion(t *testing.T) {
 		manifest, err := ReadManifest(`
 version:
   custom:
-    labelTemplate: ''`)
+    labelTemplate: ''
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.SemVer)
-		assert.NotNil(t, manifest.Version.Custom)
-		assert.Equal(t, "{{revision}}", manifest.Version.Custom.LabelTemplate)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.SemVer)
+			assert.NotNil(t, manifest.Version.Custom)
+			assert.Equal(t, "{{revision}}", manifest.Version.Custom.LabelTemplate)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionIfSemverIsSet", func(t *testing.T) {
@@ -377,12 +396,17 @@ version:
     minor: 2
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master`)
+    releaseBranch: master
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 1, manifest.Version.SemVer.Major)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 1, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithMajorDefaultingToZero", func(t *testing.T) {
@@ -391,12 +415,17 @@ version:
 		manifest, err := ReadManifest(`
 version:
   semver:
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Major)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithMinorDefaultingToZero", func(t *testing.T) {
@@ -405,12 +434,17 @@ version:
 		manifest, err := ReadManifest(`
 version:
   semver:
-    major: 1`)
+    major: 1
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Minor)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Minor)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithPatchDefaultingToAutoPlaceholder", func(t *testing.T) {
@@ -420,12 +454,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithLabelTemplateDefaultingToBranchPlaceholder", func(t *testing.T) {
@@ -435,12 +474,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithReleaseBranchDefaultingToMaster", func(t *testing.T) {
@@ -450,12 +494,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+		}
 	})
 }
 
@@ -474,9 +523,10 @@ func TestManifestToJsonMarshalling(t *testing.T) {
 		// act
 		data, err := json.Marshal(manifest)
 
-		assert.Nil(t, err)
-		assert.True(t, strings.Contains(string(data), "Pipelines"))
-		assert.False(t, strings.Contains(string(data), "Stages"))
+		if assert.Nil(t, err) {
+			assert.True(t, strings.Contains(string(data), "Pipelines"))
+			assert.False(t, strings.Contains(string(data), "Stages"))
+		}
 	})
 }
 
@@ -609,13 +659,18 @@ func TestGetAllTriggers(t *testing.T) {
 	t.Run("ReturnsReleaseTriggersIfNoBuildTriggersAreDefined", func(t *testing.T) {
 
 		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
 			Releases: []*EstafetteRelease{
 				&EstafetteRelease{
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
 						&EstafetteTrigger{
-							Pipeline: &EstafettePipelineTrigger{},
-							Run:      EstafetteTriggerRun{},
+							Pipeline:      &EstafettePipelineTrigger{},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
 					},
 				},
@@ -631,10 +686,15 @@ func TestGetAllTriggers(t *testing.T) {
 	t.Run("ReturnsBuildAndReleaseTriggersIfBothAreDefined", func(t *testing.T) {
 
 		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
 			Triggers: []*EstafetteTrigger{
 				&EstafetteTrigger{
-					Pipeline: &EstafettePipelineTrigger{},
-					Run:      EstafetteTriggerRun{},
+					Pipeline:    &EstafettePipelineTrigger{},
+					BuildAction: &EstafetteTriggerBuildAction{},
 				},
 			},
 			Releases: []*EstafetteRelease{
@@ -642,8 +702,8 @@ func TestGetAllTriggers(t *testing.T) {
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
 						&EstafetteTrigger{
-							Pipeline: &EstafettePipelineTrigger{},
-							Run:      EstafetteTriggerRun{},
+							Pipeline:      &EstafettePipelineTrigger{},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
 					},
 				},

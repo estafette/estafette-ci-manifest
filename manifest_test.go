@@ -59,7 +59,12 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithBuilderTrackDefaultStable", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  hi:
+    image: alpine
+    commands:
+    - echo 'hi'`)
 
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", manifest.Builder.Track)
@@ -68,7 +73,12 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithBuilderInMemoryWorkingDirectoryDefaultFalse", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  hi:
+    image: alpine
+    commands:
+    - echo 'hi'`)
 
 		assert.Nil(t, err)
 		assert.False(t, manifest.Builder.InMemoryWorkingDirectory)
@@ -301,6 +311,43 @@ pipelines:
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(manifest.Stages))
 	})
+
+	t.Run("ReturnsManifestWithTriggersWithoutErrors", func(t *testing.T) {
+
+		// act
+		_, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsTriggers", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 3, len(manifest.Triggers)) {
+			assert.Equal(t, "github.com/estafette/estafette-ci-manifest", manifest.Triggers[0].Pipeline.Name)
+			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Triggers[1].Git.Repository)
+			assert.Equal(t, "golang", manifest.Triggers[2].Docker.Image)
+		}
+	})
+
+	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 2, len(manifest.Releases)) {
+			assert.Equal(t, "development", manifest.Releases[0].Name)
+			assert.Equal(t, 2, len(manifest.Releases[0].Triggers))
+			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Releases[0].Triggers[0].Pipeline.Name)
+			assert.Equal(t, "0 10 */1 * *", manifest.Releases[0].Triggers[1].Cron.Expression)
+		}
+	})
 }
 
 func TestVersion(t *testing.T) {
@@ -308,12 +355,16 @@ func TestVersion(t *testing.T) {
 	t.Run("ReturnsSemverVersionByDefaultIfNoOtherVersionTypeIsSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest("")
+		manifest, err := ReadManifest(`
+stages:
+  git-clone:
+    image: extensions/git-clone`)
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsCustomVersionWithLabelTemplateDefaultingToRevisionPlaceholder", func(t *testing.T) {
@@ -322,12 +373,17 @@ func TestVersion(t *testing.T) {
 		manifest, err := ReadManifest(`
 version:
   custom:
-    labelTemplate: ''`)
+    labelTemplate: ''
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.SemVer)
-		assert.NotNil(t, manifest.Version.Custom)
-		assert.Equal(t, "{{revision}}", manifest.Version.Custom.LabelTemplate)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.SemVer)
+			assert.NotNil(t, manifest.Version.Custom)
+			assert.Equal(t, "{{revision}}", manifest.Version.Custom.LabelTemplate)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionIfSemverIsSet", func(t *testing.T) {
@@ -340,12 +396,17 @@ version:
     minor: 2
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master`)
+    releaseBranch: master
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 1, manifest.Version.SemVer.Major)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 1, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithMajorDefaultingToZero", func(t *testing.T) {
@@ -354,12 +415,17 @@ version:
 		manifest, err := ReadManifest(`
 version:
   semver:
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Major)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Major)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithMinorDefaultingToZero", func(t *testing.T) {
@@ -368,12 +434,17 @@ version:
 		manifest, err := ReadManifest(`
 version:
   semver:
-    major: 1`)
+    major: 1
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, 0, manifest.Version.SemVer.Minor)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 0, manifest.Version.SemVer.Minor)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithPatchDefaultingToAutoPlaceholder", func(t *testing.T) {
@@ -383,12 +454,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithLabelTemplateDefaultingToBranchPlaceholder", func(t *testing.T) {
@@ -398,12 +474,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
+		}
 	})
 
 	t.Run("ReturnsSemverVersionWithReleaseBranchDefaultingToMaster", func(t *testing.T) {
@@ -413,12 +494,17 @@ version:
 version:
   semver:
     major: 1
-    minor: 2`)
+    minor: 2
 
-		assert.Nil(t, err)
-		assert.Nil(t, manifest.Version.Custom)
-		assert.NotNil(t, manifest.Version.SemVer)
-		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+stages:
+  git-clone:
+    image: extensions/git-clone`)
+
+		if assert.Nil(t, err) {
+			assert.Nil(t, manifest.Version.Custom)
+			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+		}
 	})
 }
 
@@ -437,9 +523,10 @@ func TestManifestToJsonMarshalling(t *testing.T) {
 		// act
 		data, err := json.Marshal(manifest)
 
-		assert.Nil(t, err)
-		assert.True(t, strings.Contains(string(data), "Pipelines"))
-		assert.False(t, strings.Contains(string(data), "Stages"))
+		if assert.Nil(t, err) {
+			assert.True(t, strings.Contains(string(data), "Pipelines"))
+			assert.False(t, strings.Contains(string(data), "Stages"))
+		}
 	})
 }
 
@@ -553,7 +640,79 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"InMemoryWorkingDirectory\":false},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"InMemoryWorkingDirectory\":false},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
+	})
+}
+
+func TestGetAllTriggers(t *testing.T) {
+	t.Run("ReturnsEmptyArrayIfNoTriggersAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 0, len(triggers))
+	})
+
+	t.Run("ReturnsReleaseTriggersIfNoBuildTriggersAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline:      &EstafettePipelineTrigger{},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 1, len(triggers))
+	})
+
+	t.Run("ReturnsBuildAndReleaseTriggersIfBothAreDefined", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+			Triggers: []*EstafetteTrigger{
+				&EstafetteTrigger{
+					Pipeline:    &EstafettePipelineTrigger{},
+					BuildAction: &EstafetteTriggerBuildAction{},
+				},
+			},
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline:      &EstafettePipelineTrigger{},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers()
+
+		assert.Equal(t, 2, len(triggers))
 	})
 }

@@ -2,6 +2,7 @@ package manifest
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -289,6 +290,40 @@ func TestEstafetteReleaseTriggerFires(t *testing.T) {
 			Status: "succeeded",
 			Name:   "github.com/estafette/estafette-ci-api",
 			Target: "staging",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+}
+
+func TestEstafetteCronTriggerFires(t *testing.T) {
+	t.Run("ReturnsTrueIfEventTimeMatchesCronSchedule", func(t *testing.T) {
+
+		event := EstafetteCronEvent{
+			Time: time.Date(2019, 4, 5, 11, 10, 0, 0, time.UTC),
+		}
+
+		trigger := EstafetteCronTrigger{
+			Schedule: "*/5 * * * *",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+
+	t.Run("ReturnsTrueIfEventTimeMatchesCronSchedule", func(t *testing.T) {
+
+		event := EstafetteCronEvent{
+			Time: time.Date(2019, 4, 5, 11, 12, 1, 0, time.UTC),
+		}
+
+		trigger := EstafetteCronTrigger{
+			Schedule: "*/5 * * * *",
 		}
 
 		// act

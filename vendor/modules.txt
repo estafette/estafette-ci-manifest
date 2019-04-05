@@ -2,6 +2,8 @@
 github.com/davecgh/go-spew/spew
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
+github.com/robfig/cron
 # github.com/rs/zerolog v1.8.0
 github.com/rs/zerolog/log
 github.com/rs/zerolog

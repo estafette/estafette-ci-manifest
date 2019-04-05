@@ -362,3 +362,41 @@ func TestEstafetteGitTriggerValidate(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func TestEstafetteCronTriggerValidate(t *testing.T) {
+	t.Run("ReturnsErrorIfScheduleIsEmpty", func(t *testing.T) {
+
+		trigger := EstafetteCronTrigger{
+			Schedule: "",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfScheduleIsInvalid", func(t *testing.T) {
+
+		trigger := EstafetteCronTrigger{
+			Schedule: "0 * * * * *",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfScheduleIsValid", func(t *testing.T) {
+
+		trigger := EstafetteCronTrigger{
+			Schedule: "*/5 * * * *",
+		}
+
+		// act
+		err := trigger.Validate()
+
+		assert.Nil(t, err)
+	})
+}

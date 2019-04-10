@@ -15,13 +15,13 @@ type EstafettePipelineEvent struct {
 
 // EstafetteReleaseEvent fires for pipeline releases
 type EstafetteReleaseEvent struct {
-	BuildVersion string `yaml:"buildVersion,omitempty" json:"buildVersion,omitempty"`
-	RepoSource   string `yaml:"repoSource,omitempty" json:"repoSource,omitempty"`
-	RepoOwner    string `yaml:"repoOwner,omitempty" json:"repoOwner,omitempty"`
-	RepoName     string `yaml:"repoName,omitempty" json:"repoName,omitempty"`
-	Target       string `yaml:"target,omitempty" json:"target,omitempty"`
-	Status       string `yaml:"status,omitempty" json:"status,omitempty"`
-	Event        string `yaml:"event,omitempty" json:"event,omitempty"`
+	ReleaseVersion string `yaml:"releaseVersion,omitempty" json:"releaseVersion,omitempty"`
+	RepoSource     string `yaml:"repoSource,omitempty" json:"repoSource,omitempty"`
+	RepoOwner      string `yaml:"repoOwner,omitempty" json:"repoOwner,omitempty"`
+	RepoName       string `yaml:"repoName,omitempty" json:"repoName,omitempty"`
+	Target         string `yaml:"target,omitempty" json:"target,omitempty"`
+	Status         string `yaml:"status,omitempty" json:"status,omitempty"`
+	Event          string `yaml:"event,omitempty" json:"event,omitempty"`
 }
 
 // EstafetteGitEvent fires for git repository changes

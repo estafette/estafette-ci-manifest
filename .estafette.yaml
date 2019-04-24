@@ -4,7 +4,6 @@ builder:
 
 # these turn into ESTAFETTE_LABEL_... envvars, automatically injected into all pipeline steps
 labels:
-  app: estafette-ci-manifest
   app-group: estafette-ci
   team: estafette-team
   language: golang

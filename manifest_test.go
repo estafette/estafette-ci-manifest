@@ -628,7 +628,7 @@ func TestGetAllTriggers(t *testing.T) {
 		manifest := EstafetteManifest{}
 
 		// act
-		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+		triggers := manifest.GetAllTriggers("github.com", "estafette", "estafette-ci-manifest")
 
 		assert.Equal(t, 0, len(triggers))
 	})
@@ -655,7 +655,7 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+		triggers := manifest.GetAllTriggers("github.com", "estafette", "estafette-ci-manifest")
 
 		assert.Equal(t, 1, len(triggers))
 	})
@@ -688,7 +688,7 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+		triggers := manifest.GetAllTriggers("github.com", "estafette", "estafette-ci-manifest")
 
 		assert.Equal(t, 2, len(triggers))
 	})
@@ -732,7 +732,7 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+		triggers := manifest.GetAllTriggers("github.com", "estafette", "estafette-ci-manifest")
 
 		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", triggers[0].Pipeline.Name)
 		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", triggers[1].Pipeline.Name)
@@ -778,7 +778,7 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+		triggers := manifest.GetAllTriggers("github.com", "estafette", "estafette-ci-manifest")
 
 		assert.Equal(t, "github.com/estafette/estafette-ci-contracts", triggers[0].Pipeline.Name)
 		assert.Equal(t, "github.com/estafette/estafette-ci-crypt", triggers[1].Pipeline.Name)

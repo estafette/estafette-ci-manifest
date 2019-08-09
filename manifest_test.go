@@ -628,7 +628,7 @@ func TestGetAllTriggers(t *testing.T) {
 		manifest := EstafetteManifest{}
 
 		// act
-		triggers := manifest.GetAllTriggers()
+		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
 
 		assert.Equal(t, 0, len(triggers))
 	})
@@ -655,7 +655,7 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers()
+		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
 
 		assert.Equal(t, 1, len(triggers))
 	})
@@ -688,8 +688,100 @@ func TestGetAllTriggers(t *testing.T) {
 		}
 
 		// act
-		triggers := manifest.GetAllTriggers()
+		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
 
 		assert.Equal(t, 2, len(triggers))
+	})
+
+	t.Run("ReplacesPipelineNameWithActualPipelineNameIfValueIsSelf", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+			Triggers: []*EstafetteTrigger{
+				&EstafetteTrigger{
+					Pipeline: &EstafettePipelineTrigger{
+						Name: "self",
+					},
+					BuildAction: &EstafetteTriggerBuildAction{},
+				},
+			},
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline: &EstafettePipelineTrigger{
+								Name: "self",
+							},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+						&EstafetteTrigger{
+							Release: &EstafetteReleaseTrigger{
+								Name:   "self",
+								Target: "tooling",
+							},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+
+		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", triggers[0].Pipeline.Name)
+		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", triggers[1].Pipeline.Name)
+		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", triggers[2].Release.Name)
+	})
+
+	t.Run("DoesNotReplacePipelineNameWithActualPipelineNameIfValueIsNotSelf", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Stages: []*EstafetteStage{
+				&EstafetteStage{
+					Name: "build",
+				},
+			},
+			Triggers: []*EstafetteTrigger{
+				&EstafetteTrigger{
+					Pipeline: &EstafettePipelineTrigger{
+						Name: "github.com/estafette/estafette-ci-contracts",
+					},
+					BuildAction: &EstafetteTriggerBuildAction{},
+				},
+			},
+			Releases: []*EstafetteRelease{
+				&EstafetteRelease{
+					Name: "tooling",
+					Triggers: []*EstafetteTrigger{
+						&EstafetteTrigger{
+							Pipeline: &EstafettePipelineTrigger{
+								Name: "github.com/estafette/estafette-ci-crypt",
+							},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+						&EstafetteTrigger{
+							Release: &EstafetteReleaseTrigger{
+								Name:   "github.com/estaftte/estafette-ci-api",
+								Target: "tooling",
+							},
+							ReleaseAction: &EstafetteTriggerReleaseAction{},
+						},
+					},
+				},
+			},
+		}
+
+		// act
+		triggers := manifest.GetAllTriggers("github.com/estafette/estafette-ci-manifest")
+
+		assert.Equal(t, "github.com/estafette/estafette-ci-contracts", triggers[0].Pipeline.Name)
+		assert.Equal(t, "github.com/estafette/estafette-ci-crypt", triggers[1].Pipeline.Name)
+		assert.Equal(t, "github.com/estaftte/estafette-ci-api", triggers[2].Release.Name)
 	})
 }

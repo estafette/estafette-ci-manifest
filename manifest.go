@@ -131,8 +131,8 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	return aux, err
 }
 
-// setDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) setDefaults(pipeline string) {
+// SetDefaults sets default values for properties of EstafetteManifest if not defined
+func (c *EstafetteManifest) SetDefaults(pipeline string) {
 	c.Builder.setDefaults()
 	c.Version.setDefaults()
 
@@ -225,7 +225,7 @@ func ReadManifestFromFile(manifestPath, pipeline string) (manifest EstafetteMani
 	}
 
 	// set defaults
-	manifest.setDefaults(pipeline)
+	manifest.SetDefaults(pipeline)
 
 	// check if manifest is valid
 	err = manifest.Validate()
@@ -249,7 +249,7 @@ func ReadManifest(manifestString, pipeline string) (manifest EstafetteManifest, 
 	}
 
 	// set defaults
-	manifest.setDefaults(pipeline)
+	manifest.SetDefaults(pipeline)
 
 	// check if manifest is valid
 	err = manifest.Validate()

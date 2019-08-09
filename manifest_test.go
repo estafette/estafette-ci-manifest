@@ -14,7 +14,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsErrorForManifestWithUnknownSections", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-non-strict-manifest.yaml")
+		_, err := ReadManifestFromFile("test-non-strict-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.NotNil(t, err)
 	})
@@ -22,7 +22,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithoutErrors", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-manifest.yaml")
+		_, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 	})
@@ -30,7 +30,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedLabels", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "estafette-ci-builder", manifest.Labels["app"])
@@ -41,7 +41,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedBuilderTrack", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "dev", manifest.Builder.Track)
@@ -55,7 +55,7 @@ stages:
   hi:
     image: alpine
     commands:
-    - echo 'hi'`)
+    - echo 'hi'`, "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", manifest.Builder.Track)
@@ -64,7 +64,7 @@ stages:
 	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -124,7 +124,7 @@ stages:
 	t.Run("ReturnsWorkDirDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -134,7 +134,7 @@ stages:
 	t.Run("ReturnsWorkDirIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -144,7 +144,7 @@ stages:
 	t.Run("ReturnsShellDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -154,7 +154,7 @@ stages:
 	t.Run("ReturnsShellIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -164,7 +164,7 @@ stages:
 	t.Run("ReturnsWhenIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -174,7 +174,7 @@ stages:
 	t.Run("ReturnsWhenDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -184,7 +184,7 @@ stages:
 	t.Run("ReturnsManifestWithSemverVersion", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, 1, manifest.Version.SemVer.Major)
@@ -197,7 +197,7 @@ stages:
 	t.Run("ReturnsManifestWithGlobalEnvVars", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "Greetings", manifest.GlobalEnvVars["VAR_A"])
@@ -207,7 +207,7 @@ stages:
 	t.Run("ReturnsManifestWithMappedOrderedReleasesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -252,7 +252,7 @@ stages:
 	t.Run("ReturnsReleaseTargetWithActions", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -283,7 +283,7 @@ pipelines:
 `
 
 		// act
-		manifest, err := ReadManifest(input)
+		manifest, err := ReadManifest(input, "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(manifest.Stages))
@@ -292,7 +292,7 @@ pipelines:
 	t.Run("ReturnsManifestWithTriggersWithoutErrors", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		_, err := ReadManifestFromFile("test-manifest-with-triggers.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 	})
@@ -300,7 +300,7 @@ pipelines:
 	t.Run("ReturnsTriggers", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -314,7 +314,7 @@ pipelines:
 	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml", "github.com/estafette/estafette-ci-manifest")
 
 		assert.Nil(t, err)
 
@@ -335,7 +335,7 @@ func TestVersion(t *testing.T) {
 		manifest, err := ReadManifest(`
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -354,7 +354,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.SemVer)
@@ -377,7 +377,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -396,7 +396,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -415,7 +415,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -435,7 +435,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -455,7 +455,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
@@ -475,7 +475,7 @@ version:
 
 stages:
   git-clone:
-    image: extensions/git-clone`)
+    image: extensions/git-clone`, "github.com/estafette/estafette-ci-manifest")
 
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)

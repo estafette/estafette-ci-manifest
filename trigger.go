@@ -68,9 +68,9 @@ type EstafetteTriggerReleaseAction struct {
 }
 
 // SetDefaults sets defaults for EstafetteTrigger
-func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
+func (t *EstafetteTrigger) SetDefaults(pipeline, triggerType, targetName string) {
 	if t.Pipeline != nil {
-		t.Pipeline.SetDefaults()
+		t.Pipeline.SetDefaults(pipeline, triggerType)
 	}
 	if t.Release != nil {
 		t.Release.SetDefaults()
@@ -102,7 +102,7 @@ func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
 }
 
 // SetDefaults sets defaults for EstafettePipelineTrigger
-func (p *EstafettePipelineTrigger) SetDefaults() {
+func (p *EstafettePipelineTrigger) SetDefaults(pipeline, triggerType string) {
 	if p.Event == "" {
 		p.Event = "finished"
 	}
@@ -111,6 +111,9 @@ func (p *EstafettePipelineTrigger) SetDefaults() {
 	}
 	if p.Branch == "" {
 		p.Branch = "master"
+	}
+	if triggerType == "release" && p.Name == "" {
+		p.Name = pipeline
 	}
 }
 

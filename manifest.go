@@ -92,7 +92,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	}
 
 	// set default property values
-	c.setDefaults()
+	// c.setDefaults()
 
 	return nil
 }
@@ -132,17 +132,17 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 }
 
 // setDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) setDefaults() {
+func (c *EstafetteManifest) setDefaults(pipeline string) {
 	c.Builder.setDefaults()
 	c.Version.setDefaults()
 
 	for _, t := range c.Triggers {
-		t.SetDefaults("build", "")
+		t.SetDefaults(pipeline, "build", "")
 	}
 
 	for _, r := range c.Releases {
 		for _, t := range r.Triggers {
-			t.SetDefaults("release", r.Name)
+			t.SetDefaults(pipeline, "release", r.Name)
 		}
 	}
 }
@@ -210,7 +210,7 @@ func Exists(manifestPath string) bool {
 }
 
 // ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
-func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err error) {
+func ReadManifestFromFile(manifestPath, pipeline string) (manifest EstafetteManifest, err error) {
 
 	log.Info().Msgf("Reading %v file...", manifestPath)
 
@@ -225,7 +225,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	}
 
 	// set defaults
-	manifest.setDefaults()
+	manifest.setDefaults(pipeline)
 
 	// check if manifest is valid
 	err = manifest.Validate()
@@ -239,7 +239,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 }
 
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
-func ReadManifest(manifestString string) (manifest EstafetteManifest, err error) {
+func ReadManifest(manifestString, pipeline string) (manifest EstafetteManifest, err error) {
 
 	log.Info().Msg("Reading manifest from string...")
 
@@ -249,7 +249,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	}
 
 	// set defaults
-	manifest.setDefaults()
+	manifest.setDefaults(pipeline)
 
 	// check if manifest is valid
 	err = manifest.Validate()

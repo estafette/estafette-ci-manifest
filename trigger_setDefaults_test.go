@@ -14,7 +14,7 @@ func TestEstafettePipelineTriggerSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults()
+		trigger.SetDefaults("github.com/estafette/estafette-ci-manifest", "build")
 
 		assert.Equal(t, "finished", trigger.Event)
 	})
@@ -26,7 +26,7 @@ func TestEstafettePipelineTriggerSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults()
+		trigger.SetDefaults("github.com/estafette/estafette-ci-manifest", "build")
 
 		assert.Equal(t, "succeeded", trigger.Status)
 	})
@@ -38,9 +38,33 @@ func TestEstafettePipelineTriggerSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults()
+		trigger.SetDefaults("github.com/estafette/estafette-ci-manifest", "build")
 
 		assert.Equal(t, "master", trigger.Branch)
+	})
+
+	t.Run("LeavesNameEmptyIfTriggerTypeIsBuild", func(t *testing.T) {
+
+		trigger := EstafettePipelineTrigger{
+			Name: "",
+		}
+
+		// act
+		trigger.SetDefaults("github.com/estafette/estafette-ci-manifest", "build")
+
+		assert.Equal(t, "", trigger.Name)
+	})
+
+	t.Run("SetsNameToPipelineIfTriggerTypeIsRelease", func(t *testing.T) {
+
+		trigger := EstafettePipelineTrigger{
+			Name: "",
+		}
+
+		// act
+		trigger.SetDefaults("github.com/estafette/estafette-ci-manifest", "release")
+
+		assert.Equal(t, "github.com/estafette/estafette-ci-manifest", trigger.Name)
 	})
 }
 

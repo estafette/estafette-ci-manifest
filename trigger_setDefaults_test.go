@@ -121,4 +121,28 @@ func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
 
 		assert.Equal(t, "development", trigger.Target)
 	})
+
+	t.Run("SetsVersionToLatestIfEmpty", func(t *testing.T) {
+
+		trigger := EstafetteTriggerReleaseAction{
+			Version: "",
+		}
+
+		// act
+		trigger.SetDefaults("development")
+
+		assert.Equal(t, "latest", trigger.Version)
+	})
+
+	t.Run("KeepsVersionIfNotEmpty", func(t *testing.T) {
+
+		trigger := EstafetteTriggerReleaseAction{
+			Version: "current",
+		}
+
+		// act
+		trigger.SetDefaults("development")
+
+		assert.Equal(t, "current", trigger.Version)
+	})
 }

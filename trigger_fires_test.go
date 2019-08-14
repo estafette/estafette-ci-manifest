@@ -332,3 +332,24 @@ func TestEstafetteCronTriggerFires(t *testing.T) {
 		assert.False(t, fires)
 	})
 }
+
+func TestEstafetteGitTriggerFires(t *testing.T) {
+	t.Run("ReturnsTrueIfEventStatusNameAndBranchMatch", func(t *testing.T) {
+
+		event := EstafetteGitEvent{
+			Event:      "push",
+			Repository: "bitbucket.org/xivart/icarus_to_email_service_trigger",
+			Branch:     "master"}
+
+		trigger := EstafetteGitTrigger{
+			Event:      "push",
+			Repository: "bitbucket.org/xivart/icarus_to_email_service_trigger",
+			Branch:     "master",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+}

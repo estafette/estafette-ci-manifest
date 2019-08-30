@@ -61,6 +61,29 @@ stages:
 		assert.Equal(t, "stable", manifest.Builder.Track)
 	})
 
+	t.Run("ReturnsManifestWithMappedBuilderOperatingSystem", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
+	})
+
+	t.Run("ReturnsManifestWithBuilderOperatingSystemDefaultLinux", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifest(`
+stages:
+  hi:
+    image: alpine
+    commands:
+    - echo 'hi'`)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "linux", manifest.Builder.OperatingSystem)
+	})
+
 	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
@@ -508,12 +531,13 @@ func TestManifestToJsonMarshalling(t *testing.T) {
 }
 
 func TestManifestToYamlMarshalling(t *testing.T) {
-	t.Run("UmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
+	t.Run("UnmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
 
 		var manifest EstafetteManifest
 
 		input := `builder:
   track: stable
+  os: windows
 labels:
   app: estafette-ci-builder
   language: golang
@@ -573,12 +597,13 @@ releases:
 
 func TestManifestToJSONMarshalling(t *testing.T) {
 
-	t.Run("UmarshallingYamlThenMarshalToJSONForNestedCustomProperties", func(t *testing.T) {
+	t.Run("UnmarshallingYamlThenMarshalToJSONForNestedCustomProperties", func(t *testing.T) {
 
 		var manifest EstafetteManifest
 
 		input := `builder:
   track: stable
+  os: windows
 labels:
   app: estafette-ci-builder
   language: golang
@@ -617,7 +642,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
 	})
 }
@@ -783,5 +808,79 @@ func TestGetAllTriggers(t *testing.T) {
 		assert.Equal(t, "github.com/estafette/estafette-ci-contracts", triggers[0].Pipeline.Name)
 		assert.Equal(t, "github.com/estafette/estafette-ci-crypt", triggers[1].Pipeline.Name)
 		assert.Equal(t, "github.com/estaftte/estafette-ci-api", triggers[2].Release.Name)
+	})
+}
+
+func TestValidate(t *testing.T) {
+	t.Run("ReturnsErrorIfTrackIsNotDevBetaOrStable", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Builder: EstafetteBuilder{
+				Track: "nightly",
+			},
+			Stages: []*EstafetteStage{
+				&EstafetteStage{},
+			},
+		}
+		manifest.setDefaults()
+
+		// act
+		err := manifest.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfTrackIsDev", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Builder: EstafetteBuilder{
+				Track: "dev",
+			},
+			Stages: []*EstafetteStage{
+				&EstafetteStage{},
+			},
+		}
+		manifest.setDefaults()
+
+		// act
+		err := manifest.Validate()
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfTrackIsBeta", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Builder: EstafetteBuilder{
+				Track: "beta",
+			},
+			Stages: []*EstafetteStage{
+				&EstafetteStage{},
+			},
+		}
+		manifest.setDefaults()
+
+		// act
+		err := manifest.Validate()
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorIfTrackIsStable", func(t *testing.T) {
+
+		manifest := EstafetteManifest{
+			Builder: EstafetteBuilder{
+				Track: "stable",
+			},
+			Stages: []*EstafetteStage{
+				&EstafetteStage{},
+			},
+		}
+		manifest.setDefaults()
+
+		// act
+		err := manifest.Validate()
+
+		assert.Nil(t, err)
 	})
 }

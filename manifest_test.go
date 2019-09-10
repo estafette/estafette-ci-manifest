@@ -327,10 +327,11 @@ pipelines:
 
 		assert.Nil(t, err)
 
-		if assert.Equal(t, 3, len(manifest.Triggers)) {
+		if assert.Equal(t, 4, len(manifest.Triggers)) {
 			assert.Equal(t, "github.com/estafette/estafette-ci-manifest", manifest.Triggers[0].Pipeline.Name)
 			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Triggers[1].Git.Repository)
 			assert.Equal(t, "golang", manifest.Triggers[2].Docker.Image)
+			assert.Equal(t, "topic-name", manifest.Triggers[3].PubSub.Topic)
 		}
 	})
 
@@ -343,9 +344,10 @@ pipelines:
 
 		if assert.Equal(t, 2, len(manifest.Releases)) {
 			assert.Equal(t, "development", manifest.Releases[0].Name)
-			assert.Equal(t, 2, len(manifest.Releases[0].Triggers))
+			assert.Equal(t, 3, len(manifest.Releases[0].Triggers))
 			assert.Equal(t, "github.com/estafette/estafette-ci-builder", manifest.Releases[0].Triggers[0].Pipeline.Name)
 			assert.Equal(t, "0 10 */1 * *", manifest.Releases[0].Triggers[1].Cron.Schedule)
+			assert.Equal(t, "topic-name", manifest.Releases[0].Triggers[2].PubSub.Topic)
 		}
 	})
 }

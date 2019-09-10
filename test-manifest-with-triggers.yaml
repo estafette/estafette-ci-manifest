@@ -20,6 +20,9 @@ triggers:
     event: push
     image: golang
     tag: 1.8-alpine
+- pubsub:
+    project: my-project-id
+    topic: topic-name
 
 # automatically executed stages on a push to the repository
 stages:
@@ -41,6 +44,9 @@ releases:
         branch: '!~ master'
     - cron: 
         schedule: '0 10 */1 * *'
+    - pubsub:
+        project: my-project-id
+        topic: topic-name
 
     stages:
       deploy:

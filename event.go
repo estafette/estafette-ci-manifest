@@ -48,6 +48,12 @@ type EstafetteManualEvent struct {
 	UserID string `yaml:"userID,omitempty" json:"userID,omitempty"`
 }
 
+// EstafettePubSubEvent fires when a subscribed pubsub topic receives an event
+type EstafettePubSubEvent struct {
+	Project string `yaml:"project,omitempty" json:"project,omitempty"`
+	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
+}
+
 // EstafetteEvent is a container for any trigger event
 type EstafetteEvent struct {
 	Pipeline *EstafettePipelineEvent `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
@@ -55,5 +61,6 @@ type EstafetteEvent struct {
 	Git      *EstafetteGitEvent      `yaml:"git,omitempty" json:"git,omitempty"`
 	Docker   *EstafetteDockerEvent   `yaml:"docker,omitempty" json:"docker,omitempty"`
 	Cron     *EstafetteCronEvent     `yaml:"cron,omitempty" json:"cron,omitempty"`
+	PubSub   *EstafettePubSubEvent   `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
 	Manual   *EstafetteManualEvent   `yaml:"manual,omitempty" json:"manual,omitempty"`
 }

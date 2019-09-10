@@ -16,6 +16,7 @@ type EstafetteTrigger struct {
 	Git      *EstafetteGitTrigger      `yaml:"git,omitempty" json:"git,omitempty"`
 	Docker   *EstafetteDockerTrigger   `yaml:"docker,omitempty" json:"docker,omitempty"`
 	Cron     *EstafetteCronTrigger     `yaml:"cron,omitempty" json:"cron,omitempty"`
+	PubSub   *EstafettePubSubTrigger   `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
 
 	BuildAction   *EstafetteTriggerBuildAction   `yaml:"builds,omitempty" json:"builds,omitempty"`
 	ReleaseAction *EstafetteTriggerReleaseAction `yaml:"releases,omitempty" json:"releases,omitempty"`
@@ -51,6 +52,12 @@ type EstafetteDockerTrigger struct {
 	Tag   string `yaml:"tag,omitempty" json:"tag,omitempty"`
 }
 
+// EstafettePubSubTrigger fires for pubsub events in a certain project and topic
+type EstafettePubSubTrigger struct {
+	Project string `yaml:"project,omitempty" json:"project,omitempty"`
+	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
+}
+
 // EstafetteCronTrigger fires at intervals specified by the cron schedule
 type EstafetteCronTrigger struct {
 	Schedule string `yaml:"schedule,omitempty" json:"schedule,omitempty"`
@@ -84,6 +91,9 @@ func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
 	}
 	if t.Cron != nil {
 		t.Cron.SetDefaults()
+	}
+	if t.PubSub != nil {
+		t.PubSub.SetDefaults()
 	}
 
 	switch triggerType {
@@ -143,6 +153,10 @@ func (d *EstafetteDockerTrigger) SetDefaults() {
 func (c *EstafetteCronTrigger) SetDefaults() {
 }
 
+// SetDefaults sets defaults for EstafetteCronTrigger
+func (p *EstafettePubSubTrigger) SetDefaults() {
+}
+
 // SetDefaults sets defaults for EstafetteTriggerBuildAction
 func (b *EstafetteTriggerBuildAction) SetDefaults() {
 	if b.Branch == "" {
@@ -167,8 +181,9 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		t.Release == nil &&
 		t.Git == nil &&
 		t.Docker == nil &&
-		t.Cron == nil {
-		return fmt.Errorf("Set at least a 'pipeline', 'release', 'git', 'docker' or 'cron' trigger")
+		t.Cron == nil &&
+		t.PubSub == nil {
+		return fmt.Errorf("Set at least a 'pipeline', 'release', 'git', 'docker', 'cron' or 'pubsub' trigger")
 	}
 
 	if t.Pipeline != nil {
@@ -201,6 +216,13 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 	}
 	if t.Cron != nil {
 		err = t.Cron.Validate()
+		if err != nil {
+			return err
+		}
+		numberOfTypes++
+	}
+	if t.PubSub != nil {
+		err = t.PubSub.Validate()
 		if err != nil {
 			return err
 		}
@@ -298,6 +320,18 @@ func (c *EstafetteCronTrigger) Validate() (err error) {
 	_, err = cron.ParseStandard(c.Schedule)
 	if err != nil {
 		return fmt.Errorf("Invalid cron.schedule in your trigger: %v", err)
+	}
+
+	return nil
+}
+
+// Validate checks if EstafettePubSubTrigger is valid
+func (p *EstafettePubSubTrigger) Validate() (err error) {
+	if p.Project == "" {
+		return fmt.Errorf("Set pubsub.project in your trigger to the google cloud project id containing the pubsub topic")
+	}
+	if p.Topic == "" {
+		return fmt.Errorf("Set pubsub.topic in your trigger to the pubsub topic you want this pipeline to subscribe to")
 	}
 
 	return nil
@@ -470,4 +504,17 @@ func regexMatch(pattern, value string) (bool, error) {
 	}
 
 	return match, nil
+}
+
+// Fires indicates whether EstafettePubSubTrigger fires for an EstafettePubSubEvent
+func (p *EstafettePubSubTrigger) Fires(e *EstafettePubSubEvent) bool {
+
+	if !strings.EqualFold(p.Project, e.Project) {
+		return false
+	}
+	if !strings.EqualFold(p.Topic, e.Topic) {
+		return false
+	}
+
+	return false
 }

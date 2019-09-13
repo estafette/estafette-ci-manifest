@@ -1,5 +1,7 @@
 package manifest
 
+import "runtime"
+
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
 	Name             string                 `yaml:"-"`
@@ -58,12 +60,20 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 func (stage *EstafetteStage) setDefaults() {
 	// set default for Shell if not set
 	if stage.Shell == "" {
-		stage.Shell = "/bin/sh"
+		if runtime.GOOS == "windows" {
+			stage.Shell = "powershell"
+		} else {
+			stage.Shell = "/bin/sh"
+		}
 	}
 
 	// set default for WorkingDirectory if not set
 	if stage.WorkingDirectory == "" {
-		stage.WorkingDirectory = "/estafette-work"
+		if runtime.GOOS == "windows" {
+			stage.WorkingDirectory = "C:/estafette-work"
+		} else {
+			stage.WorkingDirectory = "/estafette-work"
+		}
 	}
 
 	// set default for When if not set

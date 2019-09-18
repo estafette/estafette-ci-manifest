@@ -516,5 +516,5 @@ func (p *EstafettePubSubTrigger) Fires(e *EstafettePubSubEvent) bool {
 		return false
 	}
 
-	return false
+	return true
 }

@@ -43,7 +43,7 @@ func (builder *EstafetteBuilder) setDefaults() {
 }
 
 func (builder *EstafetteBuilder) validate() (err error) {
-	if builder.Track != "dev" && builder.Track != "beta" && builder.Track != "stable" {
+	if builder.OperatingSystem == "linux" && builder.Track != "dev" && builder.Track != "beta" && builder.Track != "stable" {
 		return fmt.Errorf("builder track should be one of: dev, beta or stable")
 	}
 	if builder.OperatingSystem != "linux" && builder.OperatingSystem != "windows" {

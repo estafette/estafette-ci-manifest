@@ -34,11 +34,14 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 // setDefaults sets default values for properties of EstafetteBuilder if not defined
 func (builder *EstafetteBuilder) setDefaults() {
 	// set default for Track if not set
-	if builder.Track == "" {
-		builder.Track = "stable"
-	}
 	if builder.OperatingSystem == "" {
 		builder.OperatingSystem = "linux"
+	}
+	if builder.Track == "" && builder.OperatingSystem == "linux" {
+		builder.Track = "stable"
+	}
+	if builder.Track == "" && builder.OperatingSystem == "windows" {
+		builder.Track = "windowsservercore-1809"
 	}
 }
 

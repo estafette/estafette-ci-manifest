@@ -84,6 +84,38 @@ stages:
 		assert.Equal(t, "linux", manifest.Builder.OperatingSystem)
 	})
 
+	t.Run("ReturnsManifestWithBuilder", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "dev", manifest.Builder.Track)
+		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
+	})
+
+	t.Run("ReturnsManifestWithBuilderForReleaseIfNotOverridden", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+		assert.NotNil(t, manifest.Releases[1].Builder)
+		assert.Equal(t, "dev", manifest.Releases[1].Builder.Track)
+		assert.Equal(t, "windows", manifest.Releases[1].Builder.OperatingSystem)
+	})
+
+	t.Run("ReturnsManifestWithReleaseBuilderIfOverridden", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+		assert.NotNil(t, manifest.Releases[2].Builder)
+		assert.Equal(t, "stable", manifest.Releases[2].Builder.Track)
+		assert.Equal(t, "linux", manifest.Releases[2].Builder.OperatingSystem)
+	})
+
 	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
@@ -249,6 +281,9 @@ stages:
 			assert.Equal(t, "beta", manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})[0])
 
 			assert.Equal(t, "development", manifest.Releases[2].Name)
+			assert.NotNil(t, manifest.Releases[2].Builder)
+			assert.Equal(t, "stable", manifest.Releases[2].Builder.Track)
+			assert.Equal(t, "linux", manifest.Releases[2].Builder.OperatingSystem)
 			assert.False(t, manifest.Releases[2].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)

@@ -103,6 +103,9 @@ releases:
         - beta
 
   development:
+    builder:
+      track: stable
+      os: linux
     stages:
       deploy:
         image: extensions/deploy-to-kubernetes-engine:dev

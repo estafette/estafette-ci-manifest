@@ -7,6 +7,7 @@ import (
 // EstafetteRelease represents a release target that in itself contains one or multiple stages
 type EstafetteRelease struct {
 	Name            string                    `yaml:"-"`
+	Builder         *EstafetteBuilder         `yaml:"builder,omitempty"`
 	CloneRepository bool                      `yaml:"clone,omitempty" json:",omitempty"`
 	Actions         []*EstafetteReleaseAction `yaml:"actions,omitempty" json:",omitempty"`
 	Triggers        []*EstafetteTrigger       `yaml:"triggers,omitempty" json:",omitempty"`
@@ -18,6 +19,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 
 	var aux struct {
 		Name            string                    `yaml:"-"`
+		Builder         *EstafetteBuilder         `yaml:"builder"`
 		CloneRepository bool                      `yaml:"clone"`
 		Actions         []*EstafetteReleaseAction `yaml:"actions"`
 		Triggers        []*EstafetteTrigger       `yaml:"triggers"`
@@ -30,6 +32,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	}
 
 	// map auxiliary properties
+	release.Builder = aux.Builder
 	release.CloneRepository = aux.CloneRepository
 	release.Actions = aux.Actions
 	release.Triggers = aux.Triggers

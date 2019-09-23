@@ -141,6 +141,11 @@ func (c *EstafetteManifest) setDefaults() {
 	}
 
 	for _, r := range c.Releases {
+		if r.Builder == nil {
+			r.Builder = &c.Builder
+		} else {
+			r.Builder.setDefaults()
+		}
 		for _, t := range r.Triggers {
 			t.SetDefaults("release", r.Name)
 		}
@@ -167,6 +172,13 @@ func (c *EstafetteManifest) Validate() (err error) {
 	}
 
 	for _, r := range c.Releases {
+		if r.Builder != nil {
+			err = r.Builder.validate()
+			if err != nil {
+				return
+			}
+		}
+
 		for _, t := range r.Triggers {
 			err = t.Validate("release", r.Name)
 			if err != nil {

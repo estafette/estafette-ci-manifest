@@ -47,8 +47,33 @@ commands:
 when:
   server == 'estafette'`), &stage)
 
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+		})
+
 		assert.Nil(t, err)
 		assert.Equal(t, "/bin/sh", stage.Shell)
+	})
+
+	t.Run("DefaultsShellToPowershellIfNotPresentForWindows", func(t *testing.T) {
+
+		var stage EstafetteStage
+
+		// act
+		err := yaml.Unmarshal([]byte(`
+image: docker:17.03.0-ce
+commands:
+- cp Dockerfile ./publish
+- docker build -t estafette-ci-builder ./publish
+when:
+  server == 'estafette'`), &stage)
+
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "windows",
+		})
+
+		assert.Nil(t, err)
+		assert.Equal(t, "powershell", stage.Shell)
 	})
 
 	t.Run("DefaultsWhenToStatusEqualsSucceededIfNotPresent", func(t *testing.T) {
@@ -61,6 +86,10 @@ image: docker:17.03.0-ce
 commands:
 - cp Dockerfile ./publish
 - docker build -t estafette-ci-builder ./publish`), &stage)
+
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+		})
 
 		assert.Nil(t, err)
 		assert.Equal(t, "status == 'succeeded'", stage.When)
@@ -77,8 +106,31 @@ commands:
 - cp Dockerfile ./publish
 - docker build -t estafette-ci-builder ./publish`), &stage)
 
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+		})
+
 		assert.Nil(t, err)
 		assert.Equal(t, "/estafette-work", stage.WorkingDirectory)
+	})
+
+	t.Run("DefaultsWorkingDirectoryToEstafetteWorkIfNotPresentForWindows", func(t *testing.T) {
+
+		var stage EstafetteStage
+
+		// act
+		err := yaml.Unmarshal([]byte(`
+image: docker:17.03.0-ce
+commands:
+- cp Dockerfile ./publish
+- docker build -t estafette-ci-builder ./publish`), &stage)
+
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "windows",
+		})
+
+		assert.Nil(t, err)
+		assert.Equal(t, "C:/estafette-work", stage.WorkingDirectory)
 	})
 
 	t.Run("ReturnsNonReservedSimplePropertyAsCustomProperty", func(t *testing.T) {
@@ -147,6 +199,10 @@ container:
   repository: extensions`), &stage)
 
 		assert.Nil(t, err)
+
+		stage.setDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+		})
 
 		// act
 		bytes, err := json.Marshal(stage)

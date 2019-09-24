@@ -68,7 +68,6 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		}
 
 		stage.Name = mi.Key.(string)
-		stage.setDefaults()
 		c.Stages = append(c.Stages, stage)
 	}
 
@@ -139,6 +138,9 @@ func (c *EstafetteManifest) setDefaults() {
 	for _, t := range c.Triggers {
 		t.SetDefaults("build", "")
 	}
+	for _, s := range c.Stages {
+		s.setDefaults(c.Builder)
+	}
 
 	for _, r := range c.Releases {
 		if r.Builder == nil {
@@ -148,6 +150,9 @@ func (c *EstafetteManifest) setDefaults() {
 		}
 		for _, t := range r.Triggers {
 			t.SetDefaults("release", r.Name)
+		}
+		for _, s := range r.Stages {
+			s.setDefaults(*r.Builder)
 		}
 	}
 }

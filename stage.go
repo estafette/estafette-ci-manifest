@@ -1,7 +1,5 @@
 package manifest
 
-import "runtime"
-
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
 	Name             string                 `yaml:"-"`
@@ -50,17 +48,14 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	// fix for map[interface{}]interface breaking json.marshal - see https://github.com/go-yaml/yaml/issues/139
 	stage.CustomProperties = cleanUpStringMap(aux.CustomProperties)
 
-	// set default property values
-	stage.setDefaults()
-
 	return nil
 }
 
 // setDefaults sets default values for properties of EstafetteStage if not defined
-func (stage *EstafetteStage) setDefaults() {
+func (stage *EstafetteStage) setDefaults(builder EstafetteBuilder) {
 	// set default for Shell if not set
 	if stage.Shell == "" {
-		if runtime.GOOS == "windows" {
+		if builder.OperatingSystem == "windows" {
 			stage.Shell = "powershell"
 		} else {
 			stage.Shell = "/bin/sh"
@@ -69,7 +64,7 @@ func (stage *EstafetteStage) setDefaults() {
 
 	// set default for WorkingDirectory if not set
 	if stage.WorkingDirectory == "" {
-		if runtime.GOOS == "windows" {
+		if builder.OperatingSystem == "windows" {
 			stage.WorkingDirectory = "C:/estafette-work"
 		} else {
 			stage.WorkingDirectory = "/estafette-work"

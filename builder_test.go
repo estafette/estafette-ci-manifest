@@ -27,7 +27,7 @@ track: dev`), &builder)
 		// act
 		err := yaml.Unmarshal([]byte(` 
 `), &builder)
-		builder.setDefaults()
+		builder.SetDefaults()
 
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", builder.Track)

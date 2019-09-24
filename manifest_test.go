@@ -674,7 +674,7 @@ stages:
 `
 		err := yaml.Unmarshal([]byte(input), &manifest)
 		assert.Nil(t, err)
-		manifest.setDefaults()
+		manifest.SetDefaults()
 
 		// act
 		output, err := json.Marshal(manifest)
@@ -860,7 +860,7 @@ func TestValidate(t *testing.T) {
 				&EstafetteStage{},
 			},
 		}
-		manifest.setDefaults()
+		manifest.SetDefaults()
 
 		// act
 		err := manifest.Validate()
@@ -878,7 +878,7 @@ func TestValidate(t *testing.T) {
 				&EstafetteStage{},
 			},
 		}
-		manifest.setDefaults()
+		manifest.SetDefaults()
 
 		// act
 		err := manifest.Validate()
@@ -896,7 +896,7 @@ func TestValidate(t *testing.T) {
 				&EstafetteStage{},
 			},
 		}
-		manifest.setDefaults()
+		manifest.SetDefaults()
 
 		// act
 		err := manifest.Validate()
@@ -914,7 +914,7 @@ func TestValidate(t *testing.T) {
 				&EstafetteStage{},
 			},
 		}
-		manifest.setDefaults()
+		manifest.SetDefaults()
 
 		// act
 		err := manifest.Validate()

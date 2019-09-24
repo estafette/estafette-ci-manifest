@@ -26,13 +26,13 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.OperatingSystem = aux.OperatingSystem
 
 	// set default property values
-	builder.setDefaults()
+	builder.SetDefaults()
 
 	return nil
 }
 
-// setDefaults sets default values for properties of EstafetteBuilder if not defined
-func (builder *EstafetteBuilder) setDefaults() {
+// SetDefaults sets default values for properties of EstafetteBuilder if not defined
+func (builder *EstafetteBuilder) SetDefaults() {
 	// set default for Track if not set
 	if builder.OperatingSystem == "" {
 		builder.OperatingSystem = "linux"

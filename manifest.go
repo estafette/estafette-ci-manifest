@@ -91,7 +91,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	}
 
 	// set default property values
-	c.setDefaults()
+	c.SetDefaults()
 
 	return nil
 }
@@ -130,29 +130,29 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	return aux, err
 }
 
-// setDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) setDefaults() {
-	c.Builder.setDefaults()
-	c.Version.setDefaults()
+// SetDefaults sets default values for properties of EstafetteManifest if not defined
+func (c *EstafetteManifest) SetDefaults() {
+	c.Builder.SetDefaults()
+	c.Version.SetDefaults()
 
 	for _, t := range c.Triggers {
 		t.SetDefaults("build", "")
 	}
 	for _, s := range c.Stages {
-		s.setDefaults(c.Builder)
+		s.SetDefaults(c.Builder)
 	}
 
 	for _, r := range c.Releases {
 		if r.Builder == nil {
 			r.Builder = &c.Builder
 		} else {
-			r.Builder.setDefaults()
+			r.Builder.SetDefaults()
 		}
 		for _, t := range r.Triggers {
 			t.SetDefaults("release", r.Name)
 		}
 		for _, s := range r.Stages {
-			s.setDefaults(*r.Builder)
+			s.SetDefaults(*r.Builder)
 		}
 	}
 }
@@ -251,7 +251,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	}
 
 	// set defaults
-	manifest.setDefaults()
+	manifest.SetDefaults()
 
 	// check if manifest is valid
 	err = manifest.Validate()
@@ -275,7 +275,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	}
 
 	// set defaults
-	manifest.setDefaults()
+	manifest.SetDefaults()
 
 	// check if manifest is valid
 	err = manifest.Validate()

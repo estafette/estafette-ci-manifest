@@ -47,7 +47,7 @@ commands:
 when:
   server == 'estafette'`), &stage)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "linux",
 		})
 
@@ -68,7 +68,7 @@ commands:
 when:
   server == 'estafette'`), &stage)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "windows",
 		})
 
@@ -87,7 +87,7 @@ commands:
 - cp Dockerfile ./publish
 - docker build -t estafette-ci-builder ./publish`), &stage)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "linux",
 		})
 
@@ -106,7 +106,7 @@ commands:
 - cp Dockerfile ./publish
 - docker build -t estafette-ci-builder ./publish`), &stage)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "linux",
 		})
 
@@ -125,7 +125,7 @@ commands:
 - cp Dockerfile ./publish
 - docker build -t estafette-ci-builder ./publish`), &stage)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "windows",
 		})
 
@@ -200,7 +200,7 @@ container:
 
 		assert.Nil(t, err)
 
-		stage.setDefaults(EstafetteBuilder{
+		stage.SetDefaults(EstafetteBuilder{
 			OperatingSystem: "linux",
 		})
 

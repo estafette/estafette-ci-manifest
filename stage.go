@@ -51,8 +51,8 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	return nil
 }
 
-// setDefaults sets default values for properties of EstafetteStage if not defined
-func (stage *EstafetteStage) setDefaults(builder EstafetteBuilder) {
+// SetDefaults sets default values for properties of EstafetteStage if not defined
+func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	// set default for Shell if not set
 	if stage.Shell == "" {
 		if builder.OperatingSystem == "windows" {

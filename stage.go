@@ -1,5 +1,11 @@
 package manifest
 
+import (
+	"fmt"
+
+	yaml "gopkg.in/yaml.v2"
+)
+
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
 	Name             string                 `yaml:"-"`
@@ -11,6 +17,7 @@ type EstafetteStage struct {
 	EnvVars          map[string]string      `yaml:"env,omitempty"`
 	AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
 	Retries          int                    `yaml:"retries,omitempty"`
+	ParallelStages   []*EstafetteStage      `yaml:"parallelStages,omitempty"`
 	CustomProperties map[string]interface{} `yaml:",inline"`
 }
 
@@ -27,6 +34,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 		EnvVars          map[string]string      `yaml:"env"`
 		AutoInjected     bool                   `yaml:"autoInjected"`
 		Retries          int                    `yaml:"retries,omitempty"`
+		ParallelStages   yaml.MapSlice          `yaml:"parallelStages"`
 		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 
@@ -44,6 +52,25 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected
 	stage.Retries = aux.Retries
+
+	for _, mi := range aux.ParallelStages {
+
+		bytes, err := yaml.Marshal(mi.Value)
+		if err != nil {
+			return err
+		}
+
+		var innerStage *EstafetteStage
+		if err := yaml.Unmarshal(bytes, &innerStage); err != nil {
+			return err
+		}
+		if innerStage == nil {
+			innerStage = &EstafetteStage{}
+		}
+
+		innerStage.Name = mi.Key.(string)
+		stage.ParallelStages = append(stage.ParallelStages, innerStage)
+	}
 
 	// fix for map[interface{}]interface breaking json.marshal - see https://github.com/go-yaml/yaml/issues/139
 	stage.CustomProperties = cleanUpStringMap(aux.CustomProperties)
@@ -75,4 +102,34 @@ func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	if stage.When == "" {
 		stage.When = "status == 'succeeded'"
 	}
+
+	// set defaults for inner stages
+	for _, s := range stage.ParallelStages {
+		s.SetDefaults(builder)
+	}
+}
+
+// Validate checks whether the stage has valid parameters
+func (stage *EstafetteStage) Validate() (err error) {
+
+	if len(stage.ParallelStages) > 0 {
+		if stage.ContainerImage != "" {
+			return fmt.Errorf("Stage %v cannot use parameters parallelStages and image at the same time", stage.Name)
+		}
+		if len(stage.Commands) > 0 {
+			return fmt.Errorf("Stage %v cannot use parameters parallelStages and commands at the same time", stage.Name)
+		}
+		if len(stage.EnvVars) > 0 {
+			return fmt.Errorf("Stage %v cannot use parameters parallelStages and env at the same time", stage.Name)
+		}
+	} else {
+		if stage.ContainerImage == "" {
+			return fmt.Errorf("Stage %v has no image set", stage.Name)
+		}
+		if stage.Retries < 0 {
+			return fmt.Errorf("Stage %v has no negative retries; needs to be zero or greater", stage.Name)
+		}
+	}
+
+	return nil
 }

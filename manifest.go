@@ -168,6 +168,12 @@ func (c *EstafetteManifest) Validate() (err error) {
 	if len(c.Stages) == 0 {
 		return fmt.Errorf("The manifest should define 1 or more stages")
 	}
+	for _, s := range c.Stages {
+		err = s.Validate()
+		if err != nil {
+			return
+		}
+	}
 
 	for _, t := range c.Triggers {
 		err = t.Validate("build", "")
@@ -190,6 +196,14 @@ func (c *EstafetteManifest) Validate() (err error) {
 				return
 			}
 		}
+
+		for _, s := range r.Stages {
+			err = s.Validate()
+			if err != nil {
+				return
+			}
+		}
+
 	}
 
 	return nil

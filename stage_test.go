@@ -208,7 +208,7 @@ container:
 		bytes, err := json.Marshal(stage)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"extensions/gke:dev\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"CustomProperties\":{\"container\":{\"repository\":\"extensions\"}}}", string(bytes))
+			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"extensions/gke:dev\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"CustomProperties\":{\"container\":{\"repository\":\"extensions\"}}}", string(bytes))
 		}
 	})
 
@@ -231,8 +231,164 @@ when:
 		bytes, err := json.Marshal(stage)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"docker:17.03.0-ce\",\"Shell\":\"/bin/bash\",\"WorkingDirectory\":\"/go/src/github.com/estafette/estafette-ci-manifest\",\"Commands\":[\"cp Dockerfile ./publish\",\"docker build -t estafette-ci-builder ./publish\"],\"When\":\"server == 'estafette'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"CustomProperties\":{}}", string(bytes))
+			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"docker:17.03.0-ce\",\"Shell\":\"/bin/bash\",\"WorkingDirectory\":\"/go/src/github.com/estafette/estafette-ci-manifest\",\"Commands\":[\"cp Dockerfile ./publish\",\"docker build -t estafette-ci-builder ./publish\"],\"When\":\"server == 'estafette'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"CustomProperties\":{}}", string(bytes))
 		}
 	})
 
+}
+
+func TestValidateOnStage(t *testing.T) {
+	t.Run("ReturnsErrorIfImageAndParallelStagesAreBothSet", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ContainerImage: "docker",
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfCommandsAndParallelStagesAreBothSet", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			Commands: []string{"dotnet build"},
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfEnvvarsAndParallelStagesAreBothSet", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			EnvVars: map[string]string{
+				"ENVA": "value a",
+			},
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfImageIsNotSetWithoutParallelStages", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ContainerImage: "",
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfRetriesIsNegative", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ContainerImage: "docker",
+			Retries:        -1,
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorWhenAllFieldsAreValid", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ContainerImage: "docker",
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("ReturnsNoErrorWhenAllParallelStagesAreValid", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.Nil(t, err)
+	})
 }

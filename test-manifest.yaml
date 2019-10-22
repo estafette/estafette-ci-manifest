@@ -84,6 +84,13 @@ stages:
       limit: 256Mi
     dryrun: true
 
+  parallel-stages-group:
+    parallelStages:
+      stageA:
+        image: docker
+      stageB:
+        image: docker
+
 # releases are automatically triggered from stages or manually from gui, cli or slack
 releases:
   docker-hub:
@@ -127,6 +134,13 @@ releases:
                 enabled: true
               - key: cert
                 path: cert
+
+      parallel-stages-group:
+        parallelStages:
+          stageA:
+            image: docker
+          stageB:
+            image: docker
 
   production:
     actions:

@@ -123,7 +123,7 @@ stages:
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, 6, len(manifest.Stages))
+		assert.Equal(t, 7, len(manifest.Stages))
 
 		assert.Equal(t, "build", manifest.Stages[0].Name)
 		assert.Equal(t, "golang:1.8.0-alpine", manifest.Stages[0].ContainerImage)
@@ -385,6 +385,24 @@ pipelines:
 			assert.Equal(t, "topic-name", manifest.Releases[0].Triggers[2].PubSub.Topic)
 		}
 	})
+
+	t.Run("ReturnsManifestWithNestedParallelStages", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+
+		assert.Nil(t, err)
+
+		assert.Equal(t, "parallel-stages-group", manifest.Stages[6].Name)
+		assert.Equal(t, 2, len(manifest.Stages[6].ParallelStages))
+		assert.Equal(t, "stageA", manifest.Stages[6].ParallelStages[0].Name)
+		assert.Equal(t, "stageB", manifest.Stages[6].ParallelStages[1].Name)
+
+		assert.Equal(t, "staging", manifest.Releases[3].Name)
+		assert.Equal(t, 2, len(manifest.Releases[3].Stages[1].ParallelStages))
+		assert.Equal(t, "stageA", manifest.Releases[3].Stages[1].ParallelStages[0].Name)
+		assert.Equal(t, "stageB", manifest.Releases[3].Stages[1].ParallelStages[1].Name)
+	})
 }
 
 func TestVersion(t *testing.T) {
@@ -562,7 +580,7 @@ func TestManifestToJsonMarshalling(t *testing.T) {
 
 		if assert.Nil(t, err) {
 			assert.True(t, strings.Contains(string(data), "Pipelines"))
-			assert.False(t, strings.Contains(string(data), "Stages"))
+			assert.False(t, strings.Contains(string(data), "\"Stages\""))
 		}
 	})
 }
@@ -680,7 +698,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Pipelines\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"ParallelStages\":null,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
 	})
 }
@@ -875,7 +893,9 @@ func TestValidate(t *testing.T) {
 				Track: "dev",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{},
+				&EstafetteStage{
+					ContainerImage: "docker",
+				},
 			},
 		}
 		manifest.SetDefaults()
@@ -893,7 +913,9 @@ func TestValidate(t *testing.T) {
 				Track: "beta",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{},
+				&EstafetteStage{
+					ContainerImage: "docker",
+				},
 			},
 		}
 		manifest.SetDefaults()
@@ -911,7 +933,9 @@ func TestValidate(t *testing.T) {
 				Track: "stable",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{},
+				&EstafetteStage{
+					ContainerImage: "docker",
+				},
 			},
 		}
 		manifest.SetDefaults()

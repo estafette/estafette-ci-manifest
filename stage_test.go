@@ -264,6 +264,58 @@ func TestValidateOnStage(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
+	t.Run("ReturnsErrorIfShellAndParallelStagesAreBothSet", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			Shell: "/bin/sh",
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("ReturnsErrorIfWorkingDirectoryAndParallelStagesAreBothSet", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			WorkingDirectory: "/estafette-work",
+			ParallelStages: []*EstafetteStage{
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageA",
+				},
+				&EstafetteStage{
+					ContainerImage: "docker",
+					Name:           "StageB",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.NotNil(t, err)
+	})
+
 	t.Run("ReturnsErrorIfCommandsAndParallelStagesAreBothSet", func(t *testing.T) {
 
 		stage := EstafetteStage{

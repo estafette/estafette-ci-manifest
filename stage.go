@@ -81,7 +81,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 // SetDefaults sets default values for properties of EstafetteStage if not defined
 func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	// set default for Shell if not set
-	if stage.Shell == "" {
+	if len(stage.ParallelStages) == 0 && stage.Shell == "" {
 		if builder.OperatingSystem == "windows" {
 			stage.Shell = "powershell"
 		} else {
@@ -90,7 +90,7 @@ func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	}
 
 	// set default for WorkingDirectory if not set
-	if stage.WorkingDirectory == "" {
+	if len(stage.ParallelStages) == 0 && stage.WorkingDirectory == "" {
 		if builder.OperatingSystem == "windows" {
 			stage.WorkingDirectory = "C:/estafette-work"
 		} else {
@@ -115,6 +115,12 @@ func (stage *EstafetteStage) Validate() (err error) {
 	if len(stage.ParallelStages) > 0 {
 		if stage.ContainerImage != "" {
 			return fmt.Errorf("Stage %v cannot use parameters parallelStages and image at the same time", stage.Name)
+		}
+		if stage.Shell != "" {
+			return fmt.Errorf("Stage %v cannot use parameters parallelStages and shell at the same time", stage.Name)
+		}
+		if stage.WorkingDirectory != "" {
+			return fmt.Errorf("Stage %v cannot use parameters parallelStages and workDir at the same time", stage.Name)
 		}
 		if len(stage.Commands) > 0 {
 			return fmt.Errorf("Stage %v cannot use parameters parallelStages and commands at the same time", stage.Name)

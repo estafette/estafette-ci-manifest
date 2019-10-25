@@ -18,6 +18,7 @@ type EstafetteStage struct {
 	AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
 	Retries          int                    `yaml:"retries,omitempty"`
 	ParallelStages   []*EstafetteStage      `yaml:"parallelStages,omitempty"`
+	Services         []*EstafetteService    `yaml:"services,omitempty"`
 	CustomProperties map[string]interface{} `yaml:",inline"`
 }
 
@@ -35,6 +36,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 		AutoInjected     bool                   `yaml:"autoInjected"`
 		Retries          int                    `yaml:"retries,omitempty"`
 		ParallelStages   yaml.MapSlice          `yaml:"parallelStages"`
+		Services         []*EstafetteService    `yaml:"services"`
 		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 
@@ -52,6 +54,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected
 	stage.Retries = aux.Retries
+	stage.Services = aux.Services
 
 	for _, mi := range aux.ParallelStages {
 

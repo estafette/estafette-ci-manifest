@@ -208,7 +208,7 @@ container:
 		bytes, err := json.Marshal(stage)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"extensions/gke:dev\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"CustomProperties\":{\"container\":{\"repository\":\"extensions\"}}}", string(bytes))
+			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"extensions/gke:dev\",\"Shell\":\"/bin/sh\",\"WorkingDirectory\":\"/estafette-work\",\"Commands\":null,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{\"container\":{\"repository\":\"extensions\"}}}", string(bytes))
 		}
 	})
 
@@ -231,7 +231,7 @@ when:
 		bytes, err := json.Marshal(stage)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"docker:17.03.0-ce\",\"Shell\":\"/bin/bash\",\"WorkingDirectory\":\"/go/src/github.com/estafette/estafette-ci-manifest\",\"Commands\":[\"cp Dockerfile ./publish\",\"docker build -t estafette-ci-builder ./publish\"],\"When\":\"server == 'estafette'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"CustomProperties\":{}}", string(bytes))
+			assert.Equal(t, "{\"Name\":\"\",\"ContainerImage\":\"docker:17.03.0-ce\",\"Shell\":\"/bin/bash\",\"WorkingDirectory\":\"/go/src/github.com/estafette/estafette-ci-manifest\",\"Commands\":[\"cp Dockerfile ./publish\",\"docker build -t estafette-ci-builder ./publish\"],\"When\":\"server == 'estafette'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":0,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{}}", string(bytes))
 		}
 	})
 

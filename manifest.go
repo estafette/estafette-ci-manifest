@@ -17,7 +17,7 @@ type EstafetteManifest struct {
 	Version       EstafetteVersion    `yaml:"version,omitempty"`
 	GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
 	Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
-	Stages        []*EstafetteStage   `yaml:"-" json:"Pipelines,omitempty"`
+	Stages        []*EstafetteStage   `yaml:"-"`
 	Releases      []*EstafetteRelease `yaml:"-"`
 }
 

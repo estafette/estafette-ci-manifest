@@ -70,6 +70,11 @@ stages:
     - image: bsycorp/kind:latest-1.15
       env:
         SOME_ENVIRONMENT_VAR: "some value with spaces"
+      continueAfterStage: true
+      ports:
+      - port: 8443
+      - port: 10080
+        externalPort: 10080
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
     retries: 1
     credentials: gke-tooling

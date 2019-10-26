@@ -416,6 +416,10 @@ pipelines:
 		assert.Equal(t, "bsycorp/kind:latest-1.15", manifest.Stages[5].Services[0].ContainerImage)
 		assert.Equal(t, 1, len(manifest.Stages[5].Services[0].EnvVars))
 		assert.Equal(t, "some value with spaces", manifest.Stages[5].Services[0].EnvVars["SOME_ENVIRONMENT_VAR"])
+		assert.Equal(t, 2, len(manifest.Stages[5].Services[0].Ports))
+		assert.Equal(t, 8443, manifest.Stages[5].Services[0].Ports[0].Port)
+		assert.Equal(t, 10080, manifest.Stages[5].Services[0].Ports[1].Port)
+		assert.True(t, manifest.Stages[5].Services[0].ContinueAfterStage)
 	})
 }
 

@@ -412,7 +412,8 @@ pipelines:
 		assert.Nil(t, err)
 
 		assert.Equal(t, "test-alpha-version", manifest.Stages[5].Name)
-		assert.Equal(t, 1, len(manifest.Stages[5].Services))
+		assert.Equal(t, 2, len(manifest.Stages[5].Services))
+
 		assert.Equal(t, "bsycorp/kind:latest-1.15", manifest.Stages[5].Services[0].ContainerImage)
 		assert.Equal(t, 1, len(manifest.Stages[5].Services[0].EnvVars))
 		assert.Equal(t, "some value with spaces", manifest.Stages[5].Services[0].EnvVars["SOME_ENVIRONMENT_VAR"])
@@ -420,6 +421,13 @@ pipelines:
 		assert.Equal(t, 8443, manifest.Stages[5].Services[0].Ports[0].Port)
 		assert.Equal(t, 10080, manifest.Stages[5].Services[0].Ports[1].Port)
 		assert.True(t, manifest.Stages[5].Services[0].ContinueAfterStage)
+
+		assert.Equal(t, "cockroachdb/cockroach:v19.1.5", manifest.Stages[5].Services[1].ContainerImage)
+		assert.Equal(t, 2, len(manifest.Stages[5].Services[1].Ports))
+		assert.Equal(t, 26257, manifest.Stages[5].Services[1].Ports[0].Port)
+		assert.Equal(t, 8080, manifest.Stages[5].Services[1].Ports[1].Port)
+		assert.Equal(t, "start --insecure --listen-addr=localhost", manifest.Stages[5].Services[1].Command)
+		assert.False(t, manifest.Stages[5].Services[1].ContinueAfterStage)
 	})
 }
 

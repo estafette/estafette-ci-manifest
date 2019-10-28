@@ -75,6 +75,9 @@ stages:
       - port: 8443
       - port: 10080
         hostPort: 10080
+        readiness:
+          path: /kubernetes-ready
+          timeoutSeconds: 60
     - image: cockroachdb/cockroach:v19.1.5
       ports:
       - port: 26257

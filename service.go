@@ -11,6 +11,13 @@ type EstafetteService struct {
 
 // EstafetteServicePort represents a port to be opened on the service container and an optional external port if port mapping to a different port is required
 type EstafetteServicePort struct {
-	Port     int  `yaml:"port,omitempty"`
-	HostPort *int `yaml:"hostPort,omitempty"`
+	Port      int             `yaml:"port,omitempty"`
+	HostPort  *int            `yaml:"hostPort,omitempty"`
+	Readiness *ReadinessProbe `yaml:"readiness,omitempty"`
+}
+
+// ReadinessProbe defines an http readiness probe
+type ReadinessProbe struct {
+	Path           string `yaml:"path,omitempty"`
+	TimeoutSeconds int    `yaml:"timeoutSeconds,omitempty"`
 }

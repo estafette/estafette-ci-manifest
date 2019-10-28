@@ -419,7 +419,11 @@ pipelines:
 		assert.Equal(t, "some value with spaces", manifest.Stages[5].Services[0].EnvVars["SOME_ENVIRONMENT_VAR"])
 		assert.Equal(t, 2, len(manifest.Stages[5].Services[0].Ports))
 		assert.Equal(t, 8443, manifest.Stages[5].Services[0].Ports[0].Port)
+		assert.Nil(t, manifest.Stages[5].Services[0].Ports[0].Readiness)
 		assert.Equal(t, 10080, manifest.Stages[5].Services[0].Ports[1].Port)
+		assert.NotNil(t, manifest.Stages[5].Services[0].Ports[1].Readiness)
+		assert.Equal(t, "/kubernetes-ready", manifest.Stages[5].Services[0].Ports[1].Readiness.Path)
+		assert.Equal(t, 60, manifest.Stages[5].Services[0].Ports[1].Readiness.TimeoutSeconds)
 		assert.True(t, manifest.Stages[5].Services[0].ContinueAfterStage)
 
 		assert.Equal(t, "cockroachdb/cockroach:v19.1.5", manifest.Stages[5].Services[1].ContainerImage)

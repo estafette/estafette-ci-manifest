@@ -67,7 +67,8 @@ stages:
 
   test-alpha-version:
     services:
-    - image: bsycorp/kind:latest-1.15
+    - name: kubernetes
+      image: bsycorp/kind:latest-1.15
       env:
         SOME_ENVIRONMENT_VAR: "some value with spaces"
       continueAfterStage: true
@@ -75,7 +76,8 @@ stages:
       - port: 8443
       - port: 10080
         hostPort: 10080
-    - image: cockroachdb/cockroach:v19.1.5
+    - name: database
+      image: cockroachdb/cockroach:v19.1.5
       ports:
       - port: 26257
       - port: 8080

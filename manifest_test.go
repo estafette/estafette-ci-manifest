@@ -414,6 +414,7 @@ pipelines:
 		assert.Equal(t, "test-alpha-version", manifest.Stages[5].Name)
 		assert.Equal(t, 2, len(manifest.Stages[5].Services))
 
+		assert.Equal(t, "kubernetes", manifest.Stages[5].Services[0].Name)
 		assert.Equal(t, "bsycorp/kind:latest-1.15", manifest.Stages[5].Services[0].ContainerImage)
 		assert.Equal(t, 1, len(manifest.Stages[5].Services[0].EnvVars))
 		assert.Equal(t, "some value with spaces", manifest.Stages[5].Services[0].EnvVars["SOME_ENVIRONMENT_VAR"])
@@ -426,6 +427,7 @@ pipelines:
 		assert.Equal(t, 60, manifest.Stages[5].Services[0].Ports[1].Readiness.TimeoutSeconds)
 		assert.True(t, manifest.Stages[5].Services[0].ContinueAfterStage)
 
+		assert.Equal(t, "database", manifest.Stages[5].Services[1].Name)
 		assert.Equal(t, "cockroachdb/cockroach:v19.1.5", manifest.Stages[5].Services[1].ContainerImage)
 		assert.Equal(t, 2, len(manifest.Stages[5].Services[1].Ports))
 		assert.Equal(t, 26257, manifest.Stages[5].Services[1].Ports[0].Port)

@@ -110,6 +110,10 @@ func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	for _, s := range stage.ParallelStages {
 		s.SetDefaults(builder)
 	}
+
+	for _, svc := range stage.Services {
+		svc.SetDefaults()
+	}
 }
 
 // Validate checks whether the stage has valid parameters

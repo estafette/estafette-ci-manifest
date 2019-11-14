@@ -8,6 +8,7 @@ type EstafetteService struct {
 	Ports              []*EstafetteServicePort `yaml:"ports,omitempty"`
 	Command            string                  `yaml:"command,omitempty"`
 	ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
+	Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
 	CustomProperties   map[string]interface{}  `yaml:",inline"`
 }
 
@@ -22,6 +23,9 @@ type EstafetteServicePort struct {
 type ReadinessProbe struct {
 	Path           string `yaml:"path,omitempty"`
 	TimeoutSeconds int    `yaml:"timeoutSeconds,omitempty"`
+	Port           int    `yaml:"port,omitempty"`
+	Protocol       string `yaml:"protocol,omitempty"`
+	Hostname       string `yaml:"hostname,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteService
@@ -54,4 +58,40 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.CustomProperties = cleanUpStringMap(aux.CustomProperties)
 
 	return nil
+}
+
+// SetDefaults sets default values for properties of EstafetteService if not defined
+func (service *EstafetteService) SetDefaults() {
+	if service.Readiness != nil {
+		service.Readiness.SetDefaults(service.Name, nil)
+	}
+
+	for _, p := range service.Ports {
+		p.SetDefaults(service.Name)
+	}
+}
+
+// SetDefaults sets default values for properties of EstafetteServicePort if not defined
+func (port *EstafetteServicePort) SetDefaults(serviceName string) {
+	if port.Readiness != nil {
+		port.Readiness.SetDefaults(serviceName, port.HostPort)
+	}
+}
+
+// SetDefaults sets default values for properties of EstafetteService if not defined
+func (readiness *ReadinessProbe) SetDefaults(serviceName string, port *int) {
+
+	if readiness.Hostname == "" && serviceName != "" {
+		readiness.Hostname = serviceName
+	}
+
+	if readiness.Port == 0 && port != nil {
+		readiness.Port = *port
+	} else if readiness.Port == 0 {
+		readiness.Port = 80
+	}
+
+	if readiness.Protocol == "" {
+		readiness.Protocol = "http"
+	}
 }

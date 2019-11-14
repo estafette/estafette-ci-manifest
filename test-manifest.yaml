@@ -72,6 +72,12 @@ stages:
       env:
         SOME_ENVIRONMENT_VAR: "some value with spaces"
       continueAfterStage: true
+      readiness:
+        path: /kubernetes-ready
+        timeoutSeconds: 60
+        port: 80
+        protocol: http
+        hostname: kubernetes.kube-system.svc.cluster.local
       ports:
       - port: 8443
       - port: 10080

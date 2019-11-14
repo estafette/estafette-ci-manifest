@@ -73,25 +73,31 @@ func (service *EstafetteService) SetDefaults() {
 
 // SetDefaults sets default values for properties of EstafetteServicePort if not defined
 func (port *EstafetteServicePort) SetDefaults(serviceName string) {
+	if port.HostPort == nil && port.Port > 0 {
+		port.HostPort = &port.Port
+	}
 	if port.Readiness != nil {
-		port.Readiness.SetDefaults(serviceName, port.HostPort)
+		port.Readiness.SetDefaults(serviceName, port)
 	}
 }
 
 // SetDefaults sets default values for properties of EstafetteService if not defined
-func (readiness *ReadinessProbe) SetDefaults(serviceName string, port *int) {
+func (readiness *ReadinessProbe) SetDefaults(serviceName string, port *EstafetteServicePort) {
 
 	if readiness.Hostname == "" && serviceName != "" {
 		readiness.Hostname = serviceName
 	}
 
-	if readiness.Port == 0 && port != nil {
-		readiness.Port = *port
+	if readiness.Port == 0 && port != nil && port.HostPort != nil {
+		readiness.Port = *port.HostPort
 	} else if readiness.Port == 0 {
 		readiness.Port = 80
 	}
 
 	if readiness.Protocol == "" {
 		readiness.Protocol = "http"
+		if port != nil && port.Port == 443 {
+			readiness.Protocol = "https"
+		}
 	}
 }

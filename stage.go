@@ -27,16 +27,16 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 
 	var aux struct {
 		Name             string                 `yaml:"-"`
-		ContainerImage   string                 `yaml:"image"`
-		Shell            string                 `yaml:"shell"`
-		WorkingDirectory string                 `yaml:"workDir"`
-		Commands         []string               `yaml:"commands"`
-		When             string                 `yaml:"when"`
-		EnvVars          map[string]string      `yaml:"env"`
-		AutoInjected     bool                   `yaml:"autoInjected"`
+		ContainerImage   string                 `yaml:"image,omitempty"`
+		Shell            string                 `yaml:"shell,omitempty"`
+		WorkingDirectory string                 `yaml:"workDir,omitempty"`
+		Commands         []string               `yaml:"commands,omitempty"`
+		When             string                 `yaml:"when,omitempty"`
+		EnvVars          map[string]string      `yaml:"env,omitempty"`
+		AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
 		Retries          int                    `yaml:"retries,omitempty"`
 		ParallelStages   yaml.MapSlice          `yaml:"parallelStages"`
-		Services         []*EstafetteService    `yaml:"services"`
+		Services         []*EstafetteService    `yaml:"services,omitempty"`
 		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 

@@ -38,6 +38,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 		Ports              []*EstafetteServicePort `yaml:"ports,omitempty"`
 		Command            string                  `yaml:"command,omitempty"`
 		ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
+		Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
 		CustomProperties   map[string]interface{}  `yaml:",inline"`
 	}
 
@@ -53,6 +54,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.Ports = aux.Ports
 	service.Command = aux.Command
 	service.ContinueAfterStage = aux.ContinueAfterStage
+	service.Readiness = aux.Readiness
 
 	// fix for map[interface{}]interface breaking json.marshal - see https://github.com/go-yaml/yaml/issues/139
 	service.CustomProperties = cleanUpStringMap(aux.CustomProperties)

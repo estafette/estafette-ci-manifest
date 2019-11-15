@@ -78,18 +78,8 @@ stages:
         port: 80
         protocol: http
         hostname: kubernetes.kube-system.svc.cluster.local
-      ports:
-      - port: 8443
-      - port: 10080
-        hostPort: 10080
-        readiness:
-          path: /kubernetes-ready
-          timeoutSeconds: 60
     - name: database
       image: cockroachdb/cockroach:v19.1.5
-      ports:
-      - port: 26257
-      - port: 8080
       command: start --insecure --listen-addr=localhost
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
     retries: 1

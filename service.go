@@ -5,18 +5,10 @@ type EstafetteService struct {
 	Name               string                  `yaml:"name,omitempty"`
 	ContainerImage     string                  `yaml:"image,omitempty"`
 	EnvVars            map[string]string       `yaml:"env,omitempty"`
-	Ports              []*EstafetteServicePort `yaml:"ports,omitempty"`
 	Command            string                  `yaml:"command,omitempty"`
 	ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
 	Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
 	CustomProperties   map[string]interface{}  `yaml:",inline"`
-}
-
-// EstafetteServicePort represents a port to be opened on the service container and an optional external port if port mapping to a different port is required
-type EstafetteServicePort struct {
-	Port      int             `yaml:"port,omitempty"`
-	HostPort  *int            `yaml:"hostPort,omitempty"`
-	Readiness *ReadinessProbe `yaml:"readiness,omitempty"`
 }
 
 // ReadinessProbe defines an http readiness probe
@@ -35,7 +27,6 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 		Name               string                  `yaml:"name,omitempty"`
 		ContainerImage     string                  `yaml:"image,omitempty"`
 		EnvVars            map[string]string       `yaml:"env,omitempty"`
-		Ports              []*EstafetteServicePort `yaml:"ports,omitempty"`
 		Command            string                  `yaml:"command,omitempty"`
 		ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
 		Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
@@ -51,7 +42,6 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.Name = aux.Name
 	service.ContainerImage = aux.ContainerImage
 	service.EnvVars = aux.EnvVars
-	service.Ports = aux.Ports
 	service.Command = aux.Command
 	service.ContinueAfterStage = aux.ContinueAfterStage
 	service.Readiness = aux.Readiness
@@ -65,41 +55,29 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 // SetDefaults sets default values for properties of EstafetteService if not defined
 func (service *EstafetteService) SetDefaults() {
 	if service.Readiness != nil {
-		service.Readiness.SetDefaults(service.Name, nil)
-	}
-
-	for _, p := range service.Ports {
-		p.SetDefaults(service.Name)
-	}
-}
-
-// SetDefaults sets default values for properties of EstafetteServicePort if not defined
-func (port *EstafetteServicePort) SetDefaults(serviceName string) {
-	if port.HostPort == nil && port.Port > 0 {
-		port.HostPort = &port.Port
-	}
-	if port.Readiness != nil {
-		port.Readiness.SetDefaults(serviceName, port)
+		service.Readiness.SetDefaults(service.Name)
 	}
 }
 
 // SetDefaults sets default values for properties of EstafetteService if not defined
-func (readiness *ReadinessProbe) SetDefaults(serviceName string, port *EstafetteServicePort) {
+func (readiness *ReadinessProbe) SetDefaults(serviceName string) {
 
 	if readiness.Hostname == "" && serviceName != "" {
 		readiness.Hostname = serviceName
 	}
 
-	if readiness.Port == 0 && port != nil && port.HostPort != nil {
-		readiness.Port = *port.HostPort
-	} else if readiness.Port == 0 {
+	if readiness.Port == 0 {
 		readiness.Port = 80
 	}
 
 	if readiness.Protocol == "" {
 		readiness.Protocol = "http"
-		if port != nil && port.Port == 443 {
+		if readiness.Port == 443 {
 			readiness.Protocol = "https"
 		}
+	}
+
+	if readiness.TimeoutSeconds == 0 {
+		readiness.TimeoutSeconds = 60
 	}
 }

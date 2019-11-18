@@ -2,13 +2,16 @@ package manifest
 
 // EstafetteService represents a service container to run during a single or multiple stages
 type EstafetteService struct {
-	Name               string                  `yaml:"name,omitempty"`
-	ContainerImage     string                  `yaml:"image,omitempty"`
-	EnvVars            map[string]string       `yaml:"env,omitempty"`
-	Command            string                  `yaml:"command,omitempty"`
-	ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
-	Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
-	CustomProperties   map[string]interface{}  `yaml:",inline"`
+	Name               string                 `yaml:"name,omitempty"`
+	ContainerImage     string                 `yaml:"image,omitempty"`
+	Shell              string                 `yaml:"shell,omitempty"`
+	Commands           []string               `yaml:"commands,omitempty"`
+	When               string                 `yaml:"when,omitempty"`
+	EnvVars            map[string]string      `yaml:"env,omitempty"`
+	Command            string                 `yaml:"command,omitempty"`
+	ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
+	Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
+	CustomProperties   map[string]interface{} `yaml:",inline"`
 }
 
 // ReadinessProbe defines an http readiness probe
@@ -24,13 +27,16 @@ type ReadinessProbe struct {
 func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name               string                  `yaml:"name,omitempty"`
-		ContainerImage     string                  `yaml:"image,omitempty"`
-		EnvVars            map[string]string       `yaml:"env,omitempty"`
-		Command            string                  `yaml:"command,omitempty"`
-		ContinueAfterStage bool                    `yaml:"continueAfterStage,omitempty"`
-		Readiness          *ReadinessProbe         `yaml:"readiness,omitempty"`
-		CustomProperties   map[string]interface{}  `yaml:",inline"`
+		Name               string                 `yaml:"name,omitempty"`
+		ContainerImage     string                 `yaml:"image,omitempty"`
+		Shell              string                 `yaml:"shell,omitempty"`
+		Commands           []string               `yaml:"commands,omitempty"`
+		When               string                 `yaml:"when,omitempty"`
+		EnvVars            map[string]string      `yaml:"env,omitempty"`
+		Command            string                 `yaml:"command,omitempty"`
+		ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
+		Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
+		CustomProperties   map[string]interface{} `yaml:",inline"`
 	}
 
 	// unmarshal to auxiliary type
@@ -41,6 +47,9 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	// map auxiliary properties
 	service.Name = aux.Name
 	service.ContainerImage = aux.ContainerImage
+	service.Shell = aux.Shell
+	service.Commands = aux.Commands
+	service.When = aux.When
 	service.EnvVars = aux.EnvVars
 	service.Command = aux.Command
 	service.ContinueAfterStage = aux.ContinueAfterStage
@@ -53,9 +62,23 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 // SetDefaults sets default values for properties of EstafetteService if not defined
-func (service *EstafetteService) SetDefaults() {
+func (service *EstafetteService) SetDefaults(builder EstafetteBuilder) {
 	if service.Readiness != nil {
 		service.Readiness.SetDefaults(service.Name)
+	}
+
+	// set default for Shell if not set
+	if service.Shell == "" {
+		if builder.OperatingSystem == "windows" {
+			service.Shell = "powershell"
+		} else {
+			service.Shell = "/bin/sh"
+		}
+	}
+
+	// set default for When if not set
+	if service.When == "" {
+		service.When = "status == 'succeeded'"
 	}
 }
 

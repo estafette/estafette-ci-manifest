@@ -112,7 +112,7 @@ func (stage *EstafetteStage) SetDefaults(builder EstafetteBuilder) {
 	}
 
 	for _, svc := range stage.Services {
-		svc.SetDefaults()
+		svc.SetDefaults(builder)
 	}
 }
 

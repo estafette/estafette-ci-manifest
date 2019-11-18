@@ -80,7 +80,8 @@ stages:
         hostname: kubernetes.kube-system.svc.cluster.local
     - name: database
       image: cockroachdb/cockroach:v19.1.5
-      command: start --insecure --listen-addr=localhost
+      commands:
+      - cockroachdb start --insecure --listen-addr=localhost
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
     retries: 1
     credentials: gke-tooling

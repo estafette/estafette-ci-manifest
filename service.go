@@ -8,7 +8,6 @@ type EstafetteService struct {
 	Commands           []string               `yaml:"commands,omitempty"`
 	When               string                 `yaml:"when,omitempty"`
 	EnvVars            map[string]string      `yaml:"env,omitempty"`
-	Command            string                 `yaml:"command,omitempty"`
 	ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
 	Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
 	CustomProperties   map[string]interface{} `yaml:",inline"`
@@ -33,7 +32,6 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 		Commands           []string               `yaml:"commands,omitempty"`
 		When               string                 `yaml:"when,omitempty"`
 		EnvVars            map[string]string      `yaml:"env,omitempty"`
-		Command            string                 `yaml:"command,omitempty"`
 		ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
 		Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
 		CustomProperties   map[string]interface{} `yaml:",inline"`
@@ -51,7 +49,6 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.Commands = aux.Commands
 	service.When = aux.When
 	service.EnvVars = aux.EnvVars
-	service.Command = aux.Command
 	service.ContinueAfterStage = aux.ContinueAfterStage
 	service.Readiness = aux.Readiness
 

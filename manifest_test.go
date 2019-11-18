@@ -425,7 +425,7 @@ pipelines:
 
 		assert.Equal(t, "database", manifest.Stages[5].Services[1].Name)
 		assert.Equal(t, "cockroachdb/cockroach:v19.1.5", manifest.Stages[5].Services[1].ContainerImage)
-		assert.Equal(t, "start --insecure --listen-addr=localhost", manifest.Stages[5].Services[1].Command)
+		assert.Equal(t, "cockroachdb start --insecure --listen-addr=localhost", manifest.Stages[5].Services[1].Commands[0])
 		assert.False(t, manifest.Stages[5].Services[1].ContinueAfterStage)
 	})
 }

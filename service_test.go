@@ -16,7 +16,6 @@ func TestToYamlMarshalling(t *testing.T) {
 image: bsycorp/kind:latest-1.15
 env:
   SOME_ENVIRONMENT_VAR: some value with spaces
-continueAfterStage: true
 readiness:
   path: /kubernetes-ready
   timeoutSeconds: 60

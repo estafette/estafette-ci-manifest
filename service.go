@@ -2,15 +2,14 @@ package manifest
 
 // EstafetteService represents a service container to run during a single or multiple stages
 type EstafetteService struct {
-	Name               string                 `yaml:"name,omitempty"`
-	ContainerImage     string                 `yaml:"image,omitempty"`
-	Shell              string                 `yaml:"shell,omitempty"`
-	Commands           []string               `yaml:"commands,omitempty"`
-	When               string                 `yaml:"when,omitempty"`
-	EnvVars            map[string]string      `yaml:"env,omitempty"`
-	ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
-	Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
-	CustomProperties   map[string]interface{} `yaml:",inline"`
+	Name             string                 `yaml:"name,omitempty"`
+	ContainerImage   string                 `yaml:"image,omitempty"`
+	Shell            string                 `yaml:"shell,omitempty"`
+	Commands         []string               `yaml:"commands,omitempty"`
+	When             string                 `yaml:"when,omitempty"`
+	EnvVars          map[string]string      `yaml:"env,omitempty"`
+	Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
+	CustomProperties map[string]interface{} `yaml:",inline"`
 }
 
 // ReadinessProbe defines an http readiness probe
@@ -26,15 +25,14 @@ type ReadinessProbe struct {
 func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name               string                 `yaml:"name,omitempty"`
-		ContainerImage     string                 `yaml:"image,omitempty"`
-		Shell              string                 `yaml:"shell,omitempty"`
-		Commands           []string               `yaml:"commands,omitempty"`
-		When               string                 `yaml:"when,omitempty"`
-		EnvVars            map[string]string      `yaml:"env,omitempty"`
-		ContinueAfterStage bool                   `yaml:"continueAfterStage,omitempty"`
-		Readiness          *ReadinessProbe        `yaml:"readiness,omitempty"`
-		CustomProperties   map[string]interface{} `yaml:",inline"`
+		Name             string                 `yaml:"name,omitempty"`
+		ContainerImage   string                 `yaml:"image,omitempty"`
+		Shell            string                 `yaml:"shell,omitempty"`
+		Commands         []string               `yaml:"commands,omitempty"`
+		When             string                 `yaml:"when,omitempty"`
+		EnvVars          map[string]string      `yaml:"env,omitempty"`
+		Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
+		CustomProperties map[string]interface{} `yaml:",inline"`
 	}
 
 	// unmarshal to auxiliary type
@@ -49,7 +47,6 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.Commands = aux.Commands
 	service.When = aux.When
 	service.EnvVars = aux.EnvVars
-	service.ContinueAfterStage = aux.ContinueAfterStage
 	service.Readiness = aux.Readiness
 
 	// fix for map[interface{}]interface breaking json.marshal - see https://github.com/go-yaml/yaml/issues/139

@@ -13,6 +13,7 @@ type EstafetteStage struct {
 	Shell            string                 `yaml:"shell,omitempty"`
 	WorkingDirectory string                 `yaml:"workDir,omitempty"`
 	Commands         []string               `yaml:"commands,omitempty"`
+	CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
 	When             string                 `yaml:"when,omitempty"`
 	EnvVars          map[string]string      `yaml:"env,omitempty"`
 	AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
@@ -31,6 +32,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 		Shell            string                 `yaml:"shell,omitempty"`
 		WorkingDirectory string                 `yaml:"workDir,omitempty"`
 		Commands         []string               `yaml:"commands,omitempty"`
+		CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
 		When             string                 `yaml:"when,omitempty"`
 		EnvVars          map[string]string      `yaml:"env,omitempty"`
 		AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
@@ -50,6 +52,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.Shell = aux.Shell
 	stage.WorkingDirectory = aux.WorkingDirectory
 	stage.Commands = aux.Commands
+	stage.CommandsNotAsJob = aux.CommandsNotAsJob
 	stage.When = aux.When
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected

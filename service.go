@@ -6,6 +6,7 @@ type EstafetteService struct {
 	ContainerImage   string                 `yaml:"image,omitempty"`
 	Shell            string                 `yaml:"shell,omitempty"`
 	Commands         []string               `yaml:"commands,omitempty"`
+	CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
 	When             string                 `yaml:"when,omitempty"`
 	EnvVars          map[string]string      `yaml:"env,omitempty"`
 	Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
@@ -29,6 +30,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 		ContainerImage   string                 `yaml:"image,omitempty"`
 		Shell            string                 `yaml:"shell,omitempty"`
 		Commands         []string               `yaml:"commands,omitempty"`
+		CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
 		When             string                 `yaml:"when,omitempty"`
 		EnvVars          map[string]string      `yaml:"env,omitempty"`
 		Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
@@ -45,6 +47,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.ContainerImage = aux.ContainerImage
 	service.Shell = aux.Shell
 	service.Commands = aux.Commands
+	service.CommandsNotAsJob = aux.CommandsNotAsJob
 	service.When = aux.When
 	service.EnvVars = aux.EnvVars
 	service.Readiness = aux.Readiness

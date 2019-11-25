@@ -8,38 +8,38 @@ import (
 
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
-	Name             string                 `yaml:"-"`
-	ContainerImage   string                 `yaml:"image,omitempty"`
-	Shell            string                 `yaml:"shell,omitempty"`
-	WorkingDirectory string                 `yaml:"workDir,omitempty"`
-	Commands         []string               `yaml:"commands,omitempty"`
-	CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
-	When             string                 `yaml:"when,omitempty"`
-	EnvVars          map[string]string      `yaml:"env,omitempty"`
-	AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
-	Retries          int                    `yaml:"retries,omitempty"`
-	ParallelStages   []*EstafetteStage      `yaml:"parallelStages,omitempty"`
-	Services         []*EstafetteService    `yaml:"services,omitempty"`
-	CustomProperties map[string]interface{} `yaml:",inline"`
+	Name                    string                 `yaml:"-"`
+	ContainerImage          string                 `yaml:"image,omitempty"`
+	Shell                   string                 `yaml:"shell,omitempty"`
+	WorkingDirectory        string                 `yaml:"workDir,omitempty"`
+	Commands                []string               `yaml:"commands,omitempty"`
+	RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+	When                    string                 `yaml:"when,omitempty"`
+	EnvVars                 map[string]string      `yaml:"env,omitempty"`
+	AutoInjected            bool                   `yaml:"autoInjected,omitempty"`
+	Retries                 int                    `yaml:"retries,omitempty"`
+	ParallelStages          []*EstafetteStage      `yaml:"parallelStages,omitempty"`
+	Services                []*EstafetteService    `yaml:"services,omitempty"`
+	CustomProperties        map[string]interface{} `yaml:",inline"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteStage
 func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name             string                 `yaml:"-"`
-		ContainerImage   string                 `yaml:"image,omitempty"`
-		Shell            string                 `yaml:"shell,omitempty"`
-		WorkingDirectory string                 `yaml:"workDir,omitempty"`
-		Commands         []string               `yaml:"commands,omitempty"`
-		CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
-		When             string                 `yaml:"when,omitempty"`
-		EnvVars          map[string]string      `yaml:"env,omitempty"`
-		AutoInjected     bool                   `yaml:"autoInjected,omitempty"`
-		Retries          int                    `yaml:"retries,omitempty"`
-		ParallelStages   yaml.MapSlice          `yaml:"parallelStages"`
-		Services         []*EstafetteService    `yaml:"services,omitempty"`
-		CustomProperties map[string]interface{} `yaml:",inline"`
+		Name                    string                 `yaml:"-"`
+		ContainerImage          string                 `yaml:"image,omitempty"`
+		Shell                   string                 `yaml:"shell,omitempty"`
+		WorkingDirectory        string                 `yaml:"workDir,omitempty"`
+		Commands                []string               `yaml:"commands,omitempty"`
+		RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+		When                    string                 `yaml:"when,omitempty"`
+		EnvVars                 map[string]string      `yaml:"env,omitempty"`
+		AutoInjected            bool                   `yaml:"autoInjected,omitempty"`
+		Retries                 int                    `yaml:"retries,omitempty"`
+		ParallelStages          yaml.MapSlice          `yaml:"parallelStages"`
+		Services                []*EstafetteService    `yaml:"services,omitempty"`
+		CustomProperties        map[string]interface{} `yaml:",inline"`
 	}
 
 	// unmarshal to auxiliary type
@@ -52,7 +52,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.Shell = aux.Shell
 	stage.WorkingDirectory = aux.WorkingDirectory
 	stage.Commands = aux.Commands
-	stage.CommandsNotAsJob = aux.CommandsNotAsJob
+	stage.RunCommandsInForeground = aux.RunCommandsInForeground
 	stage.When = aux.When
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected

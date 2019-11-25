@@ -2,15 +2,15 @@ package manifest
 
 // EstafetteService represents a service container to run during a single or multiple stages
 type EstafetteService struct {
-	Name             string                 `yaml:"name,omitempty"`
-	ContainerImage   string                 `yaml:"image,omitempty"`
-	Shell            string                 `yaml:"shell,omitempty"`
-	Commands         []string               `yaml:"commands,omitempty"`
-	CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
-	When             string                 `yaml:"when,omitempty"`
-	EnvVars          map[string]string      `yaml:"env,omitempty"`
-	Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
-	CustomProperties map[string]interface{} `yaml:",inline"`
+	Name                    string                 `yaml:"name,omitempty"`
+	ContainerImage          string                 `yaml:"image,omitempty"`
+	Shell                   string                 `yaml:"shell,omitempty"`
+	Commands                []string               `yaml:"commands,omitempty"`
+	RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+	When                    string                 `yaml:"when,omitempty"`
+	EnvVars                 map[string]string      `yaml:"env,omitempty"`
+	Readiness               *ReadinessProbe        `yaml:"readiness,omitempty"`
+	CustomProperties        map[string]interface{} `yaml:",inline"`
 }
 
 // ReadinessProbe defines an http readiness probe
@@ -26,15 +26,15 @@ type ReadinessProbe struct {
 func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name             string                 `yaml:"name,omitempty"`
-		ContainerImage   string                 `yaml:"image,omitempty"`
-		Shell            string                 `yaml:"shell,omitempty"`
-		Commands         []string               `yaml:"commands,omitempty"`
-		CommandsNotAsJob bool                   `yaml:"commandsNotAsJob,omitempty"`
-		When             string                 `yaml:"when,omitempty"`
-		EnvVars          map[string]string      `yaml:"env,omitempty"`
-		Readiness        *ReadinessProbe        `yaml:"readiness,omitempty"`
-		CustomProperties map[string]interface{} `yaml:",inline"`
+		Name                    string                 `yaml:"name,omitempty"`
+		ContainerImage          string                 `yaml:"image,omitempty"`
+		Shell                   string                 `yaml:"shell,omitempty"`
+		Commands                []string               `yaml:"commands,omitempty"`
+		RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+		When                    string                 `yaml:"when,omitempty"`
+		EnvVars                 map[string]string      `yaml:"env,omitempty"`
+		Readiness               *ReadinessProbe        `yaml:"readiness,omitempty"`
+		CustomProperties        map[string]interface{} `yaml:",inline"`
 	}
 
 	// unmarshal to auxiliary type
@@ -47,7 +47,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.ContainerImage = aux.ContainerImage
 	service.Shell = aux.Shell
 	service.Commands = aux.Commands
-	service.CommandsNotAsJob = aux.CommandsNotAsJob
+	service.RunCommandsInForeground = aux.RunCommandsInForeground
 	service.When = aux.When
 	service.EnvVars = aux.EnvVars
 	service.Readiness = aux.Readiness

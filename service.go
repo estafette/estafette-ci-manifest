@@ -7,6 +7,7 @@ type EstafetteService struct {
 	Shell                   string                 `yaml:"shell,omitempty"`
 	Commands                []string               `yaml:"commands,omitempty"`
 	RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+	MultiStage              *bool                  `yaml:"multiStage,omitempty"`
 	When                    string                 `yaml:"when,omitempty"`
 	EnvVars                 map[string]string      `yaml:"env,omitempty"`
 	Readiness               *ReadinessProbe        `yaml:"readiness,omitempty"`
@@ -31,6 +32,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 		Shell                   string                 `yaml:"shell,omitempty"`
 		Commands                []string               `yaml:"commands,omitempty"`
 		RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
+		MultiStage              *bool                  `yaml:"multiStage,omitempty"`
 		When                    string                 `yaml:"when,omitempty"`
 		EnvVars                 map[string]string      `yaml:"env,omitempty"`
 		Readiness               *ReadinessProbe        `yaml:"readiness,omitempty"`
@@ -48,6 +50,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 	service.Shell = aux.Shell
 	service.Commands = aux.Commands
 	service.RunCommandsInForeground = aux.RunCommandsInForeground
+	service.MultiStage = aux.MultiStage
 	service.When = aux.When
 	service.EnvVars = aux.EnvVars
 	service.Readiness = aux.Readiness
@@ -59,7 +62,7 @@ func (service *EstafetteService) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 // SetDefaults sets default values for properties of EstafetteService if not defined
-func (service *EstafetteService) SetDefaults(builder EstafetteBuilder) {
+func (service *EstafetteService) SetDefaults(builder EstafetteBuilder, parentStage EstafetteStage) {
 	if service.Readiness != nil {
 		service.Readiness.SetDefaults(service.Name)
 	}
@@ -76,6 +79,17 @@ func (service *EstafetteService) SetDefaults(builder EstafetteBuilder) {
 	// set default for When if not set
 	if service.When == "" {
 		service.When = "status == 'succeeded'"
+	}
+
+	// set default for multistage depending on whether parent stage has image and commands or not
+	if service.MultiStage == nil {
+		trueValue := true
+		falseValue := false
+		if parentStage.ContainerImage == "" {
+			service.MultiStage = &trueValue
+		} else {
+			service.MultiStage = &falseValue
+		}
 	}
 }
 

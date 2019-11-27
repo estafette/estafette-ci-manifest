@@ -386,6 +386,28 @@ func TestValidateOnStage(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
+	t.Run("ReturnsNoErrorIfImageIsNotSetButHasService", func(t *testing.T) {
+
+		stage := EstafetteStage{
+			ContainerImage: "",
+			Services: []*EstafetteService{
+				&EstafetteService{
+					Name:           "cockroachdb",
+					ContainerImage: "cockroachdb/cockroach:v19.2.0",
+				},
+			},
+		}
+		stage.SetDefaults(EstafetteBuilder{
+			OperatingSystem: "linux",
+			Track:           "stable",
+		})
+
+		// act
+		err := stage.Validate()
+
+		assert.Nil(t, err)
+	})
+
 	t.Run("ReturnsErrorIfRetriesIsNegative", func(t *testing.T) {
 
 		stage := EstafetteStage{

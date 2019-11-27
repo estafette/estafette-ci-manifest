@@ -139,7 +139,7 @@ func (stage *EstafetteStage) Validate() (err error) {
 			return fmt.Errorf("Stage %v cannot use parameters parallelStages and env at the same time", stage.Name)
 		}
 	} else {
-		if stage.ContainerImage == "" {
+		if stage.ContainerImage == "" && len(stage.Services) == 0 {
 			return fmt.Errorf("Stage %v has no image set", stage.Name)
 		}
 		if stage.Retries < 0 {

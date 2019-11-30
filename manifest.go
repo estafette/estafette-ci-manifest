@@ -252,7 +252,7 @@ func Exists(manifestPath string) bool {
 // ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
 func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err error) {
 
-	log.Info().Msgf("Reading %v file...", manifestPath)
+	log.Debug().Msgf("Reading %v file...", manifestPath)
 
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
@@ -273,7 +273,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 		return manifest, err
 	}
 
-	log.Info().Msgf("Finished reading %v file successfully", manifestPath)
+	log.Debug().Msgf("Finished reading %v file successfully", manifestPath)
 
 	return
 }
@@ -281,7 +281,7 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
 func ReadManifest(manifestString string) (manifest EstafetteManifest, err error) {
 
-	log.Info().Msg("Reading manifest from string...")
+	log.Debug().Msg("Reading manifest from string...")
 
 	// unmarshal strict, so non-defined properties or incorrect nesting will fail
 	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
@@ -297,7 +297,7 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 		return manifest, err
 	}
 
-	log.Info().Msg("Finished unmarshalling manifest from string successfully")
+	log.Debug().Msg("Finished unmarshalling manifest from string successfully")
 
 	return
 }

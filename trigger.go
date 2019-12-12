@@ -107,7 +107,7 @@ func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
 		if t.ReleaseAction == nil {
 			t.ReleaseAction = &EstafetteTriggerReleaseAction{}
 		}
-		t.ReleaseAction.SetDefaults(targetName)
+		t.ReleaseAction.SetDefaults(t, targetName)
 		break
 	}
 }
@@ -165,10 +165,16 @@ func (b *EstafetteTriggerBuildAction) SetDefaults() {
 }
 
 // SetDefaults sets defaults for EstafetteTriggerReleaseAction
-func (r *EstafetteTriggerReleaseAction) SetDefaults(targetName string) {
+func (r *EstafetteTriggerReleaseAction) SetDefaults(t *EstafetteTrigger, targetName string) {
 	r.Target = targetName
 	if r.Version == "" {
-		r.Version = "latest"
+		if t.Pipeline != nil && t.Pipeline.Name == "self" {
+			r.Version = "same"
+		} else if t.Release != nil && t.Release.Name == "self" {
+			r.Version = "same"
+		} else {
+			r.Version = "latest"
+		}
 	}
 }
 

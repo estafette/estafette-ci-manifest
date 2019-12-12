@@ -112,37 +112,91 @@ func TestEstafetteTriggerBuildActionSetDefaults(t *testing.T) {
 func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
 	t.Run("SetsTargetToTargetParam", func(t *testing.T) {
 
-		trigger := EstafetteTriggerReleaseAction{
-			Target: "any",
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Name: "self",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target: "any",
+			},
 		}
 
 		// act
-		trigger.SetDefaults("development")
+		trigger.ReleaseAction.SetDefaults(&trigger, "development")
 
-		assert.Equal(t, "development", trigger.Target)
+		assert.Equal(t, "development", trigger.ReleaseAction.Target)
 	})
 
 	t.Run("SetsVersionToLatestIfEmpty", func(t *testing.T) {
 
-		trigger := EstafetteTriggerReleaseAction{
-			Version: "",
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Name: "self",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target:  "any",
+				Version: "",
+			},
 		}
 
 		// act
-		trigger.SetDefaults("development")
+		trigger.ReleaseAction.SetDefaults(&trigger, "development")
 
-		assert.Equal(t, "latest", trigger.Version)
+		assert.Equal(t, "latest", trigger.ReleaseAction.Version)
 	})
 
 	t.Run("KeepsVersionIfNotEmpty", func(t *testing.T) {
 
-		trigger := EstafetteTriggerReleaseAction{
-			Version: "current",
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Name: "self",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target:  "any",
+				Version: "current",
+			},
 		}
 
 		// act
-		trigger.SetDefaults("development")
+		trigger.ReleaseAction.SetDefaults(&trigger, "development")
 
-		assert.Equal(t, "current", trigger.Version)
+		assert.Equal(t, "current", trigger.ReleaseAction.Version)
 	})
+
+	t.Run("SetsVersionToSameIfPipelineTriggerIsTheSelfPipeline", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Pipeline: &EstafettePipelineTrigger{
+				Name: "self",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target:  "development",
+				Version: "",
+			},
+		}
+
+		// act
+		trigger.SetDefaults("build", "development")
+
+		assert.Equal(t, "same", trigger.ReleaseAction.Version)
+	})
+
+	t.Run("SetsVersionToSameIfReleaseTriggerIsTheSelfPipeline", func(t *testing.T) {
+
+		trigger := EstafetteTrigger{
+			Release: &EstafetteReleaseTrigger{
+				Name: "self",
+			},
+			ReleaseAction: &EstafetteTriggerReleaseAction{
+				Target:  "development",
+				Version: "",
+			},
+		}
+
+		// act
+		trigger.SetDefaults("release", "development")
+
+		assert.Equal(t, "same", trigger.ReleaseAction.Version)
+	})
+
 }

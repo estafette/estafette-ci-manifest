@@ -127,11 +127,11 @@ func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
 		assert.Equal(t, "development", trigger.ReleaseAction.Target)
 	})
 
-	t.Run("SetsVersionToLatestIfEmpty", func(t *testing.T) {
+	t.Run("SetsVersionToLatestIfEmptyAndTriggersOnOtherPipeline", func(t *testing.T) {
 
 		trigger := EstafetteTrigger{
 			Pipeline: &EstafettePipelineTrigger{
-				Name: "self",
+				Name: "github.com/estafette/estafette-ci-builder",
 			},
 			ReleaseAction: &EstafetteTriggerReleaseAction{
 				Target:  "any",
@@ -176,7 +176,7 @@ func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults("build", "development")
+		trigger.ReleaseAction.SetDefaults(&trigger, "development")
 
 		assert.Equal(t, "same", trigger.ReleaseAction.Version)
 	})
@@ -194,7 +194,7 @@ func TestEstafetteTriggerReleaseActionSetDefaults(t *testing.T) {
 		}
 
 		// act
-		trigger.SetDefaults("release", "development")
+		trigger.ReleaseAction.SetDefaults(&trigger, "development")
 
 		assert.Equal(t, "same", trigger.ReleaseAction.Version)
 	})

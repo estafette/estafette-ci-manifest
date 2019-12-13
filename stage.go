@@ -8,19 +8,19 @@ import (
 
 // EstafetteStage represents a stage of a build pipeline or release
 type EstafetteStage struct {
-	Name                    string                 `yaml:"-"`
-	ContainerImage          string                 `yaml:"image,omitempty"`
-	Shell                   string                 `yaml:"shell,omitempty"`
-	WorkingDirectory        string                 `yaml:"workDir,omitempty"`
-	Commands                []string               `yaml:"commands,omitempty"`
-	RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty"`
-	When                    string                 `yaml:"when,omitempty"`
-	EnvVars                 map[string]string      `yaml:"env,omitempty"`
-	AutoInjected            bool                   `yaml:"autoInjected,omitempty"`
-	Retries                 int                    `yaml:"retries,omitempty"`
-	ParallelStages          []*EstafetteStage      `yaml:"parallelStages,omitempty"`
-	Services                []*EstafetteService    `yaml:"services,omitempty"`
-	CustomProperties        map[string]interface{} `yaml:",inline"`
+	Name                    string                 `yaml:"-" json:",omitempty"`
+	ContainerImage          string                 `yaml:"image,omitempty" json:",omitempty"`
+	Shell                   string                 `yaml:"shell,omitempty" json:",omitempty"`
+	WorkingDirectory        string                 `yaml:"workDir,omitempty" json:",omitempty"`
+	Commands                []string               `yaml:"commands,omitempty" json:",omitempty"`
+	RunCommandsInForeground bool                   `yaml:"runCommandsInForeground,omitempty" json:",omitempty"`
+	When                    string                 `yaml:"when,omitempty" json:",omitempty"`
+	EnvVars                 map[string]string      `yaml:"env,omitempty" json:",omitempty"`
+	AutoInjected            bool                   `yaml:"autoInjected,omitempty" json:",omitempty"`
+	Retries                 int                    `yaml:"retries,omitempty" json:",omitempty"`
+	ParallelStages          []*EstafetteStage      `yaml:"parallelStages,omitempty" json:",omitempty"`
+	Services                []*EstafetteService    `yaml:"services,omitempty" json:",omitempty"`
+	CustomProperties        map[string]interface{} `yaml:",inline" json:",omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteStage

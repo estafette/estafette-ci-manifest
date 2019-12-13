@@ -10,8 +10,8 @@ import (
 
 // EstafetteVersion is the object that determines how version numbers are generated
 type EstafetteVersion struct {
-	SemVer *EstafetteSemverVersion `yaml:"semver,omitempty"`
-	Custom *EstafetteCustomVersion `yaml:"custom,omitempty"`
+	SemVer *EstafetteSemverVersion `yaml:"semver,omitempty" json:",omitempty"`
+	Custom *EstafetteCustomVersion `yaml:"custom,omitempty" json:",omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteVersion

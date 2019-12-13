@@ -12,27 +12,29 @@ import (
 
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
-	Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
-	Labels        map[string]string   `yaml:"labels,omitempty"`
-	Version       EstafetteVersion    `yaml:"version,omitempty"`
-	GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
-	Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
-	Stages        []*EstafetteStage   `yaml:"-"`
-	Releases      []*EstafetteRelease `yaml:"-"`
+	Builder       EstafetteBuilder    `yaml:"builder,omitempty" json:",omitempty"`
+	Labels        map[string]string   `yaml:"labels,omitempty" json:",omitempty"`
+	Version       EstafetteVersion    `yaml:"version,omitempty" json:",omitempty"`
+	GlobalEnvVars map[string]string   `yaml:"env,omitempty" json:",omitempty"`
+	Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty" json:",omitempty"`
+	Stages        []*EstafetteStage   `yaml:"-" json:",omitempty"`
+	Releases      []*EstafetteRelease `yaml:"-" json:",omitempty"`
+	Bots          []*EstafetteBot     `yaml:"-" json:",omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
 func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Builder             EstafetteBuilder    `yaml:"builder"`
-		Labels              map[string]string   `yaml:"labels"`
-		Version             EstafetteVersion    `yaml:"version"`
-		GlobalEnvVars       map[string]string   `yaml:"env"`
-		DeprecatedPipelines yaml.MapSlice       `yaml:"pipelines"`
-		Triggers            []*EstafetteTrigger `yaml:"triggers"`
-		Stages              yaml.MapSlice       `yaml:"stages"`
-		Releases            yaml.MapSlice       `yaml:"releases"`
+		Builder             EstafetteBuilder    `yaml:"builder,omitempty"`
+		Labels              map[string]string   `yaml:"labels,omitempty"`
+		Version             EstafetteVersion    `yaml:"version,omitempty"`
+		GlobalEnvVars       map[string]string   `yaml:"env,omitempty"`
+		DeprecatedPipelines yaml.MapSlice       `yaml:"pipelines,omitempty"`
+		Triggers            []*EstafetteTrigger `yaml:"triggers,omitempty"`
+		Stages              yaml.MapSlice       `yaml:"stages,omitempty"`
+		Releases            yaml.MapSlice       `yaml:"releases,omitempty"`
+		Bots                yaml.MapSlice       `yaml:"bots,omitempty"`
 	}
 
 	// unmarshal to auxiliary type
@@ -90,6 +92,25 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Releases = append(c.Releases, release)
 	}
 
+	for _, mi := range aux.Bots {
+
+		bytes, err := yaml.Marshal(mi.Value)
+		if err != nil {
+			return err
+		}
+
+		var bot *EstafetteBot
+		if err := yaml.Unmarshal(bytes, &bot); err != nil {
+			return err
+		}
+		if bot == nil {
+			bot = &EstafetteBot{}
+		}
+
+		bot.Name = mi.Key.(string)
+		c.Bots = append(c.Bots, bot)
+	}
+
 	// set default property values
 	c.SetDefaults()
 
@@ -106,6 +127,7 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 		Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
 		Stages        yaml.MapSlice       `yaml:"stages,omitempty"`
 		Releases      yaml.MapSlice       `yaml:"releases,omitempty"`
+		Bots          yaml.MapSlice       `yaml:"bots,omitempty"`
 	}
 
 	aux.Builder = c.Builder
@@ -124,6 +146,12 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 		aux.Releases = append(aux.Releases, yaml.MapItem{
 			Key:   release.Name,
 			Value: release,
+		})
+	}
+	for _, bot := range c.Bots {
+		aux.Bots = append(aux.Bots, yaml.MapItem{
+			Key:   bot.Name,
+			Value: bot,
 		})
 	}
 

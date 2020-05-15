@@ -14,7 +14,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsErrorForManifestWithUnknownSections", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-non-strict-manifest.yaml")
+		_, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-non-strict-manifest.yaml")
 
 		assert.NotNil(t, err)
 	})
@@ -22,7 +22,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithoutErrors", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-manifest.yaml")
+		_, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 	})
@@ -30,7 +30,7 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedLabels", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "estafette-ci-builder", manifest.Labels["app"])
@@ -41,16 +41,16 @@ func TestReadManifestFromFile(t *testing.T) {
 	t.Run("ReturnsManifestWithMappedBuilderTrack", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
-		assert.Equal(t, "dev", manifest.Builder.Track)
+		assert.Equal(t, "windowsservercore-1809", manifest.Builder.Track)
 	})
 
-	t.Run("ReturnsManifestWithBuilderTrackDefaultStable", func(t *testing.T) {
+	t.Run("ReturnsManifestWithBuilderTrackDefaultWindowsServerCore1809", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 stages:
   hi:
     image: alpine
@@ -64,7 +64,7 @@ stages:
 	t.Run("ReturnsManifestWithMappedBuilderOperatingSystem", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
@@ -73,7 +73,7 @@ stages:
 	t.Run("ReturnsManifestWithBuilderOperatingSystemDefaultLinux", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 stages:
   hi:
     image: alpine
@@ -87,28 +87,28 @@ stages:
 	t.Run("ReturnsManifestWithBuilder", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
-		assert.Equal(t, "dev", manifest.Builder.Track)
+		assert.Equal(t, "windowsservercore-1809", manifest.Builder.Track)
 		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithBuilderForReleaseIfNotOverridden", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.NotNil(t, manifest.Releases[1].Builder)
-		assert.Equal(t, "dev", manifest.Releases[1].Builder.Track)
+		assert.Equal(t, "windowsservercore-1809", manifest.Releases[1].Builder.Track)
 		assert.Equal(t, "windows", manifest.Releases[1].Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithReleaseBuilderIfOverridden", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.NotNil(t, manifest.Releases[2].Builder)
@@ -119,7 +119,7 @@ stages:
 	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -179,7 +179,7 @@ stages:
 	t.Run("ReturnsWorkDirDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -189,7 +189,7 @@ stages:
 	t.Run("ReturnsWorkDirIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -199,7 +199,7 @@ stages:
 	t.Run("ReturnsShellDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -209,7 +209,7 @@ stages:
 	t.Run("ReturnsShellIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -219,7 +219,7 @@ stages:
 	t.Run("ReturnsWhenIfSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -229,7 +229,7 @@ stages:
 	t.Run("ReturnsWhenDefaultIfMissing", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -239,7 +239,7 @@ stages:
 	t.Run("ReturnsManifestWithSemverVersion", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.Equal(t, 1, manifest.Version.SemVer.Major)
@@ -252,7 +252,7 @@ stages:
 	t.Run("ReturnsManifestWithGlobalEnvVars", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "Greetings", manifest.GlobalEnvVars["VAR_A"])
@@ -262,7 +262,7 @@ stages:
 	t.Run("ReturnsManifestWithMappedOrderedReleasesInSameOrderAsInTheManifest", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -310,7 +310,7 @@ stages:
 	t.Run("ReturnsReleaseTargetWithActions", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -341,7 +341,7 @@ pipelines:
 `
 
 		// act
-		manifest, err := ReadManifest(input)
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), input)
 
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(manifest.Stages))
@@ -350,7 +350,7 @@ pipelines:
 	t.Run("ReturnsManifestWithTriggersWithoutErrors", func(t *testing.T) {
 
 		// act
-		_, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		_, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest-with-triggers.yaml")
 
 		assert.Nil(t, err)
 	})
@@ -358,7 +358,7 @@ pipelines:
 	t.Run("ReturnsTriggers", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest-with-triggers.yaml")
 
 		assert.Nil(t, err)
 
@@ -373,7 +373,7 @@ pipelines:
 	t.Run("ReturnsReleaseTargetWithTriggers", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest-with-triggers.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest-with-triggers.yaml")
 
 		assert.Nil(t, err)
 
@@ -389,7 +389,7 @@ pipelines:
 	t.Run("ReturnsManifestWithNestedParallelStages", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -407,7 +407,7 @@ pipelines:
 	t.Run("ReturnsManifestWithStageServices", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifestFromFile("test-manifest.yaml")
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml")
 
 		assert.Nil(t, err)
 
@@ -433,7 +433,7 @@ func TestVersion(t *testing.T) {
 	t.Run("ReturnsSemverVersionByDefaultIfNoOtherVersionTypeIsSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 stages:
   git-clone:
     image: extensions/git-clone`)
@@ -448,7 +448,7 @@ stages:
 	t.Run("ReturnsCustomVersionWithLabelTemplateDefaultingToRevisionPlaceholder", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   custom:
     labelTemplate: ''
@@ -467,7 +467,7 @@ stages:
 	t.Run("ReturnsSemverVersionIfSemverIsSet", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     major: 1
@@ -490,7 +490,7 @@ stages:
 	t.Run("ReturnsSemverVersionWithMajorDefaultingToZero", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     minor: 2
@@ -509,7 +509,7 @@ stages:
 	t.Run("ReturnsSemverVersionWithMinorDefaultingToZero", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     major: 1
@@ -528,7 +528,7 @@ stages:
 	t.Run("ReturnsSemverVersionWithPatchDefaultingToAutoPlaceholder", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     major: 1
@@ -548,7 +548,7 @@ stages:
 	t.Run("ReturnsSemverVersionWithLabelTemplateDefaultingToBranchPlaceholder", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     major: 1
@@ -568,7 +568,7 @@ stages:
 	t.Run("ReturnsSemverVersionWithReleaseBranchDefaultingToMaster", func(t *testing.T) {
 
 		// act
-		manifest, err := ReadManifest(`
+		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
 version:
   semver:
     major: 1
@@ -715,7 +715,7 @@ stages:
 `
 		err := yaml.Unmarshal([]byte(input), &manifest)
 		assert.Nil(t, err)
-		manifest.SetDefaults()
+		manifest.SetDefaults(*GetDefaultManifestPreferences())
 
 		// act
 		output, err := json.Marshal(manifest)
@@ -741,15 +741,15 @@ func TestGetAllTriggers(t *testing.T) {
 
 		manifest := EstafetteManifest{
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					Name: "build",
 				},
 			},
 			Releases: []*EstafetteRelease{
-				&EstafetteRelease{
+				{
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
-						&EstafetteTrigger{
+						{
 							Pipeline:      &EstafettePipelineTrigger{},
 							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
@@ -768,21 +768,21 @@ func TestGetAllTriggers(t *testing.T) {
 
 		manifest := EstafetteManifest{
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					Name: "build",
 				},
 			},
 			Triggers: []*EstafetteTrigger{
-				&EstafetteTrigger{
+				{
 					Pipeline:    &EstafettePipelineTrigger{},
 					BuildAction: &EstafetteTriggerBuildAction{},
 				},
 			},
 			Releases: []*EstafetteRelease{
-				&EstafetteRelease{
+				{
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
-						&EstafetteTrigger{
+						{
 							Pipeline:      &EstafettePipelineTrigger{},
 							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
@@ -801,12 +801,12 @@ func TestGetAllTriggers(t *testing.T) {
 
 		manifest := EstafetteManifest{
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					Name: "build",
 				},
 			},
 			Triggers: []*EstafetteTrigger{
-				&EstafetteTrigger{
+				{
 					Pipeline: &EstafettePipelineTrigger{
 						Name: "self",
 					},
@@ -814,16 +814,16 @@ func TestGetAllTriggers(t *testing.T) {
 				},
 			},
 			Releases: []*EstafetteRelease{
-				&EstafetteRelease{
+				{
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
-						&EstafetteTrigger{
+						{
 							Pipeline: &EstafettePipelineTrigger{
 								Name: "self",
 							},
 							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
-						&EstafetteTrigger{
+						{
 							Release: &EstafetteReleaseTrigger{
 								Name:   "self",
 								Target: "tooling",
@@ -847,12 +847,12 @@ func TestGetAllTriggers(t *testing.T) {
 
 		manifest := EstafetteManifest{
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					Name: "build",
 				},
 			},
 			Triggers: []*EstafetteTrigger{
-				&EstafetteTrigger{
+				{
 					Pipeline: &EstafettePipelineTrigger{
 						Name: "github.com/estafette/estafette-ci-contracts",
 					},
@@ -860,16 +860,16 @@ func TestGetAllTriggers(t *testing.T) {
 				},
 			},
 			Releases: []*EstafetteRelease{
-				&EstafetteRelease{
+				{
 					Name: "tooling",
 					Triggers: []*EstafetteTrigger{
-						&EstafetteTrigger{
+						{
 							Pipeline: &EstafettePipelineTrigger{
 								Name: "github.com/estafette/estafette-ci-crypt",
 							},
 							ReleaseAction: &EstafetteTriggerReleaseAction{},
 						},
-						&EstafetteTrigger{
+						{
 							Release: &EstafetteReleaseTrigger{
 								Name:   "github.com/estaftte/estafette-ci-api",
 								Target: "tooling",
@@ -898,13 +898,13 @@ func TestValidate(t *testing.T) {
 				Track: "nightly",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{},
+				{},
 			},
 		}
-		manifest.SetDefaults()
+		manifest.SetDefaults(*GetDefaultManifestPreferences())
 
 		// act
-		err := manifest.Validate()
+		err := manifest.Validate(*GetDefaultManifestPreferences())
 
 		assert.NotNil(t, err)
 	})
@@ -916,15 +916,15 @@ func TestValidate(t *testing.T) {
 				Track: "dev",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					ContainerImage: "docker",
 				},
 			},
 		}
-		manifest.SetDefaults()
+		manifest.SetDefaults(*GetDefaultManifestPreferences())
 
 		// act
-		err := manifest.Validate()
+		err := manifest.Validate(*GetDefaultManifestPreferences())
 
 		assert.Nil(t, err)
 	})
@@ -936,15 +936,15 @@ func TestValidate(t *testing.T) {
 				Track: "beta",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					ContainerImage: "docker",
 				},
 			},
 		}
-		manifest.SetDefaults()
+		manifest.SetDefaults(*GetDefaultManifestPreferences())
 
 		// act
-		err := manifest.Validate()
+		err := manifest.Validate(*GetDefaultManifestPreferences())
 
 		assert.Nil(t, err)
 	})
@@ -956,15 +956,15 @@ func TestValidate(t *testing.T) {
 				Track: "stable",
 			},
 			Stages: []*EstafetteStage{
-				&EstafetteStage{
+				{
 					ContainerImage: "docker",
 				},
 			},
 		}
-		manifest.SetDefaults()
+		manifest.SetDefaults(*GetDefaultManifestPreferences())
 
 		// act
-		err := manifest.Validate()
+		err := manifest.Validate(*GetDefaultManifestPreferences())
 
 		assert.Nil(t, err)
 	})

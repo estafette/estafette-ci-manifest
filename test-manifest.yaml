@@ -1,6 +1,6 @@
 builder:
-  track: dev
   os: windows
+  track: windowsservercore-1809
 
 labels:
   app: estafette-ci-builder

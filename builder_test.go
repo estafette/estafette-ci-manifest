@@ -20,6 +20,19 @@ track: dev`), &builder)
 		assert.Equal(t, "dev", builder.Track)
 	})
 
+	t.Run("DefaultsOperatingSystemToLinuxIfMissingIfNotPresent", func(t *testing.T) {
+
+		var builder EstafetteBuilder
+
+		// act
+		err := yaml.Unmarshal([]byte(`
+`), &builder)
+		builder.SetDefaults(*GetDefaultManifestPreferences())
+
+		assert.Nil(t, err)
+		assert.Equal(t, "linux", builder.OperatingSystem)
+	})
+
 	t.Run("DefaultsTrackToStableIfMissingIfNotPresent", func(t *testing.T) {
 
 		var builder EstafetteBuilder
@@ -27,7 +40,7 @@ track: dev`), &builder)
 		// act
 		err := yaml.Unmarshal([]byte(` 
 `), &builder)
-		builder.SetDefaults()
+		builder.SetDefaults(*GetDefaultManifestPreferences())
 
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", builder.Track)

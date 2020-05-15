@@ -1,6 +1,11 @@
 package manifest
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	foundation "github.com/estafette/estafette-foundation"
+)
 
 // EstafetteBuilder contains configuration for the ci-builder component
 type EstafetteBuilder struct {
@@ -25,32 +30,36 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 	builder.OperatingSystem = aux.OperatingSystem
 
-	// set default property values
-	builder.SetDefaults()
-
 	return nil
 }
 
 // SetDefaults sets default values for properties of EstafetteBuilder if not defined
-func (builder *EstafetteBuilder) SetDefaults() {
-	// set default for Track if not set
+func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPreferences) {
+	// set default for OperatingSystem if not set
 	if builder.OperatingSystem == "" {
-		builder.OperatingSystem = "linux"
+		builder.OperatingSystem = preferences.BuilderOperatingSystems[0]
 	}
-	if builder.Track == "" && builder.OperatingSystem == "linux" {
-		builder.Track = "stable"
-	}
-	if builder.Track == "" && builder.OperatingSystem == "windows" {
-		builder.Track = "windowsservercore-1809"
+	// set default for Track if not set
+	if builder.Track == "" {
+		builder.Track = preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem][0]
 	}
 }
 
-func (builder *EstafetteBuilder) validate() (err error) {
-	if builder.OperatingSystem == "linux" && builder.Track != "dev" && builder.Track != "beta" && builder.Track != "stable" {
-		return fmt.Errorf("builder track should be one of: dev, beta or stable")
+func (builder *EstafetteBuilder) validate(preferences EstafetteManifestPreferences) (err error) {
+
+	if !foundation.StringArrayContains(preferences.BuilderOperatingSystems, builder.OperatingSystem) {
+		return fmt.Errorf("builder os should be one of: %v", strings.Join(preferences.BuilderOperatingSystems, ", "))
 	}
-	if builder.OperatingSystem != "linux" && builder.OperatingSystem != "windows" {
-		return fmt.Errorf("builder os should be one of: linux or windows")
+
+	tracks, ok := preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem]
+
+	if !ok {
+		return fmt.Errorf("no track preferences have been configured for os %v", builder.OperatingSystem)
 	}
+
+	if !foundation.StringArrayContains(tracks, builder.Track) {
+		return fmt.Errorf("builder track should be one of: %v", strings.Join(tracks, ", "))
+	}
+
 	return nil
 }

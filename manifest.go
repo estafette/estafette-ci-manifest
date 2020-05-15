@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -90,9 +92,6 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Releases = append(c.Releases, release)
 	}
 
-	// set default property values
-	c.SetDefaults()
-
 	return nil
 }
 
@@ -131,8 +130,8 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 }
 
 // SetDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) SetDefaults() {
-	c.Builder.SetDefaults()
+func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences) {
+	c.Builder.SetDefaults(preferences)
 	c.Version.SetDefaults()
 
 	for _, t := range c.Triggers {
@@ -146,7 +145,7 @@ func (c *EstafetteManifest) SetDefaults() {
 		if r.Builder == nil {
 			r.Builder = &c.Builder
 		} else {
-			r.Builder.SetDefaults()
+			r.Builder.SetDefaults(preferences)
 		}
 		for _, t := range r.Triggers {
 			t.SetDefaults("release", r.Name)
@@ -158,11 +157,27 @@ func (c *EstafetteManifest) SetDefaults() {
 }
 
 // Validate checks if the manifest is valid
-func (c *EstafetteManifest) Validate() (err error) {
+func (c *EstafetteManifest) Validate(preferences EstafetteManifestPreferences) (err error) {
 
-	err = c.Builder.validate()
+	err = c.Builder.validate(preferences)
 	if err != nil {
 		return
+	}
+
+	// loop labels and check if they meet the label regexes
+	for key, value := range c.Labels {
+		if pattern, ok := preferences.LabelRegexes[key]; ok {
+			pattern = fmt.Sprintf("^%v$", strings.TrimSpace(pattern))
+
+			match, err := regexp.MatchString(pattern, value)
+			if err != nil {
+				return err
+			}
+
+			if !match {
+				return fmt.Errorf("Label %v does not match regex %v", key, pattern)
+			}
+		}
 	}
 
 	if len(c.Stages) == 0 {
@@ -184,7 +199,7 @@ func (c *EstafetteManifest) Validate() (err error) {
 
 	for _, r := range c.Releases {
 		if r.Builder != nil {
-			err = r.Builder.validate()
+			err = r.Builder.validate(preferences)
 			if err != nil {
 				return
 			}
@@ -250,9 +265,14 @@ func Exists(manifestPath string) bool {
 }
 
 // ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
-func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err error) {
+func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPath string) (manifest EstafetteManifest, err error) {
 
 	log.Debug().Msgf("Reading %v file...", manifestPath)
+
+	// default preferences if not passed
+	if preferences == nil {
+		preferences = GetDefaultManifestPreferences()
+	}
 
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
@@ -265,10 +285,10 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	}
 
 	// set defaults
-	manifest.SetDefaults()
+	manifest.SetDefaults(*preferences)
 
 	// check if manifest is valid
-	err = manifest.Validate()
+	err = manifest.Validate(*preferences)
 	if err != nil {
 		return manifest, err
 	}
@@ -279,9 +299,14 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 }
 
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
-func ReadManifest(manifestString string) (manifest EstafetteManifest, err error) {
+func ReadManifest(preferences *EstafetteManifestPreferences, manifestString string) (manifest EstafetteManifest, err error) {
 
 	log.Debug().Msg("Reading manifest from string...")
+
+	// default preferences if not passed
+	if preferences == nil {
+		preferences = GetDefaultManifestPreferences()
+	}
 
 	// unmarshal strict, so non-defined properties or incorrect nesting will fail
 	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
@@ -289,10 +314,10 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	}
 
 	// set defaults
-	manifest.SetDefaults()
+	manifest.SetDefaults(*preferences)
 
 	// check if manifest is valid
-	err = manifest.Validate()
+	err = manifest.Validate(*preferences)
 	if err != nil {
 		return manifest, err
 	}
@@ -300,4 +325,16 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	log.Debug().Msg("Finished unmarshalling manifest from string successfully")
 
 	return
+}
+
+// GetDefaultManifestPreferences returns default preferences if not configured at the server
+func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
+	return &EstafetteManifestPreferences{
+		LabelRegexes:            map[string]string{},
+		BuilderOperatingSystems: []string{"linux", "windows"},
+		BuilderTracksPerOperatingSystem: map[string][]string{
+			"linux":   {"stable", "beta", "dev"},
+			"windows": {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
+		},
+	}
 }

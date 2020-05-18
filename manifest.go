@@ -14,6 +14,7 @@ import (
 
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
+	Archived      bool                `yaml:"archived,omitempty"`
 	Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
 	Labels        map[string]string   `yaml:"labels,omitempty"`
 	Version       EstafetteVersion    `yaml:"version,omitempty"`

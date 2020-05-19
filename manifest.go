@@ -28,6 +28,7 @@ type EstafetteManifest struct {
 func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
+		Archived            bool                `yaml:"archived"`
 		Builder             EstafetteBuilder    `yaml:"builder"`
 		Labels              map[string]string   `yaml:"labels"`
 		Version             EstafetteVersion    `yaml:"version"`
@@ -44,6 +45,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	}
 
 	// map auxiliary properties
+	c.Archived = aux.Archived
 	c.Builder = aux.Builder
 	c.Version = aux.Version
 	c.Labels = aux.Labels
@@ -99,6 +101,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 // MarshalYAML customizes marshalling an EstafetteManifest
 func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	var aux struct {
+		Archived      bool                `yaml:"archived,omitempty"`
 		Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
 		Labels        map[string]string   `yaml:"labels,omitempty"`
 		Version       EstafetteVersion    `yaml:"version,omitempty"`
@@ -108,6 +111,7 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 		Releases      yaml.MapSlice       `yaml:"releases,omitempty"`
 	}
 
+	aux.Archived = c.Archived
 	aux.Builder = c.Builder
 	aux.Labels = c.Labels
 	aux.Version = c.Version

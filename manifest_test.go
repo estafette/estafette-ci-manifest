@@ -27,6 +27,14 @@ func TestReadManifestFromFile(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
+	t.Run("ReturnsManifestWithArchivedTrueWithoutErrors", func(t *testing.T) {
+
+		// act
+		_, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest-archived.yaml")
+
+		assert.Nil(t, err)
+	})
+
 	t.Run("ReturnsManifestWithMappedLabels", func(t *testing.T) {
 
 		// act
@@ -614,6 +622,70 @@ func TestManifestToYamlMarshalling(t *testing.T) {
 		var manifest EstafetteManifest
 
 		input := `builder:
+  track: stable
+  os: windows
+labels:
+  app: estafette-ci-builder
+  language: golang
+  team: estafette-team
+version:
+  semver:
+    major: 0
+    minor: 0
+    patch: '{{auto}}'
+    labelTemplate: '{{branch}}'
+    releaseBranch: master
+env:
+  VAR_A: Greetings
+  VAR_B: World
+stages:
+  deploy:
+    image: extensions/deploy-to-kubernetes-engine:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+  create-release-notes:
+    image: extensions/create-release-notes-from-changelog:stable
+    shell: /bin/sh
+    workDir: /estafette-work
+    when: status == 'succeeded'
+releases:
+  staging:
+    stages:
+      deploy:
+        image: extensions/deploy-to-kubernetes-engine:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
+  production:
+    stages:
+      deploy:
+        image: extensions/deploy-to-kubernetes-engine:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
+      create-release-notes:
+        image: extensions/create-release-notes-from-changelog:stable
+        shell: /bin/sh
+        workDir: /estafette-work
+        when: status == 'succeeded'
+`
+		err := yaml.Unmarshal([]byte(input), &manifest)
+		assert.Nil(t, err)
+
+		// act
+		output, err := yaml.Marshal(manifest)
+
+		assert.Nil(t, err)
+		assert.Equal(t, input, string(output))
+	})
+
+	t.Run("UnmarshallingWithArchivedTrueThenMarshallingReturnsTheSameFile", func(t *testing.T) {
+
+		var manifest EstafetteManifest
+
+		input := `archived: true
+builder:
   track: stable
   os: windows
 labels:

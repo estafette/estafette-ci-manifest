@@ -306,8 +306,6 @@ func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPat
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
 func ReadManifest(preferences *EstafetteManifestPreferences, manifestString string) (manifest EstafetteManifest, err error) {
 
-	log.Debug().Msg("Reading manifest from string...")
-
 	// default preferences if not passed
 	if preferences == nil {
 		preferences = GetDefaultManifestPreferences()
@@ -326,8 +324,6 @@ func ReadManifest(preferences *EstafetteManifestPreferences, manifestString stri
 	if err != nil {
 		return manifest, err
 	}
-
-	log.Debug().Msg("Finished unmarshalling manifest from string successfully")
 
 	return
 }

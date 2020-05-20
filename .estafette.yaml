@@ -6,7 +6,7 @@ builder:
 labels:
   app-group: estafette-ci
   type: library
-  team: estafette-team
+  team: estafette
   language: golang
 
 # generates a 0.0.x-<branch> version made available as ESTAFETTE_BUILD_VERSION envvar, automatically injected into all pipeline steps

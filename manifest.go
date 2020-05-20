@@ -270,7 +270,7 @@ func Exists(manifestPath string) bool {
 }
 
 // ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
-func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPath string) (manifest EstafetteManifest, err error) {
+func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPath string, validate bool) (manifest EstafetteManifest, err error) {
 
 	log.Debug().Msgf("Reading %v file...", manifestPath)
 
@@ -292,10 +292,12 @@ func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPat
 	// set defaults
 	manifest.SetDefaults(*preferences)
 
-	// check if manifest is valid
-	err = manifest.Validate(*preferences)
-	if err != nil {
-		return manifest, err
+	if validate {
+		// check if manifest is valid
+		err = manifest.Validate(*preferences)
+		if err != nil {
+			return manifest, err
+		}
 	}
 
 	log.Debug().Msgf("Finished reading %v file successfully", manifestPath)
@@ -304,7 +306,7 @@ func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPat
 }
 
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
-func ReadManifest(preferences *EstafetteManifestPreferences, manifestString string) (manifest EstafetteManifest, err error) {
+func ReadManifest(preferences *EstafetteManifestPreferences, manifestString string, validate bool) (manifest EstafetteManifest, err error) {
 
 	// default preferences if not passed
 	if preferences == nil {
@@ -319,10 +321,12 @@ func ReadManifest(preferences *EstafetteManifestPreferences, manifestString stri
 	// set defaults
 	manifest.SetDefaults(*preferences)
 
-	// check if manifest is valid
-	err = manifest.Validate(*preferences)
-	if err != nil {
-		return manifest, err
+	if validate {
+		// check if manifest is valid
+		err = manifest.Validate(*preferences)
+		if err != nil {
+			return manifest, err
+		}
 	}
 
 	return

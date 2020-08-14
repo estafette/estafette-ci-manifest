@@ -27,7 +27,7 @@ type EstafetteStage struct {
 func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name                    string                 `yaml:"-"`
+		Name                    string                 `yaml:"name,omitempty"`
 		ContainerImage          string                 `yaml:"image,omitempty"`
 		Shell                   string                 `yaml:"shell,omitempty"`
 		WorkingDirectory        string                 `yaml:"workDir,omitempty"`
@@ -48,6 +48,7 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	}
 
 	// map auxiliary properties
+	stage.Name = aux.Name
 	stage.ContainerImage = aux.ContainerImage
 	stage.Shell = aux.Shell
 	stage.WorkingDirectory = aux.WorkingDirectory
@@ -74,7 +75,9 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 			innerStage = &EstafetteStage{}
 		}
 
-		innerStage.Name = mi.Key.(string)
+		if innerStage.Name == "" {
+			innerStage.Name = mi.Key.(string)
+		}
 		stage.ParallelStages = append(stage.ParallelStages, innerStage)
 	}
 

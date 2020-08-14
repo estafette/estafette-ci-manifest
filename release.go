@@ -52,7 +52,9 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 			stage = &EstafetteStage{}
 		}
 
-		stage.Name = mi.Key.(string)
+		if stage.Name == "" {
+			stage.Name = mi.Key.(string)
+		}
 		release.Stages = append(release.Stages, stage)
 	}
 

@@ -93,7 +93,9 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 			release = &EstafetteRelease{}
 		}
 
-		release.Name = mi.Key.(string)
+		if release.Name == "" {
+			release.Name = mi.Key.(string)
+		}
 		c.Releases = append(c.Releases, release)
 	}
 

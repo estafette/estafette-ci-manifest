@@ -18,7 +18,7 @@ type EstafetteRelease struct {
 func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name            string                    `yaml:"-"`
+		Name            string                    `yaml:"name"`
 		Builder         *EstafetteBuilder         `yaml:"builder"`
 		CloneRepository bool                      `yaml:"clone"`
 		Actions         []*EstafetteReleaseAction `yaml:"actions"`
@@ -32,6 +32,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	}
 
 	// map auxiliary properties
+	release.Name = aux.Name
 	release.Builder = aux.Builder
 	release.CloneRepository = aux.CloneRepository
 	release.Actions = aux.Actions

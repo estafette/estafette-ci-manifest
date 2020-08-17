@@ -1051,9 +1051,8 @@ func TestDeepCopy(t *testing.T) {
 		assert.Equal(t, 7, len(manifest.Stages))
 
 		// act
-		copiedManifest, err := manifest.DeepCopy()
+		copiedManifest := manifest.DeepCopy()
 
-		assert.Nil(t, err)
 		assert.Equal(t, 7, len(copiedManifest.Stages))
 		assert.NotSame(t, manifest.Stages[0], copiedManifest.Stages[0])
 	})

@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gavv/deepcopy"
 	"github.com/rs/zerolog/log"
 
 	yaml "gopkg.in/yaml.v2"
@@ -259,6 +260,24 @@ func (c *EstafetteManifest) GetAllTriggers(repoSource, repoOwner, repoName strin
 	}
 
 	return triggers
+}
+
+// DeepCopy provides a copy of all nested pointers
+func (c *EstafetteManifest) DeepCopy() (EstafetteManifest, error) {
+
+	return deepcopy.DeepCopy(*c).(EstafetteManifest), nil
+
+	// var dst EstafetteManifest
+	// bytes, err := json.Marshal(*c)
+	// if err != nil {
+	// 	return dst, err
+	// }
+	// err = json.Unmarshal(bytes, dst)
+	// if err != nil {
+	// 	return dst, err
+	// }
+
+	// return dst, nil
 }
 
 // Exists checks whether the .estafette.yaml exists

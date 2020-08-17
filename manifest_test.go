@@ -1041,3 +1041,20 @@ func TestValidate(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func TestDeepCopy(t *testing.T) {
+
+	t.Run("ReturnsCopyOfManifestAndAllStages", func(t *testing.T) {
+
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml", true)
+		assert.Nil(t, err)
+		assert.Equal(t, 7, len(manifest.Stages))
+
+		// act
+		copiedManifest, err := manifest.DeepCopy()
+
+		assert.Nil(t, err)
+		assert.Equal(t, 7, len(copiedManifest.Stages))
+		assert.NotSame(t, manifest.Stages[0], copiedManifest.Stages[0])
+	})
+}

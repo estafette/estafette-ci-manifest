@@ -497,7 +497,7 @@ func regexMatch(pattern, value string) (bool, error) {
 		pattern = strings.TrimPrefix(pattern, "!~")
 	}
 
-	pattern = fmt.Sprintf("^%v$", strings.TrimSpace(pattern))
+	pattern = fmt.Sprintf("^(%v)$", strings.TrimSpace(pattern))
 
 	match, err := regexp.MatchString(pattern, value)
 

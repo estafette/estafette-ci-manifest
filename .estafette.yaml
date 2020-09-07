@@ -14,6 +14,7 @@ version:
   semver:
     major: 0
     minor: 1
+    releaseBranch: main
 
 # global environments variables that are automatically injected into all pipeline steps and can be overridden by defining an envvar in a pipeline step with the same name
 env:

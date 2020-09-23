@@ -15,7 +15,7 @@ version:
     minor: 2
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 
 env:
   VAR_A: Greetings
@@ -50,7 +50,7 @@ stages:
     - docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}
     when:
       status == 'succeeded' &&
-      branch == 'master'
+      branch == 'main'
 
   slack-notify:
     image: docker:17.03.0-ce
@@ -60,7 +60,7 @@ stages:
     - 'curl -X POST --data-urlencode ''payload={"channel": "#build-status", "username": "estafette-ci-builder", "text": "Build ${ESTAFETTE_BUILD_VERSION} for ${ESTAFETTE_LABEL_APP} has failed!"}'' ${ESTAFETTE_SLACK_WEBHOOK}'
     when:
       status == 'failed' ||
-      branch == 'master'
+      branch == 'main'
     unknownProperty1: value1
     unknownProperty2: value2
     unknownProperty3:

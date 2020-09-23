@@ -76,7 +76,7 @@ type EstafetteTriggerReleaseAction struct {
 }
 
 // SetDefaults sets defaults for EstafetteTrigger
-func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
+func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences, triggerType, targetName string) {
 	if t.Pipeline != nil {
 		t.Pipeline.SetDefaults()
 	}
@@ -101,7 +101,7 @@ func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
 		if t.BuildAction == nil {
 			t.BuildAction = &EstafetteTriggerBuildAction{}
 		}
-		t.BuildAction.SetDefaults()
+		t.BuildAction.SetDefaults(preferences)
 		break
 	case "release":
 		if t.ReleaseAction == nil {
@@ -121,7 +121,7 @@ func (p *EstafettePipelineTrigger) SetDefaults() {
 		p.Status = "succeeded"
 	}
 	if p.Branch == "" {
-		p.Branch = "master"
+		p.Branch = "master|main"
 	}
 }
 
@@ -141,7 +141,7 @@ func (g *EstafetteGitTrigger) SetDefaults() {
 		g.Event = "push"
 	}
 	if g.Branch == "" {
-		g.Branch = "master"
+		g.Branch = "master|main"
 	}
 }
 
@@ -158,9 +158,9 @@ func (p *EstafettePubSubTrigger) SetDefaults() {
 }
 
 // SetDefaults sets defaults for EstafetteTriggerBuildAction
-func (b *EstafetteTriggerBuildAction) SetDefaults() {
+func (b *EstafetteTriggerBuildAction) SetDefaults(preferences EstafetteManifestPreferences) {
 	if b.Branch == "" {
-		b.Branch = "master"
+		b.Branch = preferences.DefaultBranch
 	}
 }
 

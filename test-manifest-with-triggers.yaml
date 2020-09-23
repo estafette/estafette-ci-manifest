@@ -9,13 +9,13 @@ triggers:
     event: finished
     status: succeeded
     name: github.com/estafette/estafette-ci-manifest
-    branch: master
+    branch: main
   builds:
-    branch: master
+    branch: main
 - git:
     event: push
     repository: github.com/estafette/estafette-ci-builder
-    branch: master
+    branch: main
 - docker:
     event: push
     image: golang
@@ -41,7 +41,7 @@ releases:
     triggers:
     - pipeline:
         name: github.com/estafette/estafette-ci-builder
-        branch: '!~ master'
+        branch: '!~ main'
     - cron: 
         schedule: '0 10 */1 * *'
     - pubsub:

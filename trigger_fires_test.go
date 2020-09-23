@@ -14,7 +14,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -23,7 +23,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "finished",
 			Status: "succeeded",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			Branch: "main",
 		}
 
 		// act
@@ -47,7 +47,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "finished",
 			Status: "succeeded",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "!~ master",
+			Branch: "!~ main",
 		}
 
 		// act
@@ -62,7 +62,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -71,7 +71,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "finished",
 			Status: "succeeded",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "!~ master",
+			Branch: "!~ main",
 		}
 
 		// act
@@ -86,7 +86,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -95,7 +95,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "started",
 			Status: "",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "!= master",
+			Branch: "!= main",
 		}
 
 		// act
@@ -110,7 +110,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -119,7 +119,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "finished",
 			Status: "failed",
 			Name:   "github.com/estafette/estafette-ci-api",
-			Branch: "master",
+			Branch: "main",
 		}
 
 		// act
@@ -134,7 +134,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -143,7 +143,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			Event:  "finished",
 			Status: "succeeded",
 			Name:   "github.com/estafette/estafette-ci-builder",
-			Branch: "master",
+			Branch: "main",
 		}
 
 		// act
@@ -158,7 +158,7 @@ func TestEstafettePipelineTriggerFires(t *testing.T) {
 			RepoSource: "github.com",
 			RepoOwner:  "estafette",
 			RepoName:   "estafette-ci-api",
-			Branch:     "master",
+			Branch:     "main",
 			Status:     "succeeded",
 			Event:      "finished",
 		}
@@ -339,12 +339,12 @@ func TestEstafetteGitTriggerFires(t *testing.T) {
 		event := EstafetteGitEvent{
 			Event:      "push",
 			Repository: "bitbucket.org/xivart/icarus_to_email_service_trigger",
-			Branch:     "master"}
+			Branch:     "main"}
 
 		trigger := EstafetteGitTrigger{
 			Event:      "push",
 			Repository: "bitbucket.org/xivart/icarus_to_email_service_trigger",
-			Branch:     "master",
+			Branch:     "main",
 		}
 
 		// act

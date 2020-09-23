@@ -145,7 +145,7 @@ func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences
 	c.Version.SetDefaults()
 
 	for _, t := range c.Triggers {
-		t.SetDefaults("build", "")
+		t.SetDefaults(preferences, "build", "")
 	}
 	for _, s := range c.Stages {
 		s.SetDefaults(c.Builder)
@@ -158,7 +158,7 @@ func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences
 			r.Builder.SetDefaults(preferences)
 		}
 		for _, t := range r.Triggers {
-			t.SetDefaults("release", r.Name)
+			t.SetDefaults(preferences, "release", r.Name)
 		}
 		for _, s := range r.Stages {
 			s.SetDefaults(*r.Builder)
@@ -351,5 +351,6 @@ func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
 			"linux":   {"stable", "beta", "dev"},
 			"windows": {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
 		},
+		DefaultBranch: "master",
 	}
 }

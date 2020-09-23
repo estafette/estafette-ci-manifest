@@ -154,12 +154,12 @@ stages:
 		assert.Equal(t, 5, manifest.Stages[3].Retries)
 		assert.Equal(t, "docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'", manifest.Stages[3].Commands[0])
 		assert.Equal(t, "docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}", manifest.Stages[3].Commands[1])
-		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Stages[3].When)
+		assert.Equal(t, "status == 'succeeded' && branch == 'main'", manifest.Stages[3].When)
 
 		assert.Equal(t, "slack-notify", manifest.Stages[4].Name)
 		assert.Equal(t, "docker:17.03.0-ce", manifest.Stages[4].ContainerImage)
 		assert.Equal(t, "curl -X POST --data-urlencode 'payload={\"channel\": \"#build-status\", \"username\": \"estafette-ci-builder\", \"text\": \"Build ${ESTAFETTE_BUILD_VERSION} for ${ESTAFETTE_LABEL_APP} has failed!\"}' ${ESTAFETTE_SLACK_WEBHOOK}", manifest.Stages[4].Commands[0])
-		assert.Equal(t, "status == 'failed' || branch == 'master'", manifest.Stages[4].When)
+		assert.Equal(t, "status == 'failed' || branch == 'main'", manifest.Stages[4].When)
 
 		assert.Equal(t, "some value with spaces", manifest.Stages[4].EnvVars["SOME_ENVIRONMENT_VAR"])
 		assert.Equal(t, "value1", manifest.Stages[4].CustomProperties["unknownProperty1"])
@@ -231,7 +231,7 @@ stages:
 
 		assert.Nil(t, err)
 
-		assert.Equal(t, "status == 'succeeded' && branch == 'master'", manifest.Stages[3].When)
+		assert.Equal(t, "status == 'succeeded' && branch == 'main'", manifest.Stages[3].When)
 	})
 
 	t.Run("ReturnsWhenDefaultIfMissing", func(t *testing.T) {
@@ -254,7 +254,7 @@ stages:
 		assert.Equal(t, 2, manifest.Version.SemVer.Minor)
 		assert.Equal(t, "{{auto}}", manifest.Version.SemVer.Patch)
 		assert.Equal(t, "{{branch}}", manifest.Version.SemVer.LabelTemplate)
-		assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+		assert.Equal(t, "main", manifest.Version.SemVer.ReleaseBranch.Values[0])
 	})
 
 	t.Run("ReturnsManifestWithGlobalEnvVars", func(t *testing.T) {
@@ -482,7 +482,7 @@ version:
     minor: 2
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 
 stages:
   git-clone:
@@ -573,7 +573,7 @@ stages:
 		}
 	})
 
-	t.Run("ReturnsSemverVersionWithReleaseBranchDefaultingToMaster", func(t *testing.T) {
+	t.Run("ReturnsSemverVersionWithReleaseBranchDefaultingToMasterAndMAin", func(t *testing.T) {
 
 		// act
 		manifest, err := ReadManifest(GetDefaultManifestPreferences(), `
@@ -589,7 +589,9 @@ stages:
 		if assert.Nil(t, err) {
 			assert.Nil(t, manifest.Version.Custom)
 			assert.NotNil(t, manifest.Version.SemVer)
+			assert.Equal(t, 2, len(manifest.Version.SemVer.ReleaseBranch.Values))
 			assert.Equal(t, "master", manifest.Version.SemVer.ReleaseBranch.Values[0])
+			assert.Equal(t, "main", manifest.Version.SemVer.ReleaseBranch.Values[1])
 		}
 	})
 }
@@ -634,7 +636,7 @@ version:
     minor: 0
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 env:
   VAR_A: Greetings
   VAR_B: World
@@ -698,7 +700,7 @@ version:
     minor: 0
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 env:
   VAR_A: Greetings
   VAR_B: World
@@ -764,7 +766,7 @@ version:
     minor: 0
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 stages:
   test-alpha-version:
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
@@ -793,7 +795,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"master\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"RunCommandsInForeground\":false,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"RunCommandsInForeground\":false,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
 		}
 	})
 }

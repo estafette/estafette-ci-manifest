@@ -73,9 +73,9 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 			stage = &EstafetteStage{}
 		}
 
-		if stage.Name == "" {
-			stage.Name = mi.Key.(string)
-		}
+		// set the stage name, overwriting the name property if set on the stage explicitly
+		stage.Name = mi.Key.(string)
+
 		c.Stages = append(c.Stages, stage)
 	}
 

@@ -15,14 +15,15 @@ import (
 
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
-	Archived      bool                `yaml:"archived,omitempty"`
-	Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
-	Labels        map[string]string   `yaml:"labels,omitempty"`
-	Version       EstafetteVersion    `yaml:"version,omitempty"`
-	GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
-	Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
-	Stages        []*EstafetteStage   `yaml:"-"`
-	Releases      []*EstafetteRelease `yaml:"-"`
+	Archived         bool                        `yaml:"archived,omitempty"`
+	Builder          EstafetteBuilder            `yaml:"builder,omitempty"`
+	Labels           map[string]string           `yaml:"labels,omitempty"`
+	Version          EstafetteVersion            `yaml:"version,omitempty"`
+	GlobalEnvVars    map[string]string           `yaml:"env,omitempty"`
+	Triggers         []*EstafetteTrigger         `yaml:"triggers,omitempty"`
+	Stages           []*EstafetteStage           `yaml:"-"`
+	Releases         []*EstafetteRelease         `yaml:"-"`
+	ReleaseTemplates []*EstafetteReleaseTemplate `yaml:"-"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
@@ -38,6 +39,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		Triggers            []*EstafetteTrigger `yaml:"triggers"`
 		Stages              yaml.MapSlice       `yaml:"stages"`
 		Releases            yaml.MapSlice       `yaml:"releases"`
+		ReleaseTemplates    yaml.MapSlice       `yaml:"releaseTemplates"`
 	}
 
 	// unmarshal to auxiliary type
@@ -79,6 +81,31 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Stages = append(c.Stages, stage)
 	}
 
+	releaseTemplates := map[string]*EstafetteReleaseTemplate{}
+
+	for _, mi := range aux.ReleaseTemplates {
+
+		bytes, err := yaml.Marshal(mi.Value)
+		if err != nil {
+			return err
+		}
+
+		var releaseTemplate *EstafetteReleaseTemplate
+		if err := yaml.Unmarshal(bytes, &releaseTemplate); err != nil {
+			return err
+		}
+		if releaseTemplate == nil {
+			releaseTemplate = &EstafetteReleaseTemplate{}
+		}
+
+		if releaseTemplate.Name == "" {
+			releaseTemplate.Name = mi.Key.(string)
+		}
+		c.ReleaseTemplates = append(c.ReleaseTemplates, releaseTemplate)
+
+		releaseTemplates[releaseTemplate.Name] = releaseTemplate
+	}
+
 	for _, mi := range aux.Releases {
 
 		bytes, err := yaml.Marshal(mi.Value)
@@ -97,6 +124,9 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		if release.Name == "" {
 			release.Name = mi.Key.(string)
 		}
+
+		release.InitFromTemplate(releaseTemplates)
+
 		c.Releases = append(c.Releases, release)
 	}
 
@@ -106,14 +136,15 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 // MarshalYAML customizes marshalling an EstafetteManifest
 func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	var aux struct {
-		Archived      bool                `yaml:"archived,omitempty"`
-		Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
-		Labels        map[string]string   `yaml:"labels,omitempty"`
-		Version       EstafetteVersion    `yaml:"version,omitempty"`
-		GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
-		Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
-		Stages        yaml.MapSlice       `yaml:"stages,omitempty"`
-		Releases      yaml.MapSlice       `yaml:"releases,omitempty"`
+		Archived         bool                `yaml:"archived,omitempty"`
+		Builder          EstafetteBuilder    `yaml:"builder,omitempty"`
+		Labels           map[string]string   `yaml:"labels,omitempty"`
+		Version          EstafetteVersion    `yaml:"version,omitempty"`
+		GlobalEnvVars    map[string]string   `yaml:"env,omitempty"`
+		Triggers         []*EstafetteTrigger `yaml:"triggers,omitempty"`
+		Stages           yaml.MapSlice       `yaml:"stages,omitempty"`
+		Releases         yaml.MapSlice       `yaml:"releases,omitempty"`
+		ReleaseTemplates yaml.MapSlice       `yaml:"releaseTemplates,omitempty"`
 	}
 
 	aux.Archived = c.Archived
@@ -135,6 +166,12 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 			Value: release,
 		})
 	}
+	for _, releaseTemplate := range c.ReleaseTemplates {
+		aux.ReleaseTemplates = append(aux.ReleaseTemplates, yaml.MapItem{
+			Key:   releaseTemplate.Name,
+			Value: releaseTemplate,
+		})
+	}
 
 	return aux, err
 }
@@ -152,6 +189,11 @@ func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences
 	}
 
 	for _, r := range c.Releases {
+		if r.CloneRepository == nil {
+			falseValue := false
+			r.CloneRepository = &falseValue
+		}
+
 		if r.Builder == nil {
 			r.Builder = &c.Builder
 		} else {

@@ -277,12 +277,12 @@ stages:
 		if assert.Equal(t, 6, len(manifest.Releases)) {
 
 			assert.Equal(t, "docker-hub", manifest.Releases[0].Name)
-			assert.False(t, manifest.Releases[0].CloneRepository)
+			assert.False(t, *manifest.Releases[0].CloneRepository)
 			assert.Equal(t, "push-image", manifest.Releases[0].Stages[0].Name)
 			assert.Equal(t, "extensions/push-to-docker-registry:dev", manifest.Releases[0].Stages[0].ContainerImage)
 
 			assert.Equal(t, "beta", manifest.Releases[1].Name)
-			assert.False(t, manifest.Releases[1].CloneRepository)
+			assert.False(t, *manifest.Releases[1].CloneRepository)
 			assert.Equal(t, "tag-container-image", manifest.Releases[1].Stages[0].Name)
 			assert.Equal(t, "extensions/docker:stable", manifest.Releases[1].Stages[0].ContainerImage)
 			assert.Equal(t, 1, len(manifest.Releases[1].Stages[0].CustomProperties["tags"].([]interface{})))
@@ -292,26 +292,26 @@ stages:
 			assert.NotNil(t, manifest.Releases[2].Builder)
 			assert.Equal(t, "stable", manifest.Releases[2].Builder.Track)
 			assert.Equal(t, "linux", manifest.Releases[2].Builder.OperatingSystem)
-			assert.False(t, manifest.Releases[2].CloneRepository)
+			assert.False(t, *manifest.Releases[2].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
 
 			assert.Equal(t, "staging", manifest.Releases[3].Name)
-			assert.False(t, manifest.Releases[3].CloneRepository)
+			assert.False(t, *manifest.Releases[3].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[3].Stages[0].Name)
 			assert.Equal(t, "extensions/gke:beta", manifest.Releases[3].Stages[0].ContainerImage)
 			assert.Equal(t, 600, manifest.Releases[3].Stages[0].CustomProperties["volumemounts"].([]interface{})[0].(map[string]interface{})["volume"].(map[string]interface{})["secret"].(map[string]interface{})["items"].([]interface{})[0].(map[string]interface{})["mode"])
 			assert.Equal(t, true, manifest.Releases[3].Stages[0].CustomProperties["volumemounts"].([]interface{})[0].(map[string]interface{})["volume"].(map[string]interface{})["secret"].(map[string]interface{})["items"].([]interface{})[0].(map[string]interface{})["enabled"])
 
 			assert.Equal(t, "production", manifest.Releases[4].Name)
-			assert.True(t, manifest.Releases[4].CloneRepository)
+			assert.True(t, *manifest.Releases[4].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[4].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:stable", manifest.Releases[4].Stages[0].ContainerImage)
 			assert.Equal(t, "create-release-notes", manifest.Releases[4].Stages[1].Name)
 			assert.Equal(t, "extensions/create-release-notes-from-changelog:stable", manifest.Releases[4].Stages[1].ContainerImage)
 
 			assert.Equal(t, "tooling", manifest.Releases[5].Name)
-			assert.False(t, manifest.Releases[5].CloneRepository)
+			assert.False(t, *manifest.Releases[5].CloneRepository)
 		}
 	})
 
@@ -329,6 +329,33 @@ stages:
 			assert.Equal(t, "deploy-canary", manifest.Releases[4].Actions[0].Name)
 			assert.Equal(t, "rollback-canary", manifest.Releases[4].Actions[1].Name)
 			assert.Equal(t, "deploy-stable", manifest.Releases[4].Actions[2].Name)
+		}
+	})
+
+	t.Run("ReturnsManifestWithReleasesUsingReleaseTemplates", func(t *testing.T) {
+
+		// act
+		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest-with-template.yaml", true)
+
+		assert.Nil(t, err)
+
+		if assert.Equal(t, 2, len(manifest.Releases)) {
+
+			assert.Equal(t, "development", manifest.Releases[0].Name)
+			assert.NotNil(t, manifest.Releases[0].Builder)
+			assert.Equal(t, "stable", manifest.Releases[0].Builder.Track)
+			assert.Equal(t, "linux", manifest.Releases[0].Builder.OperatingSystem)
+			assert.False(t, *manifest.Releases[0].CloneRepository)
+			assert.Equal(t, "deploy", manifest.Releases[0].Stages[0].Name)
+			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[0].Stages[0].ContainerImage)
+
+			assert.Equal(t, "staging", manifest.Releases[1].Name)
+			assert.NotNil(t, manifest.Releases[1].Builder)
+			assert.Equal(t, "stable", manifest.Releases[1].Builder.Track)
+			assert.Equal(t, "linux", manifest.Releases[1].Builder.OperatingSystem)
+			assert.True(t, *manifest.Releases[1].CloneRepository)
+			assert.Equal(t, "deploy", manifest.Releases[1].Stages[0].Name)
+			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[1].Stages[0].ContainerImage)
 		}
 	})
 
@@ -795,7 +822,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"RunCommandsInForeground\":false,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null}", string(output))
+			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"},\"Custom\":null},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"Commands\":null,\"RunCommandsInForeground\":false,\"When\":\"status == 'succeeded'\",\"EnvVars\":null,\"AutoInjected\":false,\"Retries\":1,\"ParallelStages\":null,\"Services\":null,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null,\"ReleaseTemplates\":null}", string(output))
 		}
 	})
 }

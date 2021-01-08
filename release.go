@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"github.com/gavv/deepcopy"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -8,10 +9,11 @@ import (
 type EstafetteRelease struct {
 	Name            string                    `yaml:"-"`
 	Builder         *EstafetteBuilder         `yaml:"builder,omitempty"`
-	CloneRepository bool                      `yaml:"clone,omitempty" json:",omitempty"`
+	CloneRepository *bool                     `yaml:"clone,omitempty" json:",omitempty"`
 	Actions         []*EstafetteReleaseAction `yaml:"actions,omitempty" json:",omitempty"`
 	Triggers        []*EstafetteTrigger       `yaml:"triggers,omitempty" json:",omitempty"`
 	Stages          []*EstafetteStage         `yaml:"-"`
+	Template        string                    `yaml:"template,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteRelease
@@ -20,10 +22,11 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	var aux struct {
 		Name            string                    `yaml:"name"`
 		Builder         *EstafetteBuilder         `yaml:"builder"`
-		CloneRepository bool                      `yaml:"clone"`
+		CloneRepository *bool                     `yaml:"clone"`
 		Actions         []*EstafetteReleaseAction `yaml:"actions"`
 		Triggers        []*EstafetteTrigger       `yaml:"triggers"`
 		Stages          yaml.MapSlice             `yaml:"stages"`
+		Template        string                    `yaml:"template"`
 	}
 
 	// unmarshal to auxiliary type
@@ -37,6 +40,7 @@ func (release *EstafetteRelease) UnmarshalYAML(unmarshal func(interface{}) error
 	release.CloneRepository = aux.CloneRepository
 	release.Actions = aux.Actions
 	release.Triggers = aux.Triggers
+	release.Template = aux.Template
 
 	for _, mi := range aux.Stages {
 
@@ -68,10 +72,11 @@ func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
 	var aux struct {
 		Name            string                    `yaml:"-"`
 		Builder         *EstafetteBuilder         `yaml:"builder,omitempty"`
-		CloneRepository bool                      `yaml:"clone,omitempty"`
+		CloneRepository *bool                     `yaml:"clone,omitempty"`
 		Actions         []*EstafetteReleaseAction `yaml:"actions,omitempty"`
 		Triggers        []*EstafetteTrigger       `yaml:"triggers,omitempty"`
 		Stages          yaml.MapSlice             `yaml:"stages,omitempty"`
+		Template        string                    `yaml:"template,omitempty"`
 	}
 
 	// map auxiliary properties
@@ -79,6 +84,7 @@ func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
 	aux.CloneRepository = release.CloneRepository
 	aux.Actions = release.Actions
 	aux.Triggers = release.Triggers
+	aux.Template = release.Template
 
 	for _, stage := range release.Stages {
 		aux.Stages = append(aux.Stages, yaml.MapItem{
@@ -88,4 +94,54 @@ func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
 	}
 
 	return aux, err
+}
+
+// DeepCopy provides a copy of all nested pointers
+func (release EstafetteRelease) DeepCopy() EstafetteRelease {
+	return deepcopy.DeepCopy(release).(EstafetteRelease)
+}
+
+// InitFromTemplate uses template values for
+func (release *EstafetteRelease) InitFromTemplate(releaseTemplates map[string]*EstafetteReleaseTemplate) {
+
+	if release.Template != "" {
+		// check if template with defined name exists, and use its values overridden by this releases values
+
+		if releaseTemplate, found := releaseTemplates[release.Template]; found && releaseTemplate != nil {
+
+			// deep copy so there's no pointers shared with other releases
+			template := releaseTemplate.DeepCopy()
+
+			if release.Builder != nil {
+				template.Builder = release.Builder
+			} else {
+				release.Builder = template.Builder
+			}
+
+			if release.CloneRepository != nil {
+				template.CloneRepository = release.CloneRepository
+			} else {
+				release.CloneRepository = template.CloneRepository
+			}
+
+			if release.Actions != nil && len(release.Actions) > 0 {
+				template.Actions = release.Actions
+			} else {
+				release.Actions = template.Actions
+			}
+
+			if release.Triggers != nil && len(release.Triggers) > 0 {
+				template.Triggers = release.Triggers
+			} else {
+				release.Triggers = template.Triggers
+			}
+
+			if release.Stages != nil && len(release.Stages) > 0 {
+				template.Stages = release.Stages
+			} else {
+				release.Stages = template.Stages
+			}
+		}
+	}
+
 }

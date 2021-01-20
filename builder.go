@@ -18,8 +18,9 @@ type EstafetteBuilder struct {
 func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Track           string `yaml:"track"`
-		OperatingSystem string `yaml:"os,omitempty"`
+		Track           string        `yaml:"track"`
+		OperatingSystem string        `yaml:"os"`
+		StorageMedium   StorageMedium `yaml:"medium"`
 	}
 
 	// unmarshal to auxiliary type
@@ -30,6 +31,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	// map auxiliary properties
 	builder.Track = aux.Track
 	builder.OperatingSystem = aux.OperatingSystem
+	builder.StorageMedium = aux.StorageMedium
 
 	return nil
 }

@@ -59,4 +59,17 @@ track: dev`), &builder)
 		assert.Equal(t, StorageMediumDefault, builder.StorageMedium)
 	})
 
+	t.Run("KeepsStorageMediumToIfSet", func(t *testing.T) {
+
+		var builder EstafetteBuilder
+
+		// act
+		err := yaml.Unmarshal([]byte(`
+medium: memory`), &builder)
+		builder.SetDefaults(*GetDefaultManifestPreferences())
+
+		assert.Nil(t, err)
+		assert.Equal(t, StorageMediumMemory, builder.StorageMedium)
+	})
+
 }

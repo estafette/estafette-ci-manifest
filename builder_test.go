@@ -45,4 +45,18 @@ track: dev`), &builder)
 		assert.Nil(t, err)
 		assert.Equal(t, "stable", builder.Track)
 	})
+
+	t.Run("DefaultsStorageMediumToDefaultIfMissingIfNotPresent", func(t *testing.T) {
+
+		var builder EstafetteBuilder
+
+		// act
+		err := yaml.Unmarshal([]byte(` 
+`), &builder)
+		builder.SetDefaults(*GetDefaultManifestPreferences())
+
+		assert.Nil(t, err)
+		assert.Equal(t, StorageMediumDefault, builder.StorageMedium)
+	})
+
 }

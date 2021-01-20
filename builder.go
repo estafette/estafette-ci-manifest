@@ -9,8 +9,9 @@ import (
 
 // EstafetteBuilder contains configuration for the ci-builder component
 type EstafetteBuilder struct {
-	Track           string `yaml:"track,omitempty"`
-	OperatingSystem string `yaml:"os,omitempty"`
+	Track           string        `yaml:"track,omitempty"`
+	OperatingSystem string        `yaml:"os,omitempty"`
+	StorageMedium   StorageMedium `yaml:"medium,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder

@@ -56,6 +56,7 @@ type EstafettePubSubEvent struct {
 
 // EstafetteEvent is a container for any trigger event
 type EstafetteEvent struct {
+	Name     string                  `yaml:"name,omitempty" json:"name,omitempty"`
 	Pipeline *EstafettePipelineEvent `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
 	Release  *EstafetteReleaseEvent  `yaml:"release,omitempty" json:"release,omitempty"`
 	Git      *EstafetteGitEvent      `yaml:"git,omitempty" json:"git,omitempty"`

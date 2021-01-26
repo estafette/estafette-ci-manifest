@@ -11,6 +11,7 @@ import (
 
 // EstafetteTrigger represents a trigger of any supported type and what action to take if the trigger fired
 type EstafetteTrigger struct {
+	Name     string                    `yaml:"name,omitempty" json:"name,omitempty"`
 	Pipeline *EstafettePipelineTrigger `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
 	Release  *EstafetteReleaseTrigger  `yaml:"release,omitempty" json:"release,omitempty"`
 	Git      *EstafetteGitTrigger      `yaml:"git,omitempty" json:"git,omitempty"`

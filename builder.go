@@ -12,6 +12,7 @@ type EstafetteBuilder struct {
 	Track           string        `yaml:"track,omitempty"`
 	OperatingSystem string        `yaml:"os,omitempty"`
 	StorageMedium   StorageMedium `yaml:"medium,omitempty"`
+	MTU             int           `yaml:"mtu,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder
@@ -21,6 +22,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 		Track           string        `yaml:"track"`
 		OperatingSystem string        `yaml:"os"`
 		StorageMedium   StorageMedium `yaml:"medium"`
+		MTU             int           `yaml:"mtu"`
 	}
 
 	// unmarshal to auxiliary type
@@ -32,6 +34,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 	builder.OperatingSystem = aux.OperatingSystem
 	builder.StorageMedium = aux.StorageMedium
+	builder.MTU = aux.MTU
 
 	return nil
 }

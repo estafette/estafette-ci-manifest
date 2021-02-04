@@ -46,8 +46,13 @@ func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPrefer
 		builder.OperatingSystem = preferences.BuilderOperatingSystems[0]
 	}
 	// set default for Track if not set
-	if builder.Track == "" {
+	if tracks, ok := preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem]; ok && len(tracks) > 0 && builder.Track == "" {
 		builder.Track = preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem][0]
+	}
+
+	// set default MTU if not set
+	if mtu, ok := preferences.MTUPerOperatingSystem[builder.OperatingSystem]; ok && builder.MTU <= 0 {
+		builder.MTU = mtu
 	}
 }
 

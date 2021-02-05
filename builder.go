@@ -21,7 +21,6 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 		Track           string        `yaml:"track"`
 		OperatingSystem string        `yaml:"os"`
 		StorageMedium   StorageMedium `yaml:"medium"`
-		MTU             int           `yaml:"mtu"`
 	}
 
 	// unmarshal to auxiliary type

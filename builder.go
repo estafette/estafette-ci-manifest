@@ -12,7 +12,6 @@ type EstafetteBuilder struct {
 	Track           string        `yaml:"track,omitempty"`
 	OperatingSystem string        `yaml:"os,omitempty"`
 	StorageMedium   StorageMedium `yaml:"medium,omitempty"`
-	MTU             int           `yaml:"mtu,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder
@@ -34,7 +33,6 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 	builder.OperatingSystem = aux.OperatingSystem
 	builder.StorageMedium = aux.StorageMedium
-	builder.MTU = aux.MTU
 
 	return nil
 }
@@ -48,11 +46,6 @@ func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPrefer
 	// set default for Track if not set
 	if tracks, ok := preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem]; ok && len(tracks) > 0 && builder.Track == "" {
 		builder.Track = preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem][0]
-	}
-
-	// set default MTU if not set
-	if mtu, ok := preferences.MTUPerOperatingSystem[builder.OperatingSystem]; ok && builder.MTU <= 0 {
-		builder.MTU = mtu
 	}
 }
 

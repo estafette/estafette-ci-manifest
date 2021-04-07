@@ -1,7 +1,7 @@
 package manifest
 
 import (
-	"github.com/gavv/deepcopy"
+	"github.com/mohae/deepcopy"
 	yaml "gopkg.in/yaml.v2"
 )
 

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gavv/deepcopy"
+	"github.com/mohae/deepcopy"
 	"github.com/rs/zerolog/log"
 
 	yaml "gopkg.in/yaml.v2"

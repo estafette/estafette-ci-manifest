@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/mohae/deepcopy"
+	"github.com/jinzhu/copier"
 	"github.com/rs/zerolog/log"
 
 	yaml "gopkg.in/yaml.v2"
@@ -305,8 +305,11 @@ func (c *EstafetteManifest) GetAllTriggers(repoSource, repoOwner, repoName strin
 }
 
 // DeepCopy provides a copy of all nested pointers
-func (c *EstafetteManifest) DeepCopy() EstafetteManifest {
-	return deepcopy.DeepCopy(*c).(EstafetteManifest)
+func (c *EstafetteManifest) DeepCopy() (target EstafetteManifest) {
+
+	copier.CopyWithOption(&target, c, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+
+	return
 }
 
 // Exists checks whether the .estafette.yaml exists

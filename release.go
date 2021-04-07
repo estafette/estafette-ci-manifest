@@ -1,7 +1,7 @@
 package manifest
 
 import (
-	"github.com/mohae/deepcopy"
+	"github.com/jinzhu/copier"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -97,8 +97,11 @@ func (release EstafetteRelease) MarshalYAML() (out interface{}, err error) {
 }
 
 // DeepCopy provides a copy of all nested pointers
-func (release EstafetteRelease) DeepCopy() EstafetteRelease {
-	return deepcopy.DeepCopy(release).(EstafetteRelease)
+func (release EstafetteRelease) DeepCopy() (target EstafetteRelease) {
+
+	copier.CopyWithOption(&target, release, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+
+	return
 }
 
 // InitFromTemplate uses template values for

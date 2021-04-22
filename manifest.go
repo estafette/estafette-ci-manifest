@@ -391,10 +391,10 @@ func ReadManifest(preferences *EstafetteManifestPreferences, manifestString stri
 func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
 	return &EstafetteManifestPreferences{
 		LabelRegexes:            map[string]string{},
-		BuilderOperatingSystems: []string{"linux", "windows"},
-		BuilderTracksPerOperatingSystem: map[string][]string{
-			"linux":   {"stable", "beta", "dev"},
-			"windows": {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
+		BuilderOperatingSystems: []OperatingSystem{OperatingSystemLinux, OperatingSystemWindows},
+		BuilderTracksPerOperatingSystem: map[OperatingSystem][]string{
+			OperatingSystemLinux:   {"stable", "beta", "dev"},
+			OperatingSystemWindows: {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
 		},
 		DefaultBranch: "master",
 	}

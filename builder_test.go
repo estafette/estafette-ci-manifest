@@ -30,7 +30,7 @@ track: dev`), &builder)
 		builder.SetDefaults(*GetDefaultManifestPreferences())
 
 		assert.Nil(t, err)
-		assert.Equal(t, "linux", builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemLinux, builder.OperatingSystem)
 	})
 
 	t.Run("DefaultsTrackToStableIfMissingIfNotPresent", func(t *testing.T) {

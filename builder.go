@@ -9,18 +9,18 @@ import (
 
 // EstafetteBuilder contains configuration for the ci-builder component
 type EstafetteBuilder struct {
-	Track           string        `yaml:"track,omitempty"`
-	OperatingSystem string        `yaml:"os,omitempty"`
-	StorageMedium   StorageMedium `yaml:"medium,omitempty"`
+	Track           string          `yaml:"track,omitempty"`
+	OperatingSystem OperatingSystem `yaml:"os,omitempty"`
+	StorageMedium   StorageMedium   `yaml:"medium,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder
 func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Track           string        `yaml:"track"`
-		OperatingSystem string        `yaml:"os"`
-		StorageMedium   StorageMedium `yaml:"medium"`
+		Track           string          `yaml:"track"`
+		OperatingSystem OperatingSystem `yaml:"os"`
+		StorageMedium   StorageMedium   `yaml:"medium"`
 	}
 
 	// unmarshal to auxiliary type
@@ -39,7 +39,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 // SetDefaults sets default values for properties of EstafetteBuilder if not defined
 func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPreferences) {
 	// set default for OperatingSystem if not set
-	if builder.OperatingSystem == "" {
+	if builder.OperatingSystem == OperatingSystemUnknown {
 		builder.OperatingSystem = preferences.BuilderOperatingSystems[0]
 	}
 	// set default for Track if not set
@@ -50,8 +50,16 @@ func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPrefer
 
 func (builder *EstafetteBuilder) validate(preferences EstafetteManifestPreferences) (err error) {
 
-	if !foundation.StringArrayContains(preferences.BuilderOperatingSystems, builder.OperatingSystem) {
-		return fmt.Errorf("builder os should be one of: %v", strings.Join(preferences.BuilderOperatingSystems, ", "))
+	if !OperatingSystemArrayContains(preferences.BuilderOperatingSystems, builder.OperatingSystem) {
+
+		var allowedOperatingSystems []string
+		for _, os := range preferences.BuilderOperatingSystems {
+			if os != OperatingSystemUnknown {
+				allowedOperatingSystems = append(allowedOperatingSystems, string(os))
+			}
+		}
+
+		return fmt.Errorf("builder os should be one of: %v", strings.Join(allowedOperatingSystems, ", "))
 	}
 
 	tracks, ok := preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem]

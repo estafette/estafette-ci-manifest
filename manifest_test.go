@@ -75,7 +75,7 @@ stages:
 		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml", true)
 
 		assert.Nil(t, err)
-		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemWindows, manifest.Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithBuilderOperatingSystemDefaultLinux", func(t *testing.T) {
@@ -89,7 +89,7 @@ stages:
     - echo 'hi'`, true)
 
 		assert.Nil(t, err)
-		assert.Equal(t, "linux", manifest.Builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemLinux, manifest.Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithBuilder", func(t *testing.T) {
@@ -99,7 +99,7 @@ stages:
 
 		assert.Nil(t, err)
 		assert.Equal(t, "windowsservercore-1809", manifest.Builder.Track)
-		assert.Equal(t, "windows", manifest.Builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemWindows, manifest.Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithBuilderForReleaseIfNotOverridden", func(t *testing.T) {
@@ -110,7 +110,7 @@ stages:
 		assert.Nil(t, err)
 		assert.NotNil(t, manifest.Releases[1].Builder)
 		assert.Equal(t, "windowsservercore-1809", manifest.Releases[1].Builder.Track)
-		assert.Equal(t, "windows", manifest.Releases[1].Builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemWindows, manifest.Releases[1].Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithReleaseBuilderIfOverridden", func(t *testing.T) {
@@ -121,7 +121,7 @@ stages:
 		assert.Nil(t, err)
 		assert.NotNil(t, manifest.Releases[2].Builder)
 		assert.Equal(t, "stable", manifest.Releases[2].Builder.Track)
-		assert.Equal(t, "linux", manifest.Releases[2].Builder.OperatingSystem)
+		assert.Equal(t, OperatingSystemLinux, manifest.Releases[2].Builder.OperatingSystem)
 	})
 
 	t.Run("ReturnsManifestWithMappedOrderedStagesInSameOrderAsInTheManifest", func(t *testing.T) {
@@ -291,7 +291,7 @@ stages:
 			assert.Equal(t, "development", manifest.Releases[2].Name)
 			assert.NotNil(t, manifest.Releases[2].Builder)
 			assert.Equal(t, "stable", manifest.Releases[2].Builder.Track)
-			assert.Equal(t, "linux", manifest.Releases[2].Builder.OperatingSystem)
+			assert.Equal(t, OperatingSystemLinux, manifest.Releases[2].Builder.OperatingSystem)
 			assert.False(t, *manifest.Releases[2].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[2].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[2].Stages[0].ContainerImage)
@@ -344,7 +344,7 @@ stages:
 			assert.Equal(t, "development", manifest.Releases[0].Name)
 			assert.NotNil(t, manifest.Releases[0].Builder)
 			assert.Equal(t, "stable", manifest.Releases[0].Builder.Track)
-			assert.Equal(t, "linux", manifest.Releases[0].Builder.OperatingSystem)
+			assert.Equal(t, OperatingSystemLinux, manifest.Releases[0].Builder.OperatingSystem)
 			assert.False(t, *manifest.Releases[0].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[0].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[0].Stages[0].ContainerImage)
@@ -352,7 +352,7 @@ stages:
 			assert.Equal(t, "staging", manifest.Releases[1].Name)
 			assert.NotNil(t, manifest.Releases[1].Builder)
 			assert.Equal(t, "stable", manifest.Releases[1].Builder.Track)
-			assert.Equal(t, "linux", manifest.Releases[1].Builder.OperatingSystem)
+			assert.Equal(t, OperatingSystemLinux, manifest.Releases[1].Builder.OperatingSystem)
 			assert.True(t, *manifest.Releases[1].CloneRepository)
 			assert.Equal(t, "deploy", manifest.Releases[1].Stages[0].Name)
 			assert.Equal(t, "extensions/deploy-to-kubernetes-engine:dev", manifest.Releases[1].Stages[0].ContainerImage)

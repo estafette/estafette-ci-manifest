@@ -12,6 +12,7 @@ type EstafetteBuilder struct {
 	Track           string          `yaml:"track,omitempty"`
 	OperatingSystem OperatingSystem `yaml:"os,omitempty"`
 	StorageMedium   StorageMedium   `yaml:"medium,omitempty"`
+	BuilderType     BuilderType     `yaml:"type,omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBuilder
@@ -21,6 +22,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 		Track           string          `yaml:"track"`
 		OperatingSystem OperatingSystem `yaml:"os"`
 		StorageMedium   StorageMedium   `yaml:"medium"`
+		BuilderType     BuilderType     `yaml:"type,omitempty"`
 	}
 
 	// unmarshal to auxiliary type
@@ -32,6 +34,7 @@ func (builder *EstafetteBuilder) UnmarshalYAML(unmarshal func(interface{}) error
 	builder.Track = aux.Track
 	builder.OperatingSystem = aux.OperatingSystem
 	builder.StorageMedium = aux.StorageMedium
+	builder.BuilderType = aux.BuilderType
 
 	return nil
 }
@@ -45,6 +48,9 @@ func (builder *EstafetteBuilder) SetDefaults(preferences EstafetteManifestPrefer
 	// set default for Track if not set
 	if tracks, ok := preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem]; ok && len(tracks) > 0 && builder.Track == "" {
 		builder.Track = preferences.BuilderTracksPerOperatingSystem[builder.OperatingSystem][0]
+	}
+	if builder.BuilderType == BuilderTypeUnknown {
+		builder.BuilderType = BuilderTypeDocker
 	}
 }
 

@@ -1,6 +1,11 @@
 package manifest
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 // StringOrStringArray is used to unmarshal/marshal either a single string value or a string array
 type StringOrStringArray struct {
@@ -75,7 +80,9 @@ func (s StringOrStringArray) MarshalJSON() ([]byte, error) {
 // Contains test whether the compared value matches one of the values
 func (s StringOrStringArray) Contains(value string) bool {
 	for _, v := range s.Values {
-		if v == value {
+		pattern := fmt.Sprintf("^%v$", strings.TrimSpace(v))
+		match, err := regexp.MatchString(pattern, value)
+		if err == nil && match {
 			return true
 		}
 	}

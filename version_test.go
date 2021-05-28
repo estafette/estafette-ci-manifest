@@ -457,4 +457,46 @@ func TestSemverVersion(t *testing.T) {
 
 		assert.Equal(t, "5.3.6", versionString)
 	})
+
+	t.Run("ReturnsSemverWithoutLabelIfBranchMatchesReleaseBranchRegularExpression", func(t *testing.T) {
+
+		version := EstafetteSemverVersion{
+			Major:         5,
+			Minor:         3,
+			Patch:         "6",
+			LabelTemplate: "{{branch}}",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release/.+"}},
+		}
+		params := EstafetteVersionParams{
+			AutoIncrement: 16,
+			Branch:        "release/abc",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+		}
+
+		// act
+		versionString := version.Version(params)
+
+		assert.Equal(t, "5.3.6", versionString)
+	})
+
+	t.Run("ReturnsSemverWithLabelIfBranchDoesNotMatchReleaseBranchRegularExpression", func(t *testing.T) {
+
+		version := EstafetteSemverVersion{
+			Major:         5,
+			Minor:         3,
+			Patch:         "6",
+			LabelTemplate: "{{branch}}",
+			ReleaseBranch: StringOrStringArray{Values: []string{"release/[0-9]+"}},
+		}
+		params := EstafetteVersionParams{
+			AutoIncrement: 16,
+			Branch:        "release/abc",
+			Revision:      "219aae19153da2b20ac1d88e2fd68e0b20274be2",
+		}
+
+		// act
+		versionString := version.Version(params)
+
+		assert.Equal(t, "5.3.6-release-abc", versionString)
+	})
 }

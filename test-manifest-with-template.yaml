@@ -1,7 +1,6 @@
-unknownProperty: true
-
 builder:
-  track: dev
+  os: windows
+  track: windowsservercore-1809
 
 labels:
   app: estafette-ci-builder
@@ -67,6 +66,21 @@ stages:
       - supported2
 
   test-alpha-version:
+    services:
+    - name: kubernetes
+      image: bsycorp/kind:latest-1.15
+      env:
+        SOME_ENVIRONMENT_VAR: "some value with spaces"
+      readiness:
+        path: /kubernetes-ready
+        timeoutSeconds: 60
+        port: 80
+        protocol: http
+        hostname: kubernetes.kube-system.svc.cluster.local
+    - name: database
+      image: cockroachdb/cockroach:v19.1.5
+      commands:
+      - cockroachdb start --insecure --listen-addr=localhost
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
     retries: 1
     credentials: gke-tooling
@@ -85,59 +99,27 @@ stages:
       limit: 256Mi
     dryrun: true
 
-# releases are automatically triggered from stages or manually from gui, cli or slack
-releases:
-  docker-hub:
-    stages:
-      push-image:
-        image: extensions/push-to-docker-registry:dev
+  parallel-stages-group:
+    parallelStages:
+      stageA:
+        image: docker
+      stageB:
+        image: docker
 
-  beta:
-    stages:
-      tag-container-image:
-        image: extensions/docker:stable
-        action: tag
-        container: gke
-        repositories:
-        - extensions
-        tags:
-        - beta
-
-  development:
+releaseTemplates:
+  default:
+    builder:
+      track: stable
+      os: linux
     stages:
       deploy:
         image: extensions/deploy-to-kubernetes-engine:dev
 
+# releases are automatically triggered from stages or manually from gui, cli or slack
+releases:
+  development:
+    template: default
+
   staging:
-    stages:
-      deploy:
-        image: extensions/gke:beta
-        volumemounts:
-        - name: client-certs
-          mountpath: /cockroach-certs
-          volume:
-            secret:
-              secretName: estafette.client.estafette
-              items:
-              - key: key
-                path: key
-                mode: 600
-                enabled: true
-              - key: cert
-                path: cert
-
-  production:
-    actions:
-    - name: deploy-canary
-    - name: rollback-canary
-    - name: deploy-stable
-
+    template: default
     clone: true
-    stages:
-      deploy:
-        image: extensions/deploy-to-kubernetes-engine:stable
-
-      create-release-notes:
-        image: extensions/create-release-notes-from-changelog:stable
-
-  tooling:

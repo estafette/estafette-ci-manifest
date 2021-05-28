@@ -50,7 +50,7 @@ func TestEstafetteTriggerValidate(t *testing.T) {
 		}
 
 		// act
-		err := trigger.Validate("release", "development")
+		err := trigger.Validate(TriggerTypeRelease, "development")
 
 		assert.Nil(t, err)
 	})

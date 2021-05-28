@@ -11,6 +11,7 @@ import (
 
 // EstafetteTrigger represents a trigger of any supported type and what action to take if the trigger fired
 type EstafetteTrigger struct {
+	Name     string                    `yaml:"name,omitempty" json:"name,omitempty"`
 	Pipeline *EstafettePipelineTrigger `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
 	Release  *EstafetteReleaseTrigger  `yaml:"release,omitempty" json:"release,omitempty"`
 	Git      *EstafetteGitTrigger      `yaml:"git,omitempty" json:"git,omitempty"`
@@ -20,6 +21,7 @@ type EstafetteTrigger struct {
 
 	BuildAction   *EstafetteTriggerBuildAction   `yaml:"builds,omitempty" json:"builds,omitempty"`
 	ReleaseAction *EstafetteTriggerReleaseAction `yaml:"releases,omitempty" json:"releases,omitempty"`
+	BotAction     *EstafetteTriggerBotAction     `yaml:"runs,omitempty" json:"runs,omitempty"`
 }
 
 // EstafettePipelineTrigger fires for pipeline changes and applies filtering to limit when this results in an action
@@ -75,8 +77,12 @@ type EstafetteTriggerReleaseAction struct {
 	Version string `yaml:"version,omitempty" json:"version,omitempty"`
 }
 
+type EstafetteTriggerBotAction struct {
+	Branch string `yaml:"branch,omitempty" json:"branch,omitempty"`
+}
+
 // SetDefaults sets defaults for EstafetteTrigger
-func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
+func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences, triggerType TriggerType, targetName string) {
 	if t.Pipeline != nil {
 		t.Pipeline.SetDefaults()
 	}
@@ -97,18 +103,21 @@ func (t *EstafetteTrigger) SetDefaults(triggerType, targetName string) {
 	}
 
 	switch triggerType {
-	case "build":
+	case TriggerTypeBuild:
 		if t.BuildAction == nil {
 			t.BuildAction = &EstafetteTriggerBuildAction{}
 		}
-		t.BuildAction.SetDefaults()
-		break
-	case "release":
+		t.BuildAction.SetDefaults(preferences)
+	case TriggerTypeRelease:
 		if t.ReleaseAction == nil {
 			t.ReleaseAction = &EstafetteTriggerReleaseAction{}
 		}
 		t.ReleaseAction.SetDefaults(t, targetName)
-		break
+	case TriggerTypeBot:
+		if t.BotAction == nil {
+			t.BotAction = &EstafetteTriggerBotAction{}
+		}
+		t.BotAction.SetDefaults(preferences)
 	}
 }
 
@@ -121,7 +130,7 @@ func (p *EstafettePipelineTrigger) SetDefaults() {
 		p.Status = "succeeded"
 	}
 	if p.Branch == "" {
-		p.Branch = "master"
+		p.Branch = "master|main"
 	}
 }
 
@@ -141,7 +150,7 @@ func (g *EstafetteGitTrigger) SetDefaults() {
 		g.Event = "push"
 	}
 	if g.Branch == "" {
-		g.Branch = "master"
+		g.Branch = "master|main"
 	}
 }
 
@@ -158,9 +167,9 @@ func (p *EstafettePubSubTrigger) SetDefaults() {
 }
 
 // SetDefaults sets defaults for EstafetteTriggerBuildAction
-func (b *EstafetteTriggerBuildAction) SetDefaults() {
+func (b *EstafetteTriggerBuildAction) SetDefaults(preferences EstafetteManifestPreferences) {
 	if b.Branch == "" {
-		b.Branch = "master"
+		b.Branch = preferences.DefaultBranch
 	}
 }
 
@@ -178,8 +187,15 @@ func (r *EstafetteTriggerReleaseAction) SetDefaults(t *EstafetteTrigger, targetN
 	}
 }
 
+// SetDefaults sets defaults for EstafetteTriggerReleaseAction
+func (b *EstafetteTriggerBotAction) SetDefaults(preferences EstafetteManifestPreferences) {
+	if b.Branch == "" {
+		b.Branch = preferences.DefaultBranch
+	}
+}
+
 // Validate checks if EstafetteTrigger is valid
-func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) {
+func (t *EstafetteTrigger) Validate(triggerType TriggerType, targetName string) (err error) {
 
 	numberOfTypes := 0
 
@@ -240,7 +256,7 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 	}
 
 	switch triggerType {
-	case "build":
+	case TriggerTypeBuild:
 		if t.BuildAction == nil {
 			return fmt.Errorf("For a build trigger set the 'builds' property")
 		}
@@ -253,7 +269,7 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		}
 
 		break
-	case "release":
+	case TriggerTypeRelease:
 		if t.ReleaseAction == nil {
 			return fmt.Errorf("For a release trigger set the 'releases' property")
 		}
@@ -497,7 +513,7 @@ func regexMatch(pattern, value string) (bool, error) {
 		pattern = strings.TrimPrefix(pattern, "!~")
 	}
 
-	pattern = fmt.Sprintf("^%v$", strings.TrimSpace(pattern))
+	pattern = fmt.Sprintf("^(%v)$", strings.TrimSpace(pattern))
 
 	match, err := regexp.MatchString(pattern, value)
 

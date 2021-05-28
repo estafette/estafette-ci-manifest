@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strings"
 
+	"github.com/jinzhu/copier"
 	"github.com/rs/zerolog/log"
 
 	yaml "gopkg.in/yaml.v2"
@@ -12,29 +15,33 @@ import (
 
 // EstafetteManifest is the object that the .estafette.yaml deserializes to
 type EstafetteManifest struct {
-	Builder       EstafetteBuilder    `yaml:"builder,omitempty" json:",omitempty"`
-	Labels        map[string]string   `yaml:"labels,omitempty" json:",omitempty"`
-	Version       EstafetteVersion    `yaml:"version,omitempty" json:",omitempty"`
-	GlobalEnvVars map[string]string   `yaml:"env,omitempty" json:",omitempty"`
-	Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty" json:",omitempty"`
-	Stages        []*EstafetteStage   `yaml:"-" json:",omitempty"`
-	Releases      []*EstafetteRelease `yaml:"-" json:",omitempty"`
-	Bots          []*EstafetteBot     `yaml:"-" json:",omitempty"`
+	Archived         bool                        `yaml:"archived,omitempty"`
+	Builder          EstafetteBuilder            `yaml:"builder,omitempty"`
+	Labels           map[string]string           `yaml:"labels,omitempty"`
+	Version          EstafetteVersion            `yaml:"version,omitempty"`
+	GlobalEnvVars    map[string]string           `yaml:"env,omitempty"`
+	Triggers         []*EstafetteTrigger         `yaml:"triggers,omitempty"`
+	Stages           []*EstafetteStage           `yaml:"-"`
+	Releases         []*EstafetteRelease         `yaml:"-"`
+	ReleaseTemplates []*EstafetteReleaseTemplate `yaml:"-"`
+	Bots             []*EstafetteBot             `yaml:"-" json:",omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
 func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Builder             EstafetteBuilder    `yaml:"builder,omitempty"`
-		Labels              map[string]string   `yaml:"labels,omitempty"`
-		Version             EstafetteVersion    `yaml:"version,omitempty"`
-		GlobalEnvVars       map[string]string   `yaml:"env,omitempty"`
-		DeprecatedPipelines yaml.MapSlice       `yaml:"pipelines,omitempty"`
-		Triggers            []*EstafetteTrigger `yaml:"triggers,omitempty"`
-		Stages              yaml.MapSlice       `yaml:"stages,omitempty"`
-		Releases            yaml.MapSlice       `yaml:"releases,omitempty"`
-		Bots                yaml.MapSlice       `yaml:"bots,omitempty"`
+		Archived            bool                `yaml:"archived"`
+		Builder             EstafetteBuilder    `yaml:"builder"`
+		Labels              map[string]string   `yaml:"labels"`
+		Version             EstafetteVersion    `yaml:"version"`
+		GlobalEnvVars       map[string]string   `yaml:"env"`
+		DeprecatedPipelines yaml.MapSlice       `yaml:"pipelines"`
+		Triggers            []*EstafetteTrigger `yaml:"triggers"`
+		Stages              yaml.MapSlice       `yaml:"stages"`
+		Releases            yaml.MapSlice       `yaml:"releases"`
+		ReleaseTemplates    yaml.MapSlice       `yaml:"releaseTemplates"`
+		Bots                yaml.MapSlice       `yaml:"bots"`
 	}
 
 	// unmarshal to auxiliary type
@@ -43,6 +50,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 	}
 
 	// map auxiliary properties
+	c.Archived = aux.Archived
 	c.Builder = aux.Builder
 	c.Version = aux.Version
 	c.Labels = aux.Labels
@@ -69,8 +77,35 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 			stage = &EstafetteStage{}
 		}
 
+		// set the stage name, overwriting the name property if set on the stage explicitly
 		stage.Name = mi.Key.(string)
+
 		c.Stages = append(c.Stages, stage)
+	}
+
+	releaseTemplates := map[string]*EstafetteReleaseTemplate{}
+
+	for _, mi := range aux.ReleaseTemplates {
+
+		bytes, err := yaml.Marshal(mi.Value)
+		if err != nil {
+			return err
+		}
+
+		var releaseTemplate *EstafetteReleaseTemplate
+		if err := yaml.Unmarshal(bytes, &releaseTemplate); err != nil {
+			return err
+		}
+		if releaseTemplate == nil {
+			releaseTemplate = &EstafetteReleaseTemplate{}
+		}
+
+		if releaseTemplate.Name == "" {
+			releaseTemplate.Name = mi.Key.(string)
+		}
+		c.ReleaseTemplates = append(c.ReleaseTemplates, releaseTemplate)
+
+		releaseTemplates[releaseTemplate.Name] = releaseTemplate
 	}
 
 	for _, mi := range aux.Releases {
@@ -88,7 +123,12 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 			release = &EstafetteRelease{}
 		}
 
-		release.Name = mi.Key.(string)
+		if release.Name == "" {
+			release.Name = mi.Key.(string)
+		}
+
+		release.InitFromTemplate(releaseTemplates)
+
 		c.Releases = append(c.Releases, release)
 	}
 
@@ -111,25 +151,25 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Bots = append(c.Bots, bot)
 	}
 
-	// set default property values
-	c.SetDefaults()
-
 	return nil
 }
 
 // MarshalYAML customizes marshalling an EstafetteManifest
 func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 	var aux struct {
-		Builder       EstafetteBuilder    `yaml:"builder,omitempty"`
-		Labels        map[string]string   `yaml:"labels,omitempty"`
-		Version       EstafetteVersion    `yaml:"version,omitempty"`
-		GlobalEnvVars map[string]string   `yaml:"env,omitempty"`
-		Triggers      []*EstafetteTrigger `yaml:"triggers,omitempty"`
-		Stages        yaml.MapSlice       `yaml:"stages,omitempty"`
-		Releases      yaml.MapSlice       `yaml:"releases,omitempty"`
-		Bots          yaml.MapSlice       `yaml:"bots,omitempty"`
+		Archived         bool                `yaml:"archived,omitempty"`
+		Builder          EstafetteBuilder    `yaml:"builder,omitempty"`
+		Labels           map[string]string   `yaml:"labels,omitempty"`
+		Version          EstafetteVersion    `yaml:"version,omitempty"`
+		GlobalEnvVars    map[string]string   `yaml:"env,omitempty"`
+		Triggers         []*EstafetteTrigger `yaml:"triggers,omitempty"`
+		Stages           yaml.MapSlice       `yaml:"stages,omitempty"`
+		Releases         yaml.MapSlice       `yaml:"releases,omitempty"`
+		ReleaseTemplates yaml.MapSlice       `yaml:"releaseTemplates,omitempty"`
+		Bots             yaml.MapSlice       `yaml:"bots,omitempty"`
 	}
 
+	aux.Archived = c.Archived
 	aux.Builder = c.Builder
 	aux.Labels = c.Labels
 	aux.Version = c.Version
@@ -148,6 +188,12 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 			Value: release,
 		})
 	}
+	for _, releaseTemplate := range c.ReleaseTemplates {
+		aux.ReleaseTemplates = append(aux.ReleaseTemplates, yaml.MapItem{
+			Key:   releaseTemplate.Name,
+			Value: releaseTemplate,
+		})
+	}
 	for _, bot := range c.Bots {
 		aux.Bots = append(aux.Bots, yaml.MapItem{
 			Key:   bot.Name,
@@ -159,38 +205,78 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 }
 
 // SetDefaults sets default values for properties of EstafetteManifest if not defined
-func (c *EstafetteManifest) SetDefaults() {
-	c.Builder.SetDefaults()
+func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences) {
+	c.Builder.SetDefaults(preferences)
 	c.Version.SetDefaults()
 
 	for _, t := range c.Triggers {
-		t.SetDefaults("build", "")
+		t.SetDefaults(preferences, TriggerTypeBuild, "")
 	}
 	for _, s := range c.Stages {
 		s.SetDefaults(c.Builder)
 	}
 
 	for _, r := range c.Releases {
+		if r.CloneRepository == nil {
+			falseValue := false
+			r.CloneRepository = &falseValue
+		}
+
 		if r.Builder == nil {
 			r.Builder = &c.Builder
 		} else {
-			r.Builder.SetDefaults()
+			r.Builder.SetDefaults(preferences)
 		}
 		for _, t := range r.Triggers {
-			t.SetDefaults("release", r.Name)
+			t.SetDefaults(preferences, TriggerTypeRelease, r.Name)
 		}
 		for _, s := range r.Stages {
 			s.SetDefaults(*r.Builder)
 		}
 	}
+
+	for _, b := range c.Bots {
+		if b.CloneRepository == nil {
+			falseValue := false
+			b.CloneRepository = &falseValue
+		}
+
+		if b.Builder == nil {
+			b.Builder = &c.Builder
+		} else {
+			b.Builder.SetDefaults(preferences)
+		}
+		for _, t := range b.Triggers {
+			t.SetDefaults(preferences, TriggerTypeBot, b.Name)
+		}
+		for _, s := range b.Stages {
+			s.SetDefaults(*b.Builder)
+		}
+	}
 }
 
 // Validate checks if the manifest is valid
-func (c *EstafetteManifest) Validate() (err error) {
+func (c *EstafetteManifest) Validate(preferences EstafetteManifestPreferences) (err error) {
 
-	err = c.Builder.validate()
+	err = c.Builder.validate(preferences)
 	if err != nil {
 		return
+	}
+
+	// loop labels and check if they meet the label regexes
+	for key, value := range c.Labels {
+		if pattern, ok := preferences.LabelRegexes[key]; ok {
+			pattern = fmt.Sprintf("^%v$", strings.TrimSpace(pattern))
+
+			match, err := regexp.MatchString(pattern, value)
+			if err != nil {
+				return err
+			}
+
+			if !match {
+				return fmt.Errorf("Label %v does not match regex %v", key, pattern)
+			}
+		}
 	}
 
 	if len(c.Stages) == 0 {
@@ -212,14 +298,14 @@ func (c *EstafetteManifest) Validate() (err error) {
 
 	for _, r := range c.Releases {
 		if r.Builder != nil {
-			err = r.Builder.validate()
+			err = r.Builder.validate(preferences)
 			if err != nil {
 				return
 			}
 		}
 
 		for _, t := range r.Triggers {
-			err = t.Validate("release", r.Name)
+			err = t.Validate(TriggerTypeRelease, r.Name)
 			if err != nil {
 				return
 			}
@@ -265,6 +351,14 @@ func (c *EstafetteManifest) GetAllTriggers(repoSource, repoOwner, repoName strin
 	return triggers
 }
 
+// DeepCopy provides a copy of all nested pointers
+func (c *EstafetteManifest) DeepCopy() (target EstafetteManifest) {
+
+	copier.CopyWithOption(&target, c, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+
+	return
+}
+
 // Exists checks whether the .estafette.yaml exists
 func Exists(manifestPath string) bool {
 
@@ -278,9 +372,14 @@ func Exists(manifestPath string) bool {
 }
 
 // ReadManifestFromFile reads the .estafette.yaml into an EstafetteManifest object
-func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err error) {
+func ReadManifestFromFile(preferences *EstafetteManifestPreferences, manifestPath string, validate bool) (manifest EstafetteManifest, err error) {
 
 	log.Debug().Msgf("Reading %v file...", manifestPath)
+
+	// default preferences if not passed
+	if preferences == nil {
+		preferences = GetDefaultManifestPreferences()
+	}
 
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
@@ -293,12 +392,14 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 	}
 
 	// set defaults
-	manifest.SetDefaults()
+	manifest.SetDefaults(*preferences)
 
-	// check if manifest is valid
-	err = manifest.Validate()
-	if err != nil {
-		return manifest, err
+	if validate {
+		// check if manifest is valid
+		err = manifest.Validate(*preferences)
+		if err != nil {
+			return manifest, err
+		}
 	}
 
 	log.Debug().Msgf("Finished reading %v file successfully", manifestPath)
@@ -307,9 +408,12 @@ func ReadManifestFromFile(manifestPath string) (manifest EstafetteManifest, err 
 }
 
 // ReadManifest reads the string representation of .estafette.yaml into an EstafetteManifest object
-func ReadManifest(manifestString string) (manifest EstafetteManifest, err error) {
+func ReadManifest(preferences *EstafetteManifestPreferences, manifestString string, validate bool) (manifest EstafetteManifest, err error) {
 
-	log.Debug().Msg("Reading manifest from string...")
+	// default preferences if not passed
+	if preferences == nil {
+		preferences = GetDefaultManifestPreferences()
+	}
 
 	// unmarshal strict, so non-defined properties or incorrect nesting will fail
 	if err := yaml.UnmarshalStrict([]byte(manifestString), &manifest); err != nil {
@@ -317,15 +421,28 @@ func ReadManifest(manifestString string) (manifest EstafetteManifest, err error)
 	}
 
 	// set defaults
-	manifest.SetDefaults()
+	manifest.SetDefaults(*preferences)
 
-	// check if manifest is valid
-	err = manifest.Validate()
-	if err != nil {
-		return manifest, err
+	if validate {
+		// check if manifest is valid
+		err = manifest.Validate(*preferences)
+		if err != nil {
+			return manifest, err
+		}
 	}
 
-	log.Debug().Msg("Finished unmarshalling manifest from string successfully")
-
 	return
+}
+
+// GetDefaultManifestPreferences returns default preferences if not configured at the server
+func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
+	return &EstafetteManifestPreferences{
+		LabelRegexes:            map[string]string{},
+		BuilderOperatingSystems: []OperatingSystem{OperatingSystemLinux, OperatingSystemWindows},
+		BuilderTracksPerOperatingSystem: map[OperatingSystem][]string{
+			OperatingSystemLinux:   {"stable", "beta", "dev"},
+			OperatingSystemWindows: {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
+		},
+		DefaultBranch: "master",
+	}
 }

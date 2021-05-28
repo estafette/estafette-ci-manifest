@@ -52,7 +52,7 @@ func (version *EstafetteVersion) SetDefaults() {
 			version.SemVer.LabelTemplate = "{{branch}}"
 		}
 		if len(version.SemVer.ReleaseBranch.Values) == 0 {
-			version.SemVer.ReleaseBranch.Values = []string{"master"}
+			version.SemVer.ReleaseBranch.Values = []string{"master", "main"}
 		}
 	}
 

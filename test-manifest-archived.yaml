@@ -1,7 +1,8 @@
-unknownProperty: true
+archived: true
 
 builder:
-  track: dev
+  os: windows
+  track: windowsservercore-1809
 
 labels:
   app: estafette-ci-builder
@@ -67,6 +68,21 @@ stages:
       - supported2
 
   test-alpha-version:
+    services:
+    - name: kubernetes
+      image: bsycorp/kind:latest-1.15
+      env:
+        SOME_ENVIRONMENT_VAR: "some value with spaces"
+      readiness:
+        path: /kubernetes-ready
+        timeoutSeconds: 60
+        port: 80
+        protocol: http
+        hostname: kubernetes.kube-system.svc.cluster.local
+    - name: database
+      image: cockroachdb/cockroach:v19.1.5
+      commands:
+      - cockroachdb start --insecure --listen-addr=localhost
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
     retries: 1
     credentials: gke-tooling
@@ -84,6 +100,13 @@ stages:
       request: 256Mi
       limit: 256Mi
     dryrun: true
+
+  parallel-stages-group:
+    parallelStages:
+      stageA:
+        image: docker
+      stageB:
+        image: docker
 
 # releases are automatically triggered from stages or manually from gui, cli or slack
 releases:
@@ -104,6 +127,9 @@ releases:
         - beta
 
   development:
+    builder:
+      track: stable
+      os: linux
     stages:
       deploy:
         image: extensions/deploy-to-kubernetes-engine:dev
@@ -125,6 +151,13 @@ releases:
                 enabled: true
               - key: cert
                 path: cert
+
+      parallel-stages-group:
+        parallelStages:
+          stageA:
+            image: docker
+          stageB:
+            image: docker
 
   production:
     actions:

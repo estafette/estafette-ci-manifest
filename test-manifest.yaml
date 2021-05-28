@@ -1,6 +1,6 @@
 builder:
-  track: dev
   os: windows
+  track: windowsservercore-1809
 
 labels:
   app: estafette-ci-builder
@@ -13,7 +13,7 @@ version:
     minor: 2
     patch: '{{auto}}'
     labelTemplate: '{{branch}}'
-    releaseBranch: master
+    releaseBranch: main
 
 env:
   VAR_A: Greetings
@@ -48,7 +48,7 @@ stages:
     - docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}
     when:
       status == 'succeeded' &&
-      branch == 'master'
+      branch == 'main'
 
   slack-notify:
     image: docker:17.03.0-ce
@@ -58,7 +58,7 @@ stages:
     - 'curl -X POST --data-urlencode ''payload={"channel": "#build-status", "username": "estafette-ci-builder", "text": "Build ${ESTAFETTE_BUILD_VERSION} for ${ESTAFETTE_LABEL_APP} has failed!"}'' ${ESTAFETTE_SLACK_WEBHOOK}'
     when:
       status == 'failed' ||
-      branch == 'master'
+      branch == 'main'
     unknownProperty1: value1
     unknownProperty2: value2
     unknownProperty3:
@@ -172,79 +172,3 @@ releases:
         image: extensions/create-release-notes-from-changelog:stable
 
   tooling: {}
-
-bots:
-  pr-bot:
-    events:
-    - bitbucket:pullrequest:created
-    - bitbucket:pullrequest:updated
-    - bitbucket:pullrequest:approved
-    - bitbucket:pullrequest:unapproved
-    - bitbucket:pullrequest:fulfilled
-    - bitbucket:pullrequest:rejected
-    - bitbucket:pullrequest:comment_created
-    - bitbucket:pullrequest:comment_updated
-    - bitbucket:pullrequest:comment_deleted
-    stages:
-      welcome:
-        image: extensions/github-pr-bot:stable
-
-  any-bot:
-    events:
-    - bitbucket:repo:push
-    - bitbucket:repo:fork
-    - bitbucket:repo:transfer
-    - bitbucket:repo:created
-    - bitbucket:repo:deleted
-    - bitbucket:repo:commit_comment_created
-    - bitbucket:repo:commit_status_created
-    - bitbucket:repo:commit_status_updated
-    - bitbucket:issue:created
-    - bitbucket:issue:updated
-    - bitbucket:issue:comment_created
-    - bitbucket:pullrequest:created
-    - bitbucket:pullrequest:updated
-    - bitbucket:pullrequest:approved
-    - bitbucket:pullrequest:unapproved
-    - bitbucket:pullrequest:fulfilled
-    - bitbucket:pullrequest:rejected
-    - bitbucket:pullrequest:comment_created
-    - bitbucket:pullrequest:comment_updated
-    - bitbucket:pullrequest:comment_deleted
-    - github:commit_comment
-    - github:create
-    - github:delete
-    - github:deployment
-    - github:deployment_status
-    - github:fork
-    - github:gollum
-    - github:installation
-    - github:installation_repositories
-    - github:issue_comment
-    - github:issues
-    - github:label
-    - github:marketplace_purchase
-    - github:member
-    - github:membership
-    - github:milestone
-    - github:organization
-    - github:org_block
-    - github:page_build
-    - github:project_card
-    - github:project_column
-    - github:project
-    - github:public
-    - github:pull_request_review_comment
-    - github:pull_request_review
-    - github:pull_request
-    - github:push
-    - github:release
-    - github:repository
-    - github:status
-    - github:team
-    - github:team_add
-    - github:watch
-    - github:integration_installation_repositories
-    stages:
-      backup:
-        image: extensions/backup-event:stable

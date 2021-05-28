@@ -6,18 +6,24 @@ import (
 
 // EstafetteBot allows to respond to any event coming from one of the integrations
 type EstafetteBot struct {
-	Name   string            `yaml:"-"`
-	Events []string          `yaml:"events,omitempty" json:",omitempty"`
-	Stages []*EstafetteStage `yaml:"-" json:",omitempty"`
+	Name            string              `yaml:"-"`
+	Events          []string            `yaml:"events,omitempty" json:",omitempty"`
+	Builder         *EstafetteBuilder   `yaml:"builder,omitempty"`
+	CloneRepository *bool               `yaml:"clone,omitempty" json:",omitempty"`
+	Triggers        []*EstafetteTrigger `yaml:"triggers,omitempty" json:",omitempty"`
+	Stages          []*EstafetteStage   `yaml:"-" json:",omitempty"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteBot
 func (bot *EstafetteBot) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 
 	var aux struct {
-		Name   string        `yaml:"-"`
-		Events []string      `yaml:"events"`
-		Stages yaml.MapSlice `yaml:"stages"`
+		Name            string              `yaml:"-"`
+		Events          []string            `yaml:"events"`
+		Builder         *EstafetteBuilder   `yaml:"builder"`
+		CloneRepository *bool               `yaml:"clone"`
+		Triggers        []*EstafetteTrigger `yaml:"triggers"`
+		Stages          yaml.MapSlice       `yaml:"stages"`
 	}
 
 	// unmarshal to auxiliary type
@@ -26,7 +32,11 @@ func (bot *EstafetteBot) UnmarshalYAML(unmarshal func(interface{}) error) (err e
 	}
 
 	// map auxiliary properties
+	bot.Name = aux.Name
 	bot.Events = aux.Events
+	bot.Builder = aux.Builder
+	bot.CloneRepository = aux.CloneRepository
+	bot.Triggers = aux.Triggers
 
 	for _, mi := range aux.Stages {
 
@@ -54,13 +64,19 @@ func (bot *EstafetteBot) UnmarshalYAML(unmarshal func(interface{}) error) (err e
 func (bot *EstafetteBot) MarshalYAML() (out interface{}, err error) {
 
 	var aux struct {
-		Name   string        `yaml:"-"`
-		Events []string      `yaml:"events,omitempty"`
-		Stages yaml.MapSlice `yaml:"stages,omitempty"`
+		Name            string              `yaml:"-"`
+		Events          []string            `yaml:"events,omitempty"`
+		Builder         *EstafetteBuilder   `yaml:"builder,omitempty"`
+		CloneRepository *bool               `yaml:"clone,omitempty"`
+		Triggers        []*EstafetteTrigger `yaml:"triggers,omitempty"`
+		Stages          yaml.MapSlice       `yaml:"stages,omitempty"`
 	}
 
 	// map auxiliary properties
 	aux.Events = bot.Events
+	aux.Builder = bot.Builder
+	aux.CloneRepository = bot.CloneRepository
+	aux.Triggers = bot.Triggers
 
 	for _, stage := range bot.Stages {
 		aux.Stages = append(aux.Stages, yaml.MapItem{

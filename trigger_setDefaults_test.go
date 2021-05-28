@@ -31,7 +31,7 @@ func TestEstafettePipelineTriggerSetDefaults(t *testing.T) {
 		assert.Equal(t, "succeeded", trigger.Status)
 	})
 
-	t.Run("SetsBranchToMasterIfEmpty", func(t *testing.T) {
+	t.Run("SetsBranchToMasterOrMainIfEmpty", func(t *testing.T) {
 
 		trigger := EstafettePipelineTrigger{
 			Branch: "",
@@ -40,7 +40,7 @@ func TestEstafettePipelineTriggerSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, "master", trigger.Branch)
+		assert.Equal(t, "master|main", trigger.Branch)
 	})
 }
 
@@ -82,7 +82,7 @@ func TestEstafetteGitTriggerSetDefaults(t *testing.T) {
 		assert.Equal(t, "push", trigger.Event)
 	})
 
-	t.Run("SetsBranchToMasterIfEmpty", func(t *testing.T) {
+	t.Run("SetsBranchToMasterOrMainIfEmpty", func(t *testing.T) {
 
 		trigger := EstafetteGitTrigger{
 			Branch: "",
@@ -91,7 +91,7 @@ func TestEstafetteGitTriggerSetDefaults(t *testing.T) {
 		// act
 		trigger.SetDefaults()
 
-		assert.Equal(t, "master", trigger.Branch)
+		assert.Equal(t, "master|main", trigger.Branch)
 	})
 }
 
@@ -102,10 +102,14 @@ func TestEstafetteTriggerBuildActionSetDefaults(t *testing.T) {
 			Branch: "",
 		}
 
-		// act
-		trigger.SetDefaults()
+		preferences := EstafetteManifestPreferences{
+			DefaultBranch: "main",
+		}
 
-		assert.Equal(t, "master", trigger.Branch)
+		// act
+		trigger.SetDefaults(preferences)
+
+		assert.Equal(t, "main", trigger.Branch)
 	})
 }
 

@@ -353,3 +353,55 @@ func TestEstafetteGitTriggerFires(t *testing.T) {
 		assert.True(t, fires)
 	})
 }
+
+func TestEstafetteGithubTriggerFires(t *testing.T) {
+	t.Run("ReturnsTrueIfEventIsContainedInTriggerEvents", func(t *testing.T) {
+
+		event := EstafetteGithubEvent{
+			Event: "create",
+		}
+
+		trigger := EstafetteGithubTrigger{
+			Events: []string{
+				"commit_comment",
+				"create",
+				"delete",
+				"deployment",
+				"deployment_status",
+				"fork",
+				"gollum",
+				"installation",
+				"installation_repositories",
+			},
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+}
+
+func TestEstafetteBitbucketTriggerFires(t *testing.T) {
+	t.Run("ReturnsTrueIfEventIsContainedInTriggerEvents", func(t *testing.T) {
+
+		event := EstafetteGithubEvent{
+			Event: "pullrequest:comment_created",
+		}
+
+		trigger := EstafetteGithubTrigger{
+			Events: []string{
+				"pullrequest:fulfilled",
+				"pullrequest:rejected",
+				"pullrequest:comment_created",
+				"pullrequest:comment_updated",
+				"pullrequest:comment_deleted",
+			},
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+}

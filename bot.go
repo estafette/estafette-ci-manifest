@@ -7,7 +7,6 @@ import (
 // EstafetteBot allows to respond to any event coming from one of the integrations
 type EstafetteBot struct {
 	Name            string              `yaml:"-"`
-	Events          []string            `yaml:"events,omitempty" json:",omitempty"`
 	Builder         *EstafetteBuilder   `yaml:"builder,omitempty"`
 	CloneRepository *bool               `yaml:"clone,omitempty" json:",omitempty"`
 	Triggers        []*EstafetteTrigger `yaml:"triggers,omitempty" json:",omitempty"`
@@ -19,7 +18,6 @@ func (bot *EstafetteBot) UnmarshalYAML(unmarshal func(interface{}) error) (err e
 
 	var aux struct {
 		Name            string              `yaml:"-"`
-		Events          []string            `yaml:"events"`
 		Builder         *EstafetteBuilder   `yaml:"builder"`
 		CloneRepository *bool               `yaml:"clone"`
 		Triggers        []*EstafetteTrigger `yaml:"triggers"`
@@ -33,7 +31,6 @@ func (bot *EstafetteBot) UnmarshalYAML(unmarshal func(interface{}) error) (err e
 
 	// map auxiliary properties
 	bot.Name = aux.Name
-	bot.Events = aux.Events
 	bot.Builder = aux.Builder
 	bot.CloneRepository = aux.CloneRepository
 	bot.Triggers = aux.Triggers
@@ -65,7 +62,6 @@ func (bot *EstafetteBot) MarshalYAML() (out interface{}, err error) {
 
 	var aux struct {
 		Name            string              `yaml:"-"`
-		Events          []string            `yaml:"events,omitempty"`
 		Builder         *EstafetteBuilder   `yaml:"builder,omitempty"`
 		CloneRepository *bool               `yaml:"clone,omitempty"`
 		Triggers        []*EstafetteTrigger `yaml:"triggers,omitempty"`
@@ -73,7 +69,6 @@ func (bot *EstafetteBot) MarshalYAML() (out interface{}, err error) {
 	}
 
 	// map auxiliary properties
-	aux.Events = bot.Events
 	aux.Builder = bot.Builder
 	aux.CloneRepository = bot.CloneRepository
 	aux.Triggers = bot.Triggers

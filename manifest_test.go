@@ -472,18 +472,21 @@ pipelines:
 		if assert.Equal(t, 3, len(manifest.Bots)) {
 
 			assert.Equal(t, "pr-bot", manifest.Bots[0].Name)
-			assert.Equal(t, 9, len(manifest.Bots[0].Events))
+			assert.Equal(t, 1, len(manifest.Bots[0].Triggers))
+			assert.Equal(t, 9, len(manifest.Bots[0].Triggers[0].Bitbucket.Events))
 			assert.Equal(t, "welcome", manifest.Bots[0].Stages[0].Name)
 			assert.Equal(t, "extensions/github-pr-bot:stable", manifest.Bots[0].Stages[0].ContainerImage)
 
 			assert.Equal(t, "any-bot", manifest.Bots[1].Name)
-			assert.Equal(t, 54, len(manifest.Bots[1].Events))
+			assert.Equal(t, 2, len(manifest.Bots[1].Triggers))
+			assert.Equal(t, 20, len(manifest.Bots[1].Triggers[0].Bitbucket.Events))
+			assert.Equal(t, 34, len(manifest.Bots[1].Triggers[1].Github.Events))
 			assert.Equal(t, "backup", manifest.Bots[1].Stages[0].Name)
 			assert.Equal(t, "extensions/backup-event:stable", manifest.Bots[1].Stages[0].ContainerImage)
 
 			assert.Equal(t, "stale-issues-bot", manifest.Bots[2].Name)
-			assert.Equal(t, 0, len(manifest.Bots[2].Events))
 			assert.Equal(t, 1, len(manifest.Bots[2].Triggers))
+			assert.Equal(t, "0 10 * * *", manifest.Bots[2].Triggers[0].Cron.Schedule)
 			assert.Equal(t, true, *manifest.Bots[2].CloneRepository)
 			assert.Equal(t, "welcome", manifest.Bots[2].Stages[0].Name)
 			assert.Equal(t, "extensions/github-stale-issue-bot:stable", manifest.Bots[2].Stages[0].ContainerImage)
@@ -856,7 +859,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\",\"StorageMedium\":\"\",\"BuilderType\":\"docker\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"}},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"When\":\"status == 'succeeded'\",\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null,\"ReleaseTemplates\":null}", string(output))
+			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\",\"StorageMedium\":\"\",\"BuilderType\":\"docker\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"}},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"When\":\"status == 'succeeded'\",\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null,\"ReleaseTemplates\":null,\"Bots\":null}", string(output))
 		}
 	})
 }

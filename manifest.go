@@ -24,7 +24,7 @@ type EstafetteManifest struct {
 	Stages           []*EstafetteStage           `yaml:"-"`
 	Releases         []*EstafetteRelease         `yaml:"-"`
 	ReleaseTemplates []*EstafetteReleaseTemplate `yaml:"-"`
-	Bots             []*EstafetteBot             `yaml:"-" json:",omitempty"`
+	Bots             []*EstafetteBot             `yaml:"-"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
@@ -317,7 +317,29 @@ func (c *EstafetteManifest) Validate(preferences EstafetteManifestPreferences) (
 				return
 			}
 		}
+	}
 
+	for _, b := range c.Bots {
+		if b.Builder != nil {
+			err = b.Builder.validate(preferences)
+			if err != nil {
+				return
+			}
+		}
+
+		for _, t := range b.Triggers {
+			err = t.Validate(TriggerTypeBot, b.Name)
+			if err != nil {
+				return
+			}
+		}
+
+		for _, s := range b.Stages {
+			err = s.Validate()
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	return nil
@@ -341,6 +363,16 @@ func (c *EstafetteManifest) GetAllTriggers(repoSource, repoOwner, repoName strin
 	// add all release triggers
 	for _, r := range c.Releases {
 		for _, t := range r.Triggers {
+			if t != nil {
+				t.ReplaceSelf(pipelineName)
+				triggers = append(triggers, *t)
+			}
+		}
+	}
+
+	// add all bots triggers
+	for _, b := range c.Bots {
+		for _, t := range b.Triggers {
 			if t != nil {
 				t.ReplaceSelf(pipelineName)
 				triggers = append(triggers, *t)

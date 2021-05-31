@@ -92,6 +92,7 @@ type EstafetteTriggerReleaseAction struct {
 }
 
 type EstafetteTriggerBotAction struct {
+	Bot    string `yaml:"bot,omitempty" json:"bot,omitempty"`
 	Branch string `yaml:"branch,omitempty" json:"branch,omitempty"`
 }
 
@@ -137,7 +138,7 @@ func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences,
 		if t.BotAction == nil {
 			t.BotAction = &EstafetteTriggerBotAction{}
 		}
-		t.BotAction.SetDefaults(preferences)
+		t.BotAction.SetDefaults(preferences, targetName)
 	}
 }
 
@@ -222,7 +223,8 @@ func (r *EstafetteTriggerReleaseAction) SetDefaults(t *EstafetteTrigger, targetN
 }
 
 // SetDefaults sets defaults for EstafetteTriggerReleaseAction
-func (b *EstafetteTriggerBotAction) SetDefaults(preferences EstafetteManifestPreferences) {
+func (b *EstafetteTriggerBotAction) SetDefaults(preferences EstafetteManifestPreferences, botName string) {
+	b.Bot = botName
 	if b.Branch == "" {
 		b.Branch = preferences.DefaultBranch
 	}
@@ -350,7 +352,7 @@ func (p *EstafettePipelineTrigger) Validate() (err error) {
 		return fmt.Errorf("Set pipeline.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if p.Name == "" {
-		return fmt.Errorf("Set pipeline.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
+		return fmt.Errorf("Set pipeline.name in your trigger to 'self' or a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
 	}
 	return nil
 }
@@ -364,7 +366,7 @@ func (r *EstafetteReleaseTrigger) Validate() (err error) {
 		return fmt.Errorf("Set release.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if r.Name == "" {
-		return fmt.Errorf("Set release.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
+		return fmt.Errorf("Set release.name in your trigger to 'self' or a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
 	}
 	if r.Target == "" {
 		return fmt.Errorf("Set release.target in your trigger to a release target name on the pipeline set by release.name")

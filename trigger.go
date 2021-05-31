@@ -11,16 +11,19 @@ import (
 
 // EstafetteTrigger represents a trigger of any supported type and what action to take if the trigger fired
 type EstafetteTrigger struct {
-	Name     string                    `yaml:"name,omitempty" json:"name,omitempty"`
-	Pipeline *EstafettePipelineTrigger `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
-	Release  *EstafetteReleaseTrigger  `yaml:"release,omitempty" json:"release,omitempty"`
-	Git      *EstafetteGitTrigger      `yaml:"git,omitempty" json:"git,omitempty"`
-	Docker   *EstafetteDockerTrigger   `yaml:"docker,omitempty" json:"docker,omitempty"`
-	Cron     *EstafetteCronTrigger     `yaml:"cron,omitempty" json:"cron,omitempty"`
-	PubSub   *EstafettePubSubTrigger   `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
+	Name      string                     `yaml:"name,omitempty" json:"name,omitempty"`
+	Pipeline  *EstafettePipelineTrigger  `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
+	Release   *EstafetteReleaseTrigger   `yaml:"release,omitempty" json:"release,omitempty"`
+	Git       *EstafetteGitTrigger       `yaml:"git,omitempty" json:"git,omitempty"`
+	Docker    *EstafetteDockerTrigger    `yaml:"docker,omitempty" json:"docker,omitempty"`
+	Cron      *EstafetteCronTrigger      `yaml:"cron,omitempty" json:"cron,omitempty"`
+	PubSub    *EstafettePubSubTrigger    `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
+	Github    *EstafetteGithubTrigger    `yaml:"github,omitempty" json:"github,omitempty"`
+	Bitbucket *EstafetteBitbucketTrigger `yaml:"bitbucket,omitempty" json:"bitbucket,omitempty"`
 
 	BuildAction   *EstafetteTriggerBuildAction   `yaml:"builds,omitempty" json:"builds,omitempty"`
 	ReleaseAction *EstafetteTriggerReleaseAction `yaml:"releases,omitempty" json:"releases,omitempty"`
+	BotAction     *EstafetteTriggerBotAction     `yaml:"runs,omitempty" json:"runs,omitempty"`
 }
 
 // EstafettePipelineTrigger fires for pipeline changes and applies filtering to limit when this results in an action
@@ -59,6 +62,18 @@ type EstafettePubSubTrigger struct {
 	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
 }
 
+// EstafetteGithubTrigger fires for github events
+type EstafetteGithubTrigger struct {
+	Events     []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Repository string   `yaml:"repository,omitempty" json:"repository,omitempty"`
+}
+
+// EstafetteBitbucketTrigger fires for bitbucket events
+type EstafetteBitbucketTrigger struct {
+	Events     []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Repository string   `yaml:"repository,omitempty" json:"repository,omitempty"`
+}
+
 // EstafetteCronTrigger fires at intervals specified by the cron schedule
 type EstafetteCronTrigger struct {
 	Schedule string `yaml:"schedule,omitempty" json:"schedule,omitempty"`
@@ -76,8 +91,13 @@ type EstafetteTriggerReleaseAction struct {
 	Version string `yaml:"version,omitempty" json:"version,omitempty"`
 }
 
+type EstafetteTriggerBotAction struct {
+	Bot    string `yaml:"bot,omitempty" json:"bot,omitempty"`
+	Branch string `yaml:"branch,omitempty" json:"branch,omitempty"`
+}
+
 // SetDefaults sets defaults for EstafetteTrigger
-func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences, triggerType, targetName string) {
+func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences, triggerType TriggerType, targetName string) {
 	if t.Pipeline != nil {
 		t.Pipeline.SetDefaults()
 	}
@@ -96,20 +116,29 @@ func (t *EstafetteTrigger) SetDefaults(preferences EstafetteManifestPreferences,
 	if t.PubSub != nil {
 		t.PubSub.SetDefaults()
 	}
+	if t.Github != nil {
+		t.Github.SetDefaults()
+	}
+	if t.Bitbucket != nil {
+		t.Bitbucket.SetDefaults()
+	}
 
 	switch triggerType {
-	case "build":
+	case TriggerTypeBuild:
 		if t.BuildAction == nil {
 			t.BuildAction = &EstafetteTriggerBuildAction{}
 		}
 		t.BuildAction.SetDefaults(preferences)
-		break
-	case "release":
+	case TriggerTypeRelease:
 		if t.ReleaseAction == nil {
 			t.ReleaseAction = &EstafetteTriggerReleaseAction{}
 		}
 		t.ReleaseAction.SetDefaults(t, targetName)
-		break
+	case TriggerTypeBot:
+		if t.BotAction == nil {
+			t.BotAction = &EstafetteTriggerBotAction{}
+		}
+		t.BotAction.SetDefaults(preferences, targetName)
 	}
 }
 
@@ -154,8 +183,22 @@ func (d *EstafetteDockerTrigger) SetDefaults() {
 func (c *EstafetteCronTrigger) SetDefaults() {
 }
 
-// SetDefaults sets defaults for EstafetteCronTrigger
+// SetDefaults sets defaults for EstafettePubSubTrigger
 func (p *EstafettePubSubTrigger) SetDefaults() {
+}
+
+// SetDefaults sets defaults for EstafetteGithubTrigger
+func (p *EstafetteGithubTrigger) SetDefaults() {
+	if p.Repository == "" {
+		p.Repository = "self"
+	}
+}
+
+// SetDefaults sets defaults for EstafetteBitbucketTrigger
+func (p *EstafetteBitbucketTrigger) SetDefaults() {
+	if p.Repository == "" {
+		p.Repository = "self"
+	}
 }
 
 // SetDefaults sets defaults for EstafetteTriggerBuildAction
@@ -179,8 +222,16 @@ func (r *EstafetteTriggerReleaseAction) SetDefaults(t *EstafetteTrigger, targetN
 	}
 }
 
+// SetDefaults sets defaults for EstafetteTriggerReleaseAction
+func (b *EstafetteTriggerBotAction) SetDefaults(preferences EstafetteManifestPreferences, botName string) {
+	b.Bot = botName
+	if b.Branch == "" {
+		b.Branch = preferences.DefaultBranch
+	}
+}
+
 // Validate checks if EstafetteTrigger is valid
-func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) {
+func (t *EstafetteTrigger) Validate(triggerType TriggerType, targetName string) (err error) {
 
 	numberOfTypes := 0
 
@@ -189,8 +240,10 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		t.Git == nil &&
 		t.Docker == nil &&
 		t.Cron == nil &&
-		t.PubSub == nil {
-		return fmt.Errorf("Set at least a 'pipeline', 'release', 'git', 'docker', 'cron' or 'pubsub' trigger")
+		t.PubSub == nil &&
+		t.Github == nil &&
+		t.Bitbucket == nil {
+		return fmt.Errorf("Set at least a 'pipeline', 'release', 'git', 'docker', 'cron', 'pubsub', 'github' or 'bitbucket' trigger")
 	}
 
 	if t.Pipeline != nil {
@@ -235,13 +288,27 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		}
 		numberOfTypes++
 	}
+	if t.Github != nil {
+		err = t.Github.Validate()
+		if err != nil {
+			return err
+		}
+		numberOfTypes++
+	}
+	if t.Bitbucket != nil {
+		err = t.Bitbucket.Validate()
+		if err != nil {
+			return err
+		}
+		numberOfTypes++
+	}
 
 	if numberOfTypes != 1 {
-		return fmt.Errorf("Do not specify more than one type of trigger 'pipeline', 'release', 'git', 'docker' or 'cron' per trigger object")
+		return fmt.Errorf("Do not specify more than one type of trigger 'pipeline', 'release', 'git', 'docker', 'cron', 'pubsub', 'github' or 'bitbucket' per trigger object")
 	}
 
 	switch triggerType {
-	case "build":
+	case TriggerTypeBuild:
 		if t.BuildAction == nil {
 			return fmt.Errorf("For a build trigger set the 'builds' property")
 		}
@@ -252,9 +319,7 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		if err != nil {
 			return err
 		}
-
-		break
-	case "release":
+	case TriggerTypeRelease:
 		if t.ReleaseAction == nil {
 			return fmt.Errorf("For a release trigger set the 'releases' property")
 		}
@@ -265,7 +330,14 @@ func (t *EstafetteTrigger) Validate(triggerType, targetName string) (err error) 
 		if err != nil {
 			return err
 		}
-		break
+	case TriggerTypeBot:
+		if t.BotAction == nil {
+			return fmt.Errorf("For a bot trigger set the 'runs' property")
+		}
+		err = t.BotAction.Validate()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -280,7 +352,7 @@ func (p *EstafettePipelineTrigger) Validate() (err error) {
 		return fmt.Errorf("Set pipeline.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if p.Name == "" {
-		return fmt.Errorf("Set pipeline.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
+		return fmt.Errorf("Set pipeline.name in your trigger to 'self' or a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
 	}
 	return nil
 }
@@ -294,7 +366,7 @@ func (r *EstafetteReleaseTrigger) Validate() (err error) {
 		return fmt.Errorf("Set release.status in your trigger to 'succeeded' or 'failed' for event 'finished'")
 	}
 	if r.Name == "" {
-		return fmt.Errorf("Set release.name in your trigger to a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
+		return fmt.Errorf("Set release.name in your trigger to 'self' or a full qualified pipeline name, i.e. github.com/estafette/estafette-ci-manifest")
 	}
 	if r.Target == "" {
 		return fmt.Errorf("Set release.target in your trigger to a release target name on the pipeline set by release.name")
@@ -344,6 +416,24 @@ func (p *EstafettePubSubTrigger) Validate() (err error) {
 	return nil
 }
 
+// Validate checks if EstafetteGithubTrigger is valid
+func (p *EstafetteGithubTrigger) Validate() (err error) {
+	if len(p.Events) == 0 {
+		return fmt.Errorf("Set array github.events in your trigger to at least one github event")
+	}
+
+	return nil
+}
+
+// Validate checks if EstafetteBitbucketTrigger is valid
+func (p *EstafetteBitbucketTrigger) Validate() (err error) {
+	if len(p.Events) == 0 {
+		return fmt.Errorf("Set array bitbucket.events in your trigger to at least one bitbucket event")
+	}
+
+	return nil
+}
+
 // Validate checks if EstafetteTriggerBuildAction is valid
 func (b *EstafetteTriggerBuildAction) Validate() (err error) {
 	return nil
@@ -351,11 +441,15 @@ func (b *EstafetteTriggerBuildAction) Validate() (err error) {
 
 // Validate checks if EstafetteTriggerReleaseAction is valid
 func (r *EstafetteTriggerReleaseAction) Validate(targetName string) (err error) {
-
 	if r.Target != targetName {
 		return fmt.Errorf("The target in your releases action should have defaulted to '%v'", targetName)
 	}
 
+	return nil
+}
+
+// Validate checks if EstafetteTriggerBotAction is valid
+func (b *EstafetteTriggerBotAction) Validate() (err error) {
 	return nil
 }
 
@@ -366,6 +460,12 @@ func (t *EstafetteTrigger) ReplaceSelf(pipeline string) {
 	}
 	if t.Release != nil && t.Release.Name == "self" {
 		t.Release.Name = pipeline
+	}
+	if t.Github != nil && t.Github.Repository == "self" {
+		t.Github.Repository = pipeline
+	}
+	if t.Bitbucket != nil && t.Bitbucket.Repository == "self" {
+		t.Bitbucket.Repository = pipeline
 	}
 }
 
@@ -521,6 +621,36 @@ func (p *EstafettePubSubTrigger) Fires(e *EstafettePubSubEvent) bool {
 	}
 	if !strings.EqualFold(p.Topic, e.Topic) {
 		return false
+	}
+
+	return true
+}
+
+// Fires indicates whether EstafetteGithubTrigger fires for an EstafetteGithubEvent
+func (p *EstafetteGithubTrigger) Fires(e *EstafetteGithubEvent) bool {
+	if e.Repository != "" && e.Repository != p.Repository {
+		return false
+	}
+
+	for _, ev := range p.Events {
+		if ev == e.Event {
+			return true
+		}
+	}
+
+	return true
+}
+
+// Fires indicates whether EstafetteBitbucketTrigger fires for an EstafetteBitbucketEvent
+func (p *EstafetteBitbucketTrigger) Fires(e *EstafetteBitbucketEvent) bool {
+	if e.Repository != "" && e.Repository != p.Repository {
+		return false
+	}
+
+	for _, ev := range p.Events {
+		if ev == e.Event {
+			return true
+		}
 	}
 
 	return true

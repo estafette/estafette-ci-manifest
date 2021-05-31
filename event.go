@@ -54,15 +54,31 @@ type EstafettePubSubEvent struct {
 	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
 }
 
+// EstafetteGithubEvent fires for github events
+type EstafetteGithubEvent struct {
+	Event      string `yaml:"event,omitempty" json:"event,omitempty"`
+	Repository string `yaml:"repository,omitempty" json:"repository,omitempty"`
+	EventBody  string `yaml:"eventBody,omitempty" json:"eventBody,omitempty"`
+}
+
+// EstafetteBitbucketEvent fires for bitbucket events
+type EstafetteBitbucketEvent struct {
+	Event      string `yaml:"event,omitempty" json:"event,omitempty"`
+	Repository string `yaml:"repository,omitempty" json:"repository,omitempty"`
+	EventBody  string `yaml:"eventBody,omitempty" json:"eventBody,omitempty"`
+}
+
 // EstafetteEvent is a container for any trigger event
 type EstafetteEvent struct {
-	Name     string                  `yaml:"name,omitempty" json:"name,omitempty"`
-	Fired    bool                    `yaml:"fired,omitempty" json:"fired,omitempty"`
-	Pipeline *EstafettePipelineEvent `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
-	Release  *EstafetteReleaseEvent  `yaml:"release,omitempty" json:"release,omitempty"`
-	Git      *EstafetteGitEvent      `yaml:"git,omitempty" json:"git,omitempty"`
-	Docker   *EstafetteDockerEvent   `yaml:"docker,omitempty" json:"docker,omitempty"`
-	Cron     *EstafetteCronEvent     `yaml:"cron,omitempty" json:"cron,omitempty"`
-	PubSub   *EstafettePubSubEvent   `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
-	Manual   *EstafetteManualEvent   `yaml:"manual,omitempty" json:"manual,omitempty"`
+	Name      string                   `yaml:"name,omitempty" json:"name,omitempty"`
+	Fired     bool                     `yaml:"fired,omitempty" json:"fired,omitempty"`
+	Pipeline  *EstafettePipelineEvent  `yaml:"pipeline,omitempty" json:"pipeline,omitempty"`
+	Release   *EstafetteReleaseEvent   `yaml:"release,omitempty" json:"release,omitempty"`
+	Git       *EstafetteGitEvent       `yaml:"git,omitempty" json:"git,omitempty"`
+	Docker    *EstafetteDockerEvent    `yaml:"docker,omitempty" json:"docker,omitempty"`
+	Cron      *EstafetteCronEvent      `yaml:"cron,omitempty" json:"cron,omitempty"`
+	PubSub    *EstafettePubSubEvent    `yaml:"pubsub,omitempty" json:"pubsub,omitempty"`
+	Github    *EstafetteGithubEvent    `yaml:"github,omitempty" json:"github,omitempty"`
+	Bitbucket *EstafetteBitbucketEvent `yaml:"bitbucket,omitempty" json:"bitbucket,omitempty"`
+	Manual    *EstafetteManualEvent    `yaml:"manual,omitempty" json:"manual,omitempty"`
 }

@@ -24,6 +24,7 @@ type EstafetteManifest struct {
 	Stages           []*EstafetteStage           `yaml:"-"`
 	Releases         []*EstafetteRelease         `yaml:"-"`
 	ReleaseTemplates []*EstafetteReleaseTemplate `yaml:"-"`
+	Bots             []*EstafetteBot             `yaml:"-"`
 }
 
 // UnmarshalYAML customizes unmarshalling an EstafetteManifest
@@ -40,6 +41,7 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		Stages              yaml.MapSlice       `yaml:"stages"`
 		Releases            yaml.MapSlice       `yaml:"releases"`
 		ReleaseTemplates    yaml.MapSlice       `yaml:"releaseTemplates"`
+		Bots                yaml.MapSlice       `yaml:"bots"`
 	}
 
 	// unmarshal to auxiliary type
@@ -130,6 +132,25 @@ func (c *EstafetteManifest) UnmarshalYAML(unmarshal func(interface{}) error) (er
 		c.Releases = append(c.Releases, release)
 	}
 
+	for _, mi := range aux.Bots {
+
+		bytes, err := yaml.Marshal(mi.Value)
+		if err != nil {
+			return err
+		}
+
+		var bot *EstafetteBot
+		if err := yaml.Unmarshal(bytes, &bot); err != nil {
+			return err
+		}
+		if bot == nil {
+			bot = &EstafetteBot{}
+		}
+
+		bot.Name = mi.Key.(string)
+		c.Bots = append(c.Bots, bot)
+	}
+
 	return nil
 }
 
@@ -145,6 +166,7 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 		Stages           yaml.MapSlice       `yaml:"stages,omitempty"`
 		Releases         yaml.MapSlice       `yaml:"releases,omitempty"`
 		ReleaseTemplates yaml.MapSlice       `yaml:"releaseTemplates,omitempty"`
+		Bots             yaml.MapSlice       `yaml:"bots,omitempty"`
 	}
 
 	aux.Archived = c.Archived
@@ -172,6 +194,12 @@ func (c EstafetteManifest) MarshalYAML() (out interface{}, err error) {
 			Value: releaseTemplate,
 		})
 	}
+	for _, bot := range c.Bots {
+		aux.Bots = append(aux.Bots, yaml.MapItem{
+			Key:   bot.Name,
+			Value: bot,
+		})
+	}
 
 	return aux, err
 }
@@ -182,7 +210,7 @@ func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences
 	c.Version.SetDefaults()
 
 	for _, t := range c.Triggers {
-		t.SetDefaults(preferences, "build", "")
+		t.SetDefaults(preferences, TriggerTypeBuild, "")
 	}
 	for _, s := range c.Stages {
 		s.SetDefaults(c.Builder)
@@ -200,10 +228,29 @@ func (c *EstafetteManifest) SetDefaults(preferences EstafetteManifestPreferences
 			r.Builder.SetDefaults(preferences)
 		}
 		for _, t := range r.Triggers {
-			t.SetDefaults(preferences, "release", r.Name)
+			t.SetDefaults(preferences, TriggerTypeRelease, r.Name)
 		}
 		for _, s := range r.Stages {
 			s.SetDefaults(*r.Builder)
+		}
+	}
+
+	for _, b := range c.Bots {
+		if b.CloneRepository == nil {
+			falseValue := false
+			b.CloneRepository = &falseValue
+		}
+
+		if b.Builder == nil {
+			b.Builder = &c.Builder
+		} else {
+			b.Builder.SetDefaults(preferences)
+		}
+		for _, t := range b.Triggers {
+			t.SetDefaults(preferences, TriggerTypeBot, b.Name)
+		}
+		for _, s := range b.Stages {
+			s.SetDefaults(*b.Builder)
 		}
 	}
 }
@@ -258,7 +305,7 @@ func (c *EstafetteManifest) Validate(preferences EstafetteManifestPreferences) (
 		}
 
 		for _, t := range r.Triggers {
-			err = t.Validate("release", r.Name)
+			err = t.Validate(TriggerTypeRelease, r.Name)
 			if err != nil {
 				return
 			}
@@ -270,7 +317,29 @@ func (c *EstafetteManifest) Validate(preferences EstafetteManifestPreferences) (
 				return
 			}
 		}
+	}
 
+	for _, b := range c.Bots {
+		if b.Builder != nil {
+			err = b.Builder.validate(preferences)
+			if err != nil {
+				return
+			}
+		}
+
+		for _, t := range b.Triggers {
+			err = t.Validate(TriggerTypeBot, b.Name)
+			if err != nil {
+				return
+			}
+		}
+
+		for _, s := range b.Stages {
+			err = s.Validate()
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	return nil
@@ -294,6 +363,16 @@ func (c *EstafetteManifest) GetAllTriggers(repoSource, repoOwner, repoName strin
 	// add all release triggers
 	for _, r := range c.Releases {
 		for _, t := range r.Triggers {
+			if t != nil {
+				t.ReplaceSelf(pipelineName)
+				triggers = append(triggers, *t)
+			}
+		}
+	}
+
+	// add all bots triggers
+	for _, b := range c.Bots {
+		for _, t := range b.Triggers {
 			if t != nil {
 				t.ReplaceSelf(pipelineName)
 				triggers = append(triggers, *t)

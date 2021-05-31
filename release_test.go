@@ -32,7 +32,7 @@ stages:
 }
 
 func TestReleaseToYamlMarshalling(t *testing.T) {
-	t.Run("UmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
+	t.Run("UnmarshallingThenMarshallingReturnsTheSameFile", func(t *testing.T) {
 
 		var release EstafetteRelease
 

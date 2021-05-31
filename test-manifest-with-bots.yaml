@@ -1,0 +1,107 @@
+labels:
+  app: estafette-ci-api
+  team: estafette-team
+  language: golang
+
+# automatically executed stages on a push to the repository
+# automatically executed stages on a push to the repository
+stages:
+  build:
+    image: golang:1.12.1-alpine3.9
+    env:
+      CGO_ENABLED: 0
+      GOOS: linux
+      GOFLAGS: -mod=vendor
+    commands:
+    - go test ./...
+
+bots:
+  pr-bot:
+    triggers:
+    - bitbucket:
+        events:
+        - pullrequest:created
+        - pullrequest:updated
+        - pullrequest:approved
+        - pullrequest:unapproved
+        - pullrequest:fulfilled
+        - pullrequest:rejected
+        - pullrequest:comment_created
+        - pullrequest:comment_updated
+        - pullrequest:comment_deleted
+    stages:
+      welcome:
+        image: extensions/github-pr-bot:stable
+
+  any-bot:
+    triggers:
+    - bitbucket:
+        events:
+        - repo:push
+        - repo:fork
+        - repo:transfer
+        - repo:created
+        - repo:deleted
+        - repo:commit_comment_created
+        - repo:commit_status_created
+        - repo:commit_status_updated
+        - issue:created
+        - issue:updated
+        - issue:comment_created
+        - pullrequest:created
+        - pullrequest:updated
+        - pullrequest:approved
+        - pullrequest:unapproved
+        - pullrequest:fulfilled
+        - pullrequest:rejected
+        - pullrequest:comment_created
+        - pullrequest:comment_updated
+        - pullrequest:comment_deleted
+    - github:
+        events:
+        - commit_comment
+        - create
+        - delete
+        - deployment
+        - deployment_status
+        - fork
+        - gollum
+        - installation
+        - installation_repositories
+        - issue_comment
+        - issues
+        - label
+        - marketplace_purchase
+        - member
+        - membership
+        - milestone
+        - organization
+        - org_block
+        - page_build
+        - project_card
+        - project_column
+        - project
+        - public
+        - pull_request_review_comment
+        - pull_request_review
+        - pull_request
+        - push
+        - release
+        - repository
+        - status
+        - team
+        - team_add
+        - watch
+        - integration_installation_repositories
+    stages:
+      backup:
+        image: extensions/backup-event:stable
+
+  stale-issues-bot:
+    triggers:
+    - cron: 
+        schedule: '0 10 * * *'
+    clone: true
+    stages:
+      welcome:
+        image: extensions/github-stale-issue-bot:stable

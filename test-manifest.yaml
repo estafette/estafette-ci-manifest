@@ -171,4 +171,4 @@ releases:
       create-release-notes:
         image: extensions/create-release-notes-from-changelog:stable
 
-  tooling:
+  tooling: {}

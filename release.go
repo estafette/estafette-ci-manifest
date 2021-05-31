@@ -12,7 +12,7 @@ type EstafetteRelease struct {
 	CloneRepository *bool                     `yaml:"clone,omitempty" json:",omitempty"`
 	Actions         []*EstafetteReleaseAction `yaml:"actions,omitempty" json:",omitempty"`
 	Triggers        []*EstafetteTrigger       `yaml:"triggers,omitempty" json:",omitempty"`
-	Stages          []*EstafetteStage         `yaml:"-"`
+	Stages          []*EstafetteStage         `yaml:"-" json:",omitempty"`
 	Template        string                    `yaml:"template,omitempty"`
 }
 
@@ -146,5 +146,4 @@ func (release *EstafetteRelease) InitFromTemplate(releaseTemplates map[string]*E
 			}
 		}
 	}
-
 }

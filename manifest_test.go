@@ -474,13 +474,16 @@ pipelines:
 			assert.Equal(t, "pr-bot", manifest.Bots[0].Name)
 			assert.Equal(t, 1, len(manifest.Bots[0].Triggers))
 			assert.Equal(t, 9, len(manifest.Bots[0].Triggers[0].Bitbucket.Events))
+			assert.Equal(t, "self", manifest.Bots[1].Triggers[0].Bitbucket.Repository)
 			assert.Equal(t, "welcome", manifest.Bots[0].Stages[0].Name)
 			assert.Equal(t, "extensions/github-pr-bot:stable", manifest.Bots[0].Stages[0].ContainerImage)
 
 			assert.Equal(t, "any-bot", manifest.Bots[1].Name)
 			assert.Equal(t, 2, len(manifest.Bots[1].Triggers))
 			assert.Equal(t, 20, len(manifest.Bots[1].Triggers[0].Bitbucket.Events))
+			assert.Equal(t, "self", manifest.Bots[1].Triggers[0].Bitbucket.Repository)
 			assert.Equal(t, 34, len(manifest.Bots[1].Triggers[1].Github.Events))
+			assert.Equal(t, "self", manifest.Bots[1].Triggers[1].Github.Repository)
 			assert.Equal(t, "backup", manifest.Bots[1].Stages[0].Name)
 			assert.Equal(t, "extensions/backup-event:stable", manifest.Bots[1].Stages[0].ContainerImage)
 

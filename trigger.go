@@ -64,12 +64,14 @@ type EstafettePubSubTrigger struct {
 
 // EstafetteGithubTrigger fires for github events
 type EstafetteGithubTrigger struct {
-	Events []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Events     []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Repository string   `yaml:"repository,omitempty" json:"repository,omitempty"`
 }
 
 // EstafetteBitbucketTrigger fires for bitbucket events
 type EstafetteBitbucketTrigger struct {
-	Events []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Events     []string `yaml:"events,omitempty" json:"events,omitempty"`
+	Repository string   `yaml:"repository,omitempty" json:"repository,omitempty"`
 }
 
 // EstafetteCronTrigger fires at intervals specified by the cron schedule
@@ -186,10 +188,16 @@ func (p *EstafettePubSubTrigger) SetDefaults() {
 
 // SetDefaults sets defaults for EstafetteGithubTrigger
 func (p *EstafetteGithubTrigger) SetDefaults() {
+	if p.Repository == "" {
+		p.Repository = "self"
+	}
 }
 
 // SetDefaults sets defaults for EstafetteBitbucketTrigger
 func (p *EstafetteBitbucketTrigger) SetDefaults() {
+	if p.Repository == "" {
+		p.Repository = "self"
+	}
 }
 
 // SetDefaults sets defaults for EstafetteTriggerBuildAction
@@ -451,6 +459,12 @@ func (t *EstafetteTrigger) ReplaceSelf(pipeline string) {
 	if t.Release != nil && t.Release.Name == "self" {
 		t.Release.Name = pipeline
 	}
+	if t.Github != nil && t.Github.Repository == "self" {
+		t.Github.Repository = pipeline
+	}
+	if t.Bitbucket != nil && t.Bitbucket.Repository == "self" {
+		t.Bitbucket.Repository = pipeline
+	}
 }
 
 // Fires indicates whether EstafettePipelineTrigger fires for an EstafettePipelineEvent
@@ -612,6 +626,9 @@ func (p *EstafettePubSubTrigger) Fires(e *EstafettePubSubEvent) bool {
 
 // Fires indicates whether EstafetteGithubTrigger fires for an EstafetteGithubEvent
 func (p *EstafetteGithubTrigger) Fires(e *EstafetteGithubEvent) bool {
+	if e.Repository != "" && e.Repository != p.Repository {
+		return false
+	}
 
 	for _, ev := range p.Events {
 		if ev == e.Event {
@@ -624,6 +641,9 @@ func (p *EstafetteGithubTrigger) Fires(e *EstafetteGithubEvent) bool {
 
 // Fires indicates whether EstafetteBitbucketTrigger fires for an EstafetteBitbucketEvent
 func (p *EstafetteBitbucketTrigger) Fires(e *EstafetteBitbucketEvent) bool {
+	if e.Repository != "" && e.Repository != p.Repository {
+		return false
+	}
 
 	for _, ev := range p.Events {
 		if ev == e.Event {

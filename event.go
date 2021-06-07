@@ -64,9 +64,12 @@ type EstafetteGithubEvent struct {
 
 // EstafetteBitbucketEvent fires for bitbucket events
 type EstafetteBitbucketEvent struct {
-	Event      string `yaml:"event,omitempty" json:"event,omitempty"`
-	Repository string `yaml:"repository,omitempty" json:"repository,omitempty"`
-	Payload    string `yaml:"payload,omitempty" json:"payload,omitempty"`
+	Event         string `yaml:"event,omitempty" json:"event,omitempty"`
+	Repository    string `yaml:"repository,omitempty" json:"repository,omitempty"`
+	HookUUID      string `yaml:"hookUUID,omitempty" json:"hookUUID,omitempty"`
+	RequestUUID   string `yaml:"requestUUID,omitempty" json:"requestUUID,omitempty"`
+	AttemptNumber string `yaml:"attemptNumber,omitempty" json:"attemptNumber,omitempty"`
+	Payload       string `yaml:"payload,omitempty" json:"payload,omitempty"`
 }
 
 // EstafetteEvent is a container for any trigger event

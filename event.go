@@ -58,14 +58,15 @@ type EstafettePubSubEvent struct {
 type EstafetteGithubEvent struct {
 	Event      string `yaml:"event,omitempty" json:"event,omitempty"`
 	Repository string `yaml:"repository,omitempty" json:"repository,omitempty"`
-	EventBody  string `yaml:"eventBody,omitempty" json:"eventBody,omitempty"`
+	Delivery   string `yaml:"delivery,omitempty" json:"delivery,omitempty"`
+	Payload    string `yaml:"payload,omitempty" json:"payload,omitempty"`
 }
 
 // EstafetteBitbucketEvent fires for bitbucket events
 type EstafetteBitbucketEvent struct {
 	Event      string `yaml:"event,omitempty" json:"event,omitempty"`
 	Repository string `yaml:"repository,omitempty" json:"repository,omitempty"`
-	EventBody  string `yaml:"eventBody,omitempty" json:"eventBody,omitempty"`
+	Payload    string `yaml:"payload,omitempty" json:"payload,omitempty"`
 }
 
 // EstafetteEvent is a container for any trigger event

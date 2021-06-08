@@ -52,6 +52,7 @@ type EstafetteManualEvent struct {
 type EstafettePubSubEvent struct {
 	Project string `yaml:"project,omitempty" json:"project,omitempty"`
 	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
+	Payload string `yaml:"payload,omitempty" json:"payload,omitempty"`
 }
 
 // EstafetteGithubEvent fires for github events

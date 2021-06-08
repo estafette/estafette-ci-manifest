@@ -50,9 +50,9 @@ type EstafetteManualEvent struct {
 
 // EstafettePubSubEvent fires when a subscribed pubsub topic receives an event
 type EstafettePubSubEvent struct {
-	Project string `yaml:"project,omitempty" json:"project,omitempty"`
-	Topic   string `yaml:"topic,omitempty" json:"topic,omitempty"`
-	Payload string `yaml:"payload,omitempty" json:"payload,omitempty"`
+	Project string        `yaml:"project,omitempty" json:"project,omitempty"`
+	Topic   string        `yaml:"topic,omitempty" json:"topic,omitempty"`
+	Message PubsubMessage `yaml:"message,omitempty" json:"message,omitempty"`
 }
 
 // EstafetteGithubEvent fires for github events

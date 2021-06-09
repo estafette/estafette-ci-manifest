@@ -616,10 +616,13 @@ func regexMatch(pattern, value string) (bool, error) {
 // Fires indicates whether EstafettePubSubTrigger fires for an EstafettePubSubEvent
 func (p *EstafettePubSubTrigger) Fires(e *EstafettePubSubEvent) bool {
 
-	if !strings.EqualFold(p.Project, e.Project) {
+	projectMatch, err := regexp.MatchString(fmt.Sprintf("^(%v)$", strings.TrimSpace(p.Project)), e.Project)
+	if !projectMatch || err != nil {
 		return false
 	}
-	if !strings.EqualFold(p.Topic, e.Topic) {
+
+	topicMatch, err := regexp.MatchString(fmt.Sprintf("^(%v)$", strings.TrimSpace(p.Topic)), e.Topic)
+	if !topicMatch || err != nil {
 		return false
 	}
 

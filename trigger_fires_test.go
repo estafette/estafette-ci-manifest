@@ -405,3 +405,113 @@ func TestEstafetteBitbucketTriggerFires(t *testing.T) {
 		assert.True(t, fires)
 	})
 }
+
+func TestEstafettePubsubTriggerFires(t *testing.T) {
+	t.Run("ReturnsTrueIfTopicAndProjectMatch", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "my-project",
+			Topic:   "my-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: "my-project",
+			Topic:   "my-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+
+	t.Run("ReturnsFalseIfProjectDoesNotMatch", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "another-project",
+			Topic:   "my-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: "my-project",
+			Topic:   "my-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+
+	t.Run("ReturnsFalseIfTopicDoesNotMatch", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "my-project",
+			Topic:   "another-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: "my-project",
+			Topic:   "my-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+
+	t.Run("ReturnsTrueIfTopicAndProjectMatchAsRegex", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "my-project",
+			Topic:   "my-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: ".+-project",
+			Topic:   ".+-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.True(t, fires)
+	})
+
+	t.Run("ReturnsFalseIfProjectDoesNotMatchAsRegex", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "-project",
+			Topic:   "my-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: ".+-project",
+			Topic:   ".+-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+
+	t.Run("ReturnsFalseIfTopicDoesNotMatchAsRegex", func(t *testing.T) {
+
+		event := EstafettePubSubEvent{
+			Project: "my-project",
+			Topic:   "-topic",
+		}
+
+		trigger := EstafettePubSubTrigger{
+			Project: ".+-project",
+			Topic:   ".+-topic",
+		}
+
+		// act
+		fires := trigger.Fires(&event)
+
+		assert.False(t, fires)
+	})
+}

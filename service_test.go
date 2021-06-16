@@ -9,7 +9,7 @@ import (
 
 func TestToYamlMarshalling(t *testing.T) {
 
-	t.Run("ReturnsSameYaml", func(t *testing.T) {
+	t.Run("ReturnsSameYamlLegacy", func(t *testing.T) {
 		var service EstafetteService
 
 		input := `name: kubernetes
@@ -17,11 +17,66 @@ image: bsycorp/kind:latest-1.15
 env:
   SOME_ENVIRONMENT_VAR: some value with spaces
 readiness:
-  path: /kubernetes-ready
   timeoutSeconds: 60
+  path: /kubernetes-ready
   port: 80
   protocol: http
   hostname: kubernetes.kube-system.svc.cluster.local
+`
+		// act
+		err := yaml.Unmarshal([]byte(input), &service)
+		assert.Nil(t, err)
+
+		// act
+		output, err := yaml.Marshal(service)
+
+		assert.Nil(t, err)
+		assert.Equal(t, input, string(output))
+	})
+
+	t.Run("ReturnsSameYamlHttpGet", func(t *testing.T) {
+		var service EstafetteService
+
+		input := `name: kubernetes
+image: bsycorp/kind:latest-1.15
+env:
+  SOME_ENVIRONMENT_VAR: some value with spaces
+readinessProbe:
+  httpGet:
+    path: /kubernetes-ready
+    port: 80
+    host: kubernetes.kube-system.svc.cluster.local
+    scheme: http
+  timeoutSeconds: 60
+`
+		// act
+		err := yaml.Unmarshal([]byte(input), &service)
+		assert.Nil(t, err)
+
+		// act
+		output, err := yaml.Marshal(service)
+
+		assert.Nil(t, err)
+		assert.Equal(t, input, string(output))
+	})
+
+	t.Run("ReturnsSameYamlExec", func(t *testing.T) {
+		var service EstafetteService
+
+		input := `name: kubernetes
+image: bsycorp/kind:latest-1.15
+env:
+  SOME_ENVIRONMENT_VAR: some value with spaces
+readinessProbe:
+  exec:
+    command:
+    - /bin/sh
+    - -c
+    - -e
+    - |
+      exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+      [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+  timeoutSeconds: 60
 `
 		// act
 		err := yaml.Unmarshal([]byte(input), &service)

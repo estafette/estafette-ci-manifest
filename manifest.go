@@ -473,7 +473,7 @@ func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
 		BuilderOperatingSystems: []OperatingSystem{OperatingSystemLinux, OperatingSystemWindows},
 		BuilderTracksPerOperatingSystem: map[OperatingSystem][]string{
 			OperatingSystemLinux:   {"stable", "beta", "dev"},
-			OperatingSystemWindows: {"windowsservercore-1809", "windowsservercore-1909", "windowsservercore-ltsc2019"},
+			OperatingSystemWindows: {"nanoserver-1809-stable", "nanoserver-1809-beta", "nanoserver-1809-dev"},
 		},
 		DefaultBranch: "master",
 	}

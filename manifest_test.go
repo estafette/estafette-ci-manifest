@@ -52,7 +52,7 @@ func TestReadManifestFromFile(t *testing.T) {
 		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml", true)
 
 		assert.Nil(t, err)
-		assert.Equal(t, "windowsservercore-1809", manifest.Builder.Track)
+		assert.Equal(t, "nanoserver-1809-stable", manifest.Builder.Track)
 	})
 
 	t.Run("ReturnsManifestWithBuilderTrackDefaultWindowsServerCore1809", func(t *testing.T) {
@@ -98,7 +98,7 @@ stages:
 		manifest, err := ReadManifestFromFile(GetDefaultManifestPreferences(), "test-manifest.yaml", true)
 
 		assert.Nil(t, err)
-		assert.Equal(t, "windowsservercore-1809", manifest.Builder.Track)
+		assert.Equal(t, "nanoserver-1809-stable", manifest.Builder.Track)
 		assert.Equal(t, OperatingSystemWindows, manifest.Builder.OperatingSystem)
 	})
 
@@ -109,7 +109,7 @@ stages:
 
 		assert.Nil(t, err)
 		assert.NotNil(t, manifest.Releases[1].Builder)
-		assert.Equal(t, "windowsservercore-1809", manifest.Releases[1].Builder.Track)
+		assert.Equal(t, "nanoserver-1809-stable", manifest.Releases[1].Builder.Track)
 		assert.Equal(t, OperatingSystemWindows, manifest.Releases[1].Builder.OperatingSystem)
 	})
 

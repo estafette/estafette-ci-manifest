@@ -151,7 +151,6 @@ stages:
 
 		assert.Equal(t, "push-to-docker-hub", manifest.Stages[3].Name)
 		assert.Equal(t, "docker:17.03.0-ce", manifest.Stages[3].ContainerImage)
-		assert.Equal(t, 5, manifest.Stages[3].Retries)
 		assert.Equal(t, "docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'", manifest.Stages[3].Commands[0])
 		assert.Equal(t, "docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}", manifest.Stages[3].Commands[1])
 		assert.Equal(t, "status == 'succeeded' && branch == 'main'", manifest.Stages[3].When)
@@ -841,7 +840,6 @@ version:
 stages:
   test-alpha-version:
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
-    retries: 1
     credentials: gke-tooling
     app: gke
     namespace: estafette
@@ -866,7 +864,7 @@ stages:
 		output, err := json.Marshal(manifest)
 
 		if assert.Nil(t, err) {
-			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\",\"StorageMedium\":\"\",\"BuilderType\":\"docker\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"}},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"When\":\"status == 'succeeded'\",\"Retries\":1,\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null,\"ReleaseTemplates\":null,\"Bots\":null}", string(output))
+			assert.Equal(t, "{\"Archived\":false,\"Builder\":{\"Track\":\"stable\",\"OperatingSystem\":\"windows\",\"StorageMedium\":\"\",\"BuilderType\":\"docker\"},\"Labels\":{\"app\":\"estafette-ci-builder\",\"language\":\"golang\",\"team\":\"estafette-team\"},\"Version\":{\"SemVer\":{\"Major\":0,\"Minor\":0,\"Patch\":\"{{auto}}\",\"LabelTemplate\":\"{{branch}}\",\"ReleaseBranch\":\"main\"}},\"GlobalEnvVars\":null,\"Triggers\":null,\"Stages\":[{\"Name\":\"test-alpha-version\",\"ContainerImage\":\"extensions/gke:${ESTAFETTE_BUILD_VERSION}\",\"Shell\":\"powershell\",\"WorkingDirectory\":\"C:/estafette-work\",\"When\":\"status == 'succeeded'\",\"CustomProperties\":{\"app\":\"gke\",\"container\":{\"name\":\"gke\",\"repository\":\"extensions\",\"tag\":\"alpha\"},\"cpu\":{\"limit\":\"100m\",\"request\":\"100m\"},\"credentials\":\"gke-tooling\",\"dryrun\":true,\"memory\":{\"limit\":\"256Mi\",\"request\":\"256Mi\"},\"namespace\":\"estafette\",\"visibility\":\"private\"}}],\"Releases\":null,\"ReleaseTemplates\":null,\"Bots\":null}", string(output))
 		}
 	})
 }

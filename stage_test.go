@@ -408,23 +408,6 @@ func TestValidateOnStage(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("ReturnsErrorIfRetriesIsNegative", func(t *testing.T) {
-
-		stage := EstafetteStage{
-			ContainerImage: "docker",
-			Retries:        -1,
-		}
-		stage.SetDefaults(EstafetteBuilder{
-			OperatingSystem: "linux",
-			Track:           "stable",
-		})
-
-		// act
-		err := stage.Validate()
-
-		assert.NotNil(t, err)
-	})
-
 	t.Run("ReturnsNoErrorWhenAllFieldsAreValid", func(t *testing.T) {
 
 		stage := EstafetteStage{

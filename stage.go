@@ -17,7 +17,6 @@ type EstafetteStage struct {
 	When                    string                 `yaml:"when,omitempty" json:",omitempty"`
 	EnvVars                 map[string]string      `yaml:"env,omitempty" json:",omitempty"`
 	AutoInjected            bool                   `yaml:"autoInjected,omitempty" json:",omitempty"`
-	Retries                 int                    `yaml:"retries,omitempty" json:",omitempty"`
 	ParallelStages          []*EstafetteStage      `yaml:"parallelStages,omitempty" json:",omitempty"`
 	Services                []*EstafetteService    `yaml:"services,omitempty" json:",omitempty"`
 	CustomProperties        map[string]interface{} `yaml:",inline" json:",omitempty"`
@@ -36,7 +35,6 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 		When                    string                 `yaml:"when,omitempty"`
 		EnvVars                 map[string]string      `yaml:"env,omitempty"`
 		AutoInjected            bool                   `yaml:"autoInjected,omitempty"`
-		Retries                 int                    `yaml:"retries,omitempty"`
 		ParallelStages          yaml.MapSlice          `yaml:"parallelStages"`
 		Services                []*EstafetteService    `yaml:"services,omitempty"`
 		CustomProperties        map[string]interface{} `yaml:",inline"`
@@ -57,7 +55,6 @@ func (stage *EstafetteStage) UnmarshalYAML(unmarshal func(interface{}) error) (e
 	stage.When = aux.When
 	stage.EnvVars = aux.EnvVars
 	stage.AutoInjected = aux.AutoInjected
-	stage.Retries = aux.Retries
 	stage.Services = aux.Services
 
 	for _, mi := range aux.ParallelStages {
@@ -144,9 +141,6 @@ func (stage *EstafetteStage) Validate() (err error) {
 	} else {
 		if stage.ContainerImage == "" && len(stage.Services) == 0 {
 			return fmt.Errorf("Stage %v has no image set", stage.Name)
-		}
-		if stage.Retries < 0 {
-			return fmt.Errorf("Stage %v has no negative retries; needs to be zero or greater", stage.Name)
 		}
 	}
 

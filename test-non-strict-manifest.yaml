@@ -43,7 +43,6 @@ stages:
 
   push-to-docker-hub:
     image: docker:17.03.0-ce
-    retries: 5
     commands:
     - docker login --username=${ESTAFETTE_DOCKER_HUB_USERNAME} --password='${ESTAFETTE_DOCKER_HUB_PASSWORD}'
     - docker push estafette/${ESTAFETTE_LABEL_APP}:${ESTAFETTE_BUILD_VERSION}
@@ -68,7 +67,6 @@ stages:
 
   test-alpha-version:
     image: extensions/gke:${ESTAFETTE_BUILD_VERSION}
-    retries: 1
     credentials: gke-tooling
     app: gke
     namespace: estafette

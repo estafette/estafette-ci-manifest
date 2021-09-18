@@ -467,14 +467,10 @@ func ReadManifest(preferences *EstafetteManifestPreferences, manifestString stri
 }
 
 // GetDefaultManifestPreferences returns default preferences if not configured at the server
-func GetDefaultManifestPreferences() *EstafetteManifestPreferences {
-	return &EstafetteManifestPreferences{
-		LabelRegexes:            map[string]string{},
-		BuilderOperatingSystems: []OperatingSystem{OperatingSystemLinux, OperatingSystemWindows},
-		BuilderTracksPerOperatingSystem: map[OperatingSystem][]string{
-			OperatingSystemLinux:   {"stable", "beta", "dev"},
-			OperatingSystemWindows: {"nanoserver-1809-stable", "nanoserver-1809-beta", "nanoserver-1809-dev"},
-		},
-		DefaultBranch: "master",
-	}
+func GetDefaultManifestPreferences() (preferences *EstafetteManifestPreferences) {
+
+	preferences = &EstafetteManifestPreferences{}
+	preferences.SetDefaults()
+
+	return
 }
